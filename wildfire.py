@@ -27,8 +27,7 @@ class fire:
     self.upc = parameters['upc']
     self.q = parameters['q']
     self.v = parameters['v']
-    self.alpha = parameters['alpha']
-    #self.M, self.N = self.u0.shape    
+    self.alpha = parameters['alpha'] 
     self.x = parameters['x']
     self.y = parameters['y']
     self.t = parameters['t']
@@ -37,9 +36,6 @@ class fire:
     self.dx = self.x[1] - self.x[0]
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
-    
-    #self.Dx, self.x = cheb(self.M)
-    #self.Dy, self.y = cheb(self.N)
     
 
   def divergence(self, F):
@@ -67,9 +63,20 @@ class fire:
     #print(np.linalg.norm(gradux-gradu[0]))
     #print(np.linalg.norm(graduy-gradu[1]))
     
-    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2)# + u*dv1 + u*dv2
-    return np.dot(gradu[0], v1) + np.dot(graduy[1], v2) + np.dot(u, dv1) + np.dot(u, dv2)    
-    #return v1*gradux + v2*graduy
+    #return np.dot(gradu[0], v1) + np.dot(v2, gradu[1])# + u*dv1 + u*dv2
+    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + np.dot(u, dv1) + np.dot(u, dv2)
+    #return np.dot(v1, gradu[0]) + np.dot(gradu[1], v2) + np.dot(dv1, u) + np.dot(u, dv2) 
+    #return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
+    #return gradux*v1 + v2*graduy
+#    return np.dot(gradux, v1) + np.dot(v2, graduy) + np.dot(u, dv1) + np.dot(dv2, u) 
+#    return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
+    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + u*dv1 + u*dv2  
+    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + np.dot(u, dv1) + np.dot(dv2, u)  
+    
+    divV = self.divergence((v1, v2))
+    
+    return u * divV + gradu[0]*v1 + gradu[1]*v2
+    #return u * divV + ) + np.dot(v2, graduy)
     
   def gradient(self, f):
     
@@ -104,6 +111,11 @@ class fire:
     #fuel = self.ra * u
 
     W = diffusion - convection #+ beta*u #+ fuel
+    
+    W[0,:] = np.zeros(self.N)
+    W[-1,:] = np.zeros(self.N)
+    W[:,0] = np.zeros(self.M)
+    W[:,-1] = np.zeros(self.M)
         
     return W
   
@@ -146,7 +158,13 @@ class fire:
     return S
   
   
-  def solveRK4(self, U, B):
+  def solveRK4(self, U0, B0):
+    U = np.zeros((self.T+1, self.M, self.N))
+    B = np.zeros((self.T+1, self.M, self.N))
+    
+    U[0] = U0
+    B[0] = B0
+    
     for t in range(1, self.T + 1):
       k1 = self.F(U[t-1], B[t-1])
       k2 = self.F(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1)
@@ -167,16 +185,27 @@ class fire:
       U[t,:,0] = np.zeros(self.N)
       U[t,:,-1] = np.zeros(self.N)
       
+    return U, B
+      
         
-  def solveEuler(self, U, B):
+  def solveEuler(self, U0, B0):
+
+    U = np.zeros((self.T+1, self.M, self.N))
+    B = np.zeros((self.T+1, self.M, self.N))
+    
+    U[0] = U0
+    B[0] = B0
+    
     for t in range(1, self.T + 1):
       U[t] = U[t-1] + self.F(U[t-1], B[t-1]) * self.dt
       B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
       
       U[t,0,:] = np.zeros(self.N)
       U[t,-1,:] = np.zeros(self.N)
-      U[t,:,0] = np.zeros(self.N)
-      U[t,:,-1] = np.zeros(self.N)
+      U[t,:,0] = np.zeros(self.M)
+      U[t,:,-1] = np.zeros(self.M)
+      
+    return U, B
       
   # Solve PDE with cheb
   def solvePDECheb(self):
@@ -201,20 +230,23 @@ class fire:
   # Solve PDE
   def solvePDE(self, method='rk4'):
             
-    U = np.zeros((self.T+1, self.M, self.N))
-    B = np.zeros((self.T+1, self.M, self.N))
+    #U = np.zeros((self.T+1, self.M, self.N))
+    #B = np.zeros((self.T+1, self.M, self.N))
     
     X, Y = np.meshgrid(self.x, self.y)
     
-    U[0] = self.u0(X, Y)
-    B[0] = self.beta0(X, Y)
+    #U[0] = self.u0(X, Y)
+    #B[0] = self.beta0(X, Y)
+    U0 = self.u0(X, Y)
+    B0 = self.beta0(X, Y)
     
     if method == 'rk4':
-      self.solveRK4(U, B)
+      U, B = self.solveRK4(U0, B0)
     elif method == 'euler': 
-      self.solveEuler(U, B)
+      U, B = self.solveEuler(U0, B0)
     elif method == 'cheb':
       U = self.solvePDECheb()
+      B = np.zeros_like(U)
         
     return U, B
   
@@ -247,7 +279,8 @@ class fire:
     fu = interp2d(self.x, self.y, temperatures[t], kind='cubic')
     U = fu(fine, fine)
     #U = temperatures[t].reshape(self.u0.shape)
-    plt.imshow(U, origin='lower', cmap=plt.cm.jet)
+    plt.imshow(U, origin='lower', cmap=plt.cm.jet, extent=[self.x[0], self.x[-1],
+               self.y[0], self.y[-1]])
     plt.colorbar()
     #Xf, Yf = np.meshgrid(fine, fine)
     #cont = plt.contourf(Xf, Yf, U, cmap=plt.cm.jet, alpha=0.4)
@@ -262,7 +295,7 @@ class fire:
     _, y = cheb(N-1)
     fu = interp2d(x, y, temperatures[t], kind='cubic')
     U = fu(fine, fine)
-    plt.imshow(U, origin='lower', cmap=plt.cm.jet)
+    plt.imshow(U, origin='lower', cmap=plt.cm.jet, extent=[-1, 1, -1, 1])
     plt.colorbar()
     plt.show()
     

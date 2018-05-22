@@ -13,16 +13,6 @@ def S(x, y):
     - 0.5 * G(3*x - 1.25, 3*y - 1.25) + 0.35 * G(2*x + 1.25, 2*y - 1.25) \
     + 0.8 * G(x - 1.25, 3*y + 1.5) + 1.2 * G(x + 1.25, 3*y - 1.85)
 
-def temperatureFocus2(M, N):
-    temperature = np.zeros((M,N))
-    A = np.zeros((M,N))
-    A[M//2,N//2] = 1.0
-    A[M//2+1,N//2] = 1.0
-    #A[M//2-1:M//2+1, N//2-1:N//2+1] = np.ones((4, 4))
-    temperature = temperature + A * 100
-    #A = np.zeros((M,N))
-    return temperature, A
-
 def temperatureFocus(M, N):
     x = np.linspace(xa, xb, N)
     y = np.linspace(ya, yb, M)
@@ -47,8 +37,9 @@ def plotField(Xv, Yv, V):
   plt.show()
   
 def plotScalar(X, Y, U, title):
-  plt.imshow(U(X,Y), origin="lower", cmap=plt.cm.jet)
+  plt.imshow(U(X,Y), origin="lower", cmap=plt.cm.jet, extent=[X[0,0], X[-1, -1], Y[0, 0], Y[-1, -1]])
   plt.title(title)
+  plt.colorbar()
   plt.show()
   
   
@@ -61,7 +52,7 @@ y = np.linspace(ya, yb, N)
 X, Y = np.meshgrid(x, x)
 Xv, Yv = np.mgrid[xa:xb:complex(0, M // 2), ya:yb:complex(0, N // 2)]
 
-T = 20
+T = 100
 dt = 1e-3#5
 
 T_env = 300
@@ -74,17 +65,18 @@ k = 1
 # Initial conditions
 initial, B = temperatureFocus(M, N)
 
-V = vectorialField()
+v1 = lambda x, y: x #+ 1
+v2 = lambda x, y: y #np.sin(x**2 + y**2)
+V = (v1, v2)#vectorialField()
 
 a = lambda x, y: 10*S(x, y)
-u0 = lambda x, y: 1e3*np.exp(-40*((x+.5)**2 + (y+.5)**2))
+u0 = lambda x, y: 1e3*np.exp(-40*((x-.0)**2 + (y-.0)**2))
 
 plotField(Xv, Yv, V)
 plotScalar(X, Y, a, "Reaction")
 plotScalar(X, Y, u0, "Initial contidion")
 
 
-#%%
 # Parameters
 parameters = {
     'u0': u0,#initial,
@@ -104,20 +96,20 @@ parameters = {
 # use dirichlet f(x,y) = u(x,y) for (x,y) \in \partial\Omega
 ct = wildfire.fire(parameters)
 
-W, B = ct.solvePDE()
+W, B = ct.solvePDE(method='rk4')
 #W = ct.solvePDECheb()
 
 for i in range(T):
-  #if i % 10 == 0:
-  ct.plotTemperatures(i, W)
+  if i % 10 == 0:
+    ct.plotTemperatures(i, W)
 #%%
 ct = wildfire.fire(parameters)
 
 Wc, _ = ct.solvePDE(method='cheb')
 
 for i in range(T):
-  #if i % 10 == 0:
-  ct.plotTemperaturesCheb(i, Wc)
+  if i % 10 == 0:
+    ct.plotTemperaturesCheb(i, Wc)
 #%%
 for i in range(T):
   ct.plotTemperaturesCheb(i, Wc)
