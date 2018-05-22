@@ -52,8 +52,8 @@ y = np.linspace(ya, yb, N)
 X, Y = np.meshgrid(x, x)
 Xv, Yv = np.mgrid[xa:xb:complex(0, M // 2), ya:yb:complex(0, N // 2)]
 
-T = 100
-dt = 1e-3#5
+T = 200
+dt = 1e-2#5
 
 T_env = 300
 Ea = 83.68
@@ -65,23 +65,25 @@ k = 1
 # Initial conditions
 initial, B = temperatureFocus(M, N)
 
-v1 = lambda x, y: x #+ 1
-v2 = lambda x, y: y #np.sin(x**2 + y**2)
-V = (v1, v2)#vectorialField()
+v1 = lambda x, y: np.sin(x)#-y #+ 1
+v2 = lambda x, y: np.cos(y)#y #np.sin(x**2 + y**2)
+V = (v2, v2)#vectorialField() #
 
 a = lambda x, y: 10*S(x, y)
-u0 = lambda x, y: 1e3*np.exp(-40*((x-.0)**2 + (y-.0)**2))
+u0 = lambda x, y: 1e3*np.exp(-40*((x+.8)**2 + (y+.8)**2))
 
 plotField(Xv, Yv, V)
 plotScalar(X, Y, a, "Reaction")
 plotScalar(X, Y, u0, "Initial contidion")
+
+#plotScalar(X, Y, v1, "")
 
 
 # Parameters
 parameters = {
     'u0': u0,#initial,
     'beta0': a,
-    'kappa': 8e-1,
+    'kappa': 1e-2,
     'epsilon': .003,
     'upc': .1,#np.random.rand(M, N),
     'q': 1,#np.ones_like(initial)*.1,
@@ -101,7 +103,8 @@ W, B = ct.solvePDE(method='rk4')
 
 for i in range(T):
   if i % 10 == 0:
-    ct.plotTemperatures(i, W)
+    #ct.plotTemperatures(i, W)
+    ct.plotSimulation(i, W)
 #%%
 ct = wildfire.fire(parameters)
 

@@ -54,8 +54,11 @@ class fire:
     v1 = v[0](X, Y)
     v2 = v[1](X, Y)
     
-    dv1 = self.derivative(v1, 0)
-    dv2 = self.derivative(v2, 1)
+    #dv1 = self.derivative(v1, 0)
+    #dv2 = self.derivative(v2, 1)
+    
+    dv1 = np.gradient(v1, self.dx, axis=0)
+    dv2 = np.gradient(v2, self.dy, axis=1)
     
     gradux = np.gradient(u, self.dx, axis=0)
     graduy = np.gradient(u, self.dy, axis=1)
@@ -68,15 +71,22 @@ class fire:
     #return np.dot(v1, gradu[0]) + np.dot(gradu[1], v2) + np.dot(dv1, u) + np.dot(u, dv2) 
     #return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
     #return gradux*v1 + v2*graduy
-#    return np.dot(gradux, v1) + np.dot(v2, graduy) + np.dot(u, dv1) + np.dot(dv2, u) 
-#    return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
+    #return np.dot(gradux, v1) + np.dot(v2, graduy) + np.dot(u, dv1) + np.dot(dv2, u) 
+    #return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
     #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + u*dv1 + u*dv2  
     #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + np.dot(u, dv1) + np.dot(dv2, u)  
     
-    divV = self.divergence((v1, v2))
-    
-    return u * divV + gradu[0]*v1 + gradu[1]*v2
+    #divV = self.divergence((v1, v2))
+    #return u * divV + gradu[0]*v1 + gradu[1]*v2
     #return u * divV + ) + np.dot(v2, graduy)
+    #return np.dot(u, dv1) + np.dot(u, dv2) + np.dot(v1, gradux) + np.dot(v2, graduy)
+    #return np.dot(v1, gradux) + np.dot(graduy, v2)
+    #return gradu[0]*v1 + gradu[1]*v2 + u*dv1 + u*dv2
+    
+    return gradux*v1 + u*dv1 + graduy*v2 + u*dv2
+    #return np.dot(u, dv1) + np.dot(u, dv2) + v1*gradux + v2*graduy
+    
+    
     
   def gradient(self, f):
     
@@ -111,6 +121,7 @@ class fire:
     #fuel = self.ra * u
 
     W = diffusion - convection #+ beta*u #+ fuel
+    #W = -convection
     
     W[0,:] = np.zeros(self.N)
     W[-1,:] = np.zeros(self.N)
@@ -285,7 +296,13 @@ class fire:
     #Xf, Yf = np.meshgrid(fine, fine)
     #cont = plt.contourf(Xf, Yf, U, cmap=plt.cm.jet, alpha=0.4)
     #plt.colorbar(cont)
-    #plt.savefig('simulation/' + str(t) + '.png')
+    fig_n = t//10 + 1
+    if fig_n < 10:
+      fig_name = '0' + str(fig_n)
+    else:
+      fig_name = str(fig_n)
+      
+    plt.savefig('simulation/' + fig_name + '.png')
     plt.show()
     
   def plotTemperaturesCheb(self, t, temperatures):
@@ -297,5 +314,29 @@ class fire:
     U = fu(fine, fine)
     plt.imshow(U, origin='lower', cmap=plt.cm.jet, extent=[-1, 1, -1, 1])
     plt.colorbar()
+    plt.show()
+    
+  def plotSimulation(self, t, temperatures):
+    X, Y = np.meshgrid(self.x, self.y)
+    fine = np.linspace(self.x[-1], self.x[1], 2*self.N)
+    fu = interp2d(self.x, self.y, temperatures[t], kind='cubic')
+    U = fu(fine, fine)
+    #cont = plt.contourf(X, Y, U, cmap=plt.cm.jet, alpha=0.4)
+    #plt.colorbar(cont)
+    plt.imshow(U, origin='lower', cmap=plt.cm.jet, alpha=0.9, 
+               extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
+    plt.colorbar()
+    
+    Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.M // 2), 
+                      self.y[0]:self.y[-1]:complex(0, self.N // 2)]
+    plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv))      
+
+    fig_n = t//10 + 1
+    if fig_n < 10:
+      fig_name = '0' + str(fig_n)
+    else:
+      fig_name = str(fig_n)
+      
+    plt.savefig('simulation/' + fig_name + '.png')
     plt.show()
     
