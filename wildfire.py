@@ -2,8 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.interpolate import interp2d
-import pathlib, json, inspect
+import pathlib, json, inspect, os
 from datetime import datetime
+
+sec = int(datetime.today().timestamp())
+DIR_BASE = "simulation/" + str(sec) + "/"
 
 # Chebyshev differentiation matrix
 def cheb(N):
@@ -38,7 +41,6 @@ class fire:
     self.dx = self.x[1] - self.x[0]
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
-    
 
   def divergence(self, F):
     f1, f2 = F
@@ -59,11 +61,18 @@ class fire:
     #dv1 = self.derivative(v1, 0)
     #dv2 = self.derivative(v2, 1)
     
-    dv1 = np.gradient(v1, self.dx, axis=0)
-    dv2 = np.gradient(v2, self.dy, axis=1)
+#    dv1 = np.gradient(v1, self.dx, axis=0)
+#    dv2 = np.gradient(v2, self.dy, axis=1)
+#    
+#    gradux = np.gradient(u, self.dx, axis=0)
+#    graduy = np.gradient(u, self.dy, axis=1)
     
-    gradux = np.gradient(u, self.dx, axis=0)
-    graduy = np.gradient(u, self.dy, axis=1)
+    
+    dv1 = np.gradient(v1, self.dx, axis=1)
+    dv2 = np.gradient(v2, self.dy, axis=0)
+    
+    gradux = np.gradient(u, self.dx, axis=1)
+    graduy = np.gradient(u, self.dy, axis=0) 
     
     #print(np.linalg.norm(gradux-gradu[0]))
     #print(np.linalg.norm(graduy-gradu[1]))
@@ -86,7 +95,8 @@ class fire:
     #return gradu[0]*v1 + gradu[1]*v2 + u*dv1 + u*dv2
     
     return gradux*v1 + u*dv1 + graduy*v2 + u*dv2
-    #return np.dot(u, dv1) + np.dot(u, dv2) + v1*gradux + v2*graduy
+    #return v1*gradux + dv1*u + v2*graduy + dv2*u
+    #return np.dot(u, dv1) + np.dot(dv2, u) + v1*gradux + v2*graduy
     
     
     
@@ -125,11 +135,15 @@ class fire:
 #    mcon = np.max(convection)
 #    mfue = np.max(fuel)
 #    
+#    midif = np.min(diffusion)
+#    micon = np.min(convection)
+#    mifue = np.min(fuel)
+#    
 #    print("dif", mdif)
 #    print("conv", mcon)
 #    print("fuel", mfue)
 #    
-#    if mdif > 1e14 or mcon > 1e14 or mfue > 1e14:
+#    if np.isnan(mdif) or np.isnan(mcon) or np.isnan(mfue) or np.isnan(midif) or np.isnan(micon) or np.isnan(mifue):
 #      return
 
     #W = diffusion - convection #+ beta*u #+ fuel
@@ -331,10 +345,11 @@ class fire:
     
   def plotFuel(self, t, fuel, save=False):
     X, Y = np.meshgrid(self.x, self.y)
-    fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
-    fu = interp2d(self.x, self.y, fuel[t], kind='cubic')
-    U = fu(fine, fine)
-    plt.imshow(U, origin='lower', cmap=plt.cm.Oranges, alpha=1, 
+    #fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
+    #fu = interp2d(self.x, self.y, fuel[t], kind='cubic')
+    #U = fu(fine, fine)
+    B = fuel[t]
+    plt.imshow(B, origin='lower', cmap=plt.cm.Oranges, alpha=1, 
                extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
     plt.colorbar()  
 
@@ -343,16 +358,18 @@ class fire:
       if fig_n < 10:
         fig_name = '0' + str(fig_n)
       else:
-        fig_name = str(fig_n)        
-      plt.savefig('simulation/fuel/' + fig_name + '.png')
+        fig_name = str(fig_n)       
+      pathlib.Path(DIR_BASE + "figures/fuel").mkdir(parents=True, exist_ok=True) 
+      plt.savefig(DIR_BASE + "figures/fuel/" + fig_name + '.png')
       
     plt.show()
     
   def plotSimulation(self, t, temperatures, save=False):
     X, Y = np.meshgrid(self.x, self.y)
-    fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
-    fu = interp2d(self.x, self.y, temperatures[t], kind='cubic')
-    U = fu(fine, fine)
+    #fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
+    #fu = interp2d(self.x, self.y, temperatures[t], kind='cubic')
+    #U = fu(fine, fine)
+    U = temperatures[t]
     plt.imshow(U, origin='lower', cmap=plt.cm.jet, alpha=0.9, 
                extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
     plt.colorbar()
@@ -367,9 +384,63 @@ class fire:
         fig_name = '0' + str(fig_n)
       else:
         fig_name = str(fig_n)        
-      plt.savefig('simulation/temperature/' + fig_name + '.png')
+      pathlib.Path(DIR_BASE + "figures/temperature").mkdir(parents=True, exist_ok=True) 
+      plt.savefig(DIR_BASE + "figures/temperature/" + fig_name + '.png')
       
     plt.show()
+    
+  def plots(self, U, B, save=False):
+    
+    sec = int(datetime.today().timestamp())
+    DIR_BASE = "simulation/" + str(sec) + "/"
+    
+    for i in range(self.T):
+      if i % 10 == 0:
+        plt.subplot(1, 2, 1)
+        plt.imshow(U[i], origin='lower', cmap=plt.cm.jet, alpha=0.9, vmin=np.min(U),
+                   vmax=np.max(U), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
+        plt.colorbar(fraction=0.046, pad=0.04)
+        
+        Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.M // 2), 
+                          self.y[0]:self.y[-1]:complex(0, self.N // 2)]
+        plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv)) 
+        
+        plt.title("Temperature + Wind")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        
+        plt.subplot(1, 2, 2)
+        plt.imshow(B[i], origin='lower', cmap=plt.cm.Oranges, alpha=1, vmin=np.min(B),
+                   vmax=np.max(B), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
+        plt.colorbar(fraction=0.046, pad=0.04)  
+        plt.title("Fuel")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        
+        plt.tight_layout()
+        
+        if save:
+          fig_n = i // 10 + 1
+          if fig_n < 10:
+            fig_name = '0' + str(fig_n)
+          else:
+            fig_name = str(fig_n)             
+            
+          pathlib.Path(DIR_BASE + "figures/sims/").mkdir(parents=True, exist_ok=True) 
+          plt.savefig(DIR_BASE + 'figures/sims/' + str(fig_name) + '.png')
+        
+        plt.show()
+    
+    if save:      
+      #import os
+      #tmp_dir = os.getcwd() + "/" + DIR_BASE + "figures/sims/"
+      comm = "convert -delay 10 -loop 0 "
+      comm += DIR_BASE + "figures/sims/*.png "
+      comm += DIR_BASE + "figures/sims/" + str(sec) + ".gif"
+      #subprocess.call(comm)
+      a = os.system(comm)
+      #a = os.system("convert -delay 10 -loop 0 *.png " + str(sec) +".gif")
+      print(a)
     
   def plotExperiment(self, U, B, per, directory=""):
     if per == 0: return
