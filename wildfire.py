@@ -36,100 +36,70 @@ class fire:
     self.x = parameters['x']
     self.y = parameters['y']
     self.t = parameters['t']
-    self.M, self.N = len(self.x), len(self.y)
+    self.N, self.M = len(self.x), len(self.y)
     self.T = len(self.t)
     self.dx = self.x[1] - self.x[0]
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
+    
 
   def divergence(self, F):
+    # Get vector field elements
     f1, f2 = F
-    df1dx = self.derivative(f1, 0)
-    df2dy = self.derivative(f2, 1)
     
-    return df1dx + df2dy
+    # Computing df1/dx and df2/dy
+    df1dx = np.gradient(f1, self.dx, axis=1)
+    df2dy = np.gradient(f2, self.dy, axis=0)
+    
+    return df1dx + df2dy # Divergence (d/dx, d/dy) dot (f1, f2)
+  
+  
+  def gradient(self, f):
+    # Computing df/dx and df/dy
+    dfdx = np.gradient(f, self.dx, axis=1)
+    dfdy = np.gradient(f, self.dy, axis=0)
+    
+    return (dfdx, dfdy) # Gradient (df/dx, df/dy)
     
     
-  def conv(self, v, u):
+  def convection(self, v, u):
+    # Grid for evaluation
     X, Y = np.meshgrid(self.x, self.y)
     
-    gradu = self.gradient(u)
-    
+    # Evaluate vector field V = (v1, v2)
     v1 = v[0](X, Y)
     v2 = v[1](X, Y)
     
-    #dv1 = self.derivative(v1, 0)
-    #dv2 = self.derivative(v2, 1)
+    # Computing dv1/dx and dv2/dy
+    dv1dx = np.gradient(v1, self.dx, axis=1) 
+    dv2dy = np.gradient(v2, self.dy, axis=0)
     
-#    dv1 = np.gradient(v1, self.dx, axis=0)
-#    dv2 = np.gradient(v2, self.dy, axis=1)
-#    
-#    gradux = np.gradient(u, self.dx, axis=0)
-#    graduy = np.gradient(u, self.dy, axis=1)
+    # Compute u_x and u_y
+    ux = np.gradient(u, self.dx, axis=1)
+    uy = np.gradient(u, self.dy, axis=0) 
+        
+    # Convection = div(u dot V) 
+    return ux*v1 + u*dv1dx + uy*v2 + u*dv2dy
     
-    
-    dv1 = np.gradient(v1, self.dx, axis=1)
-    dv2 = np.gradient(v2, self.dy, axis=0)
-    
-    gradux = np.gradient(u, self.dx, axis=1)
-    graduy = np.gradient(u, self.dy, axis=0) 
-    
-    #print(np.linalg.norm(gradux-gradu[0]))
-    #print(np.linalg.norm(graduy-gradu[1]))
-    
-    #return np.dot(gradu[0], v1) + np.dot(v2, gradu[1])# + u*dv1 + u*dv2
-    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + np.dot(u, dv1) + np.dot(u, dv2)
-    #return np.dot(v1, gradu[0]) + np.dot(gradu[1], v2) + np.dot(dv1, u) + np.dot(u, dv2) 
-    #return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
-    #return gradux*v1 + v2*graduy
-    #return np.dot(gradux, v1) + np.dot(v2, graduy) + np.dot(u, dv1) + np.dot(dv2, u) 
-    #return np.dot(gradux, v1) + np.dot(graduy, v2) + np.dot(u, dv1) + np.dot(u, dv2) 
-    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + u*dv1 + u*dv2  
-    #return np.dot(gradu[0], v1) + np.dot(gradu[1], v2) + np.dot(u, dv1) + np.dot(dv2, u)  
-    
-    #divV = self.divergence((v1, v2))
-    #return u * divV + gradu[0]*v1 + gradu[1]*v2
-    #return u * divV + ) + np.dot(v2, graduy)
-    #return np.dot(u, dv1) + np.dot(u, dv2) + np.dot(v1, gradux) + np.dot(v2, graduy)
-    #return np.dot(v1, gradux) + np.dot(graduy, v2)
-    #return gradu[0]*v1 + gradu[1]*v2 + u*dv1 + u*dv2
-    
-    return gradux*v1 + u*dv1 + graduy*v2 + u*dv2
-    #return v1*gradux + dv1*u + v2*graduy + dv2*u
-    #return np.dot(u, dv1) + np.dot(dv2, u) + v1*gradux + v2*graduy
-    
-    
-    
-  def gradient(self, f):
-    
-    #dfdx = self.derivative(f, 0)
-    #dfdy = self.derivative(f, 1)
-    
-    dfdx = np.gradient(f, self.dx, axis=0)
-    dfdy = np.gradient(f, self.dy, axis=1)
-    
-    return (dfdx, dfdy)
-  
-  def derivative(self, f, axis_):
-    h = 0
-    if axis_ == 0:
-      h = self.dx
-    elif axis_ == 1:
-      h = self.dy
-      
-    return (np.roll(f, -1, axis=axis_) - np.roll(f, 1, axis=axis_)) / (2*h)
-  
+  # Laplacian div(grad u)
   def laplacian(self, u):
-    return (np.roll(u, 1, axis=0) + np.roll(u, -1, axis=0) + \
-              np.roll(u, -1,axis=1) + np.roll(u, 1, axis=1) - 4*u) / self.dx ** 2
+    # Compute u_{xx}
+    uxx = (np.roll(u, -1, axis=1) + np.roll(u, 1, axis=1) - 2*u) / self.dx**2
+    # Compute u_{yy}
+    uyy = (np.roll(u, -1, axis=0) + np.roll(u, 1, axis=0) - 2*u) / self.dy**2
+    return uxx + uyy 
+  
             
-  def F(self, u, beta):    
+  # RHS of PDE
+  def F(self, U, B, V):  
     
-    W = np.zeros_like(u)
+    v1, v2 = V
+    ux, uy = self.gradient(U) # Compute gradient
+    divV = self.divergence(V) # Compute divergence
     
-    diffusion = (self.kappa * self.laplacian(u))
-    convection = self.conv(self.v, u)
-    fuel = self.f(u, beta)
+    diffusion = (self.kappa * self.laplacian(U)) # k grad u
+    convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
+    fuel = self.f(U, B)
         
 #    mdif = np.max(diffusion)
 #    mcon = np.max(convection)
@@ -146,16 +116,8 @@ class fire:
 #    if np.isnan(mdif) or np.isnan(mcon) or np.isnan(mfue) or np.isnan(midif) or np.isnan(micon) or np.isnan(mifue):
 #      return
 
-    #W = diffusion - convection #+ beta*u #+ fuel
-    #W = -convection
-    W = diffusion - convection + fuel
-    
-    W[0,:] = np.zeros(self.N)
-    W[-1,:] = np.zeros(self.N)
-    W[:,0] = np.zeros(self.M)
-    W[:,-1] = np.zeros(self.M)
-        
-    return W
+    return diffusion - convection + fuel
+  
   
   def Fcheb(self, W, t, mu, A, V1, V2, Dx, Dy):
     D2x = np.dot(Dx, Dx)
@@ -180,6 +142,7 @@ class fire:
     
     return W.flatten() # Flatten for odeint
   
+  
   def K(self, u):
     return self.kappa * (1 + self.epsilon * u) ** 3 + 1
   
@@ -196,7 +159,7 @@ class fire:
     return S
   
   
-  def solveRK4(self, U0, B0):
+  def solveRK4(self, U0, B0, V):
     U = np.zeros((self.T+1, self.M, self.N))
     B = np.zeros((self.T+1, self.M, self.N))
     
@@ -204,12 +167,18 @@ class fire:
     B[0] = B0
     
     for t in range(1, self.T + 1):
-      k1 = self.F(U[t-1], B[t-1])
-      k2 = self.F(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1)
-      k3 = self.F(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2)
-      k4 = self.F(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3)
+      k1 = self.F(U[t-1], B[t-1], V)
+      k2 = self.F(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V)
+      k3 = self.F(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V)
+      k4 = self.F(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V)
 
       U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+      
+      # BC of temperature
+      U[t,0,:] = np.zeros(self.N)
+      U[t,-1,:] = np.zeros(self.N)
+      U[t,:,0] = np.zeros(self.M)
+      U[t,:,-1] = np.zeros(self.M)
       
       bk1 = self.g(U[t-1], B[t-1])
       bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
@@ -218,10 +187,11 @@ class fire:
 
       B[t] = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
       
-      U[t,0,:] = np.zeros(self.N)
-      U[t,-1,:] = np.zeros(self.N)
-      U[t,:,0] = np.zeros(self.N)
-      U[t,:,-1] = np.zeros(self.N)
+      # BF of fuel
+      B[t,0,:] = np.zeros(self.N)
+      B[t,-1,:] = np.zeros(self.N)
+      B[t,:,0] = np.zeros(self.M)
+      B[t,:,-1] = np.zeros(self.M)
       
     return U, B
       
@@ -242,6 +212,11 @@ class fire:
       U[t,-1,:] = np.zeros(self.N)
       U[t,:,0] = np.zeros(self.M)
       U[t,:,-1] = np.zeros(self.M)
+      
+      B[t,0,:] = np.zeros(self.N)
+      B[t,-1,:] = np.zeros(self.N)
+      B[t,:,0] = np.zeros(self.M)
+      B[t,:,-1] = np.zeros(self.M)
       
     return U, B
       
@@ -267,21 +242,19 @@ class fire:
     
   # Solve PDE
   def solvePDE(self, method='rk4'):
-            
-    #U = np.zeros((self.T+1, self.M, self.N))
-    #B = np.zeros((self.T+1, self.M, self.N))
     
+    # Grid for functions evaluation
     X, Y = np.meshgrid(self.x, self.y)
     
-    #U[0] = self.u0(X, Y)
-    #B[0] = self.beta0(X, Y)
-    U0 = self.u0(X, Y)
-    B0 = self.beta0(X, Y)
+    U0 = self.u0(X, Y) # Temperature initial condition
+    B0 = self.beta0(X, Y) # Fuel initial condition
+    V = (self.v[0](X, Y), self.v[1](X, Y)) # Vector field
     
+    # Solver
     if method == 'rk4':
-      U, B = self.solveRK4(U0, B0)
+      U, B = self.solveRK4(U0, B0, V)
     elif method == 'euler': 
-      U, B = self.solveEuler(U0, B0)
+      U, B = self.solveEuler(U0, B0, V)
     elif method == 'cheb':
       U = self.solvePDECheb()
       B = np.zeros_like(U)
@@ -374,8 +347,8 @@ class fire:
                extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
     plt.colorbar()
     
-    Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.M // 2), 
-                      self.y[0]:self.y[-1]:complex(0, self.N // 2)]
+    Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // 2), 
+                      self.y[0]:self.y[-1]:complex(0, self.M // 2)]
     plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv))      
 
     if save:
@@ -401,8 +374,8 @@ class fire:
                    vmax=np.max(U), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
         plt.colorbar(fraction=0.046, pad=0.04)
         
-        Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.M // 2), 
-                          self.y[0]:self.y[-1]:complex(0, self.N // 2)]
+        Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // 2), 
+                          self.y[0]:self.y[-1]:complex(0, self.M // 2)]
         plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv)) 
         
         plt.title("Temperature + Wind")
@@ -446,8 +419,8 @@ class fire:
     if per == 0: return
     
     X, Y = np.meshgrid(self.x, self.y)
-    Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.M // 4), 
-                      self.y[0]:self.y[-1]:complex(0, self.N // 4)]
+    Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // 4), 
+                      self.y[0]:self.y[-1]:complex(0, self.M // 4)]
     #fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
     size = len(U)
     step = int(size / int(per*size))

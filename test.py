@@ -29,10 +29,10 @@ def plotScalar(X, Y, U, title):
 M, N = 50, 50
 xa, xb = -1, 1
 ya, yb = -1, 1
-x = np.linspace(xa, xb, M)
-y = np.linspace(ya, yb, N)
+x = np.linspace(xa, xb, N)
+y = np.linspace(ya, yb, M)
 X, Y = np.meshgrid(x, y)
-Xv, Yv = np.mgrid[xa:xb:complex(0, M // 4), ya:yb:complex(0, N // 4)]
+Xv, Yv = np.mgrid[xa:xb:complex(0, N // 4), ya:yb:complex(0, M // 4)]
 
 T = 500
 dt = 1e-3
@@ -45,13 +45,13 @@ C = 1
 k = 1
 
 
-v1 = lambda x, y: np.cos(y)
-v2 = lambda x, y: -np.cos(y)
+v1 = lambda x, y: np.cos(x)
+v2 = lambda x, y: np.sin(y)
 V = (v1, v2)#vectorialField() #
 
 a = lambda x, y: x*0 + 1# S(x+.25, y+.25) #x*0 + 1
 #u0 = lambda x, y: 1e1*np.exp(-40*((x+.75)**2 + (y+.75)**2))
-u0 = lambda x, y: 1e1*np.exp(-40*((x+.75)**2 + (y-.75)**2))
+u0 = lambda x, y: 1e1*np.exp(-40*((x+.75)**2 + (y+.0)**2))
 
 plotField(Xv, Yv, V)
 plotScalar(X, Y, a, "Reaction")
@@ -61,14 +61,14 @@ plotScalar(X, Y, u0, "Initial contidion")
 parameters = {
     'u0': u0,#initial,
     'beta0': a,
-    'kappa': 0,#5e-2,
+    'kappa': 5e-2,
     'epsilon': 1e-1,
     'upc': .1,#np.random.rand(M, N),
     'q': 1e-1,#np.ones_like(initial)*.1,
     'v': V,
     'alpha': 1e-2,
-    'x': np.linspace(xa, xb, M),
-    'y': np.linspace(ya, yb, N),
+    'x': np.linspace(xa, xb, N),
+    'y': np.linspace(ya, yb, M),
     't': np.linspace(0, dt*T, T)
 }
 #%%
