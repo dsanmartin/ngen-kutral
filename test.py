@@ -26,13 +26,13 @@ def plotScalar(X, Y, U, title):
   
   
 # The resolution have to be lower than discrete version for computation of F
-M, N = 40, 40
+M, N = 50, 50
 xa, xb = -1, 1
 ya, yb = -1, 1
 x = np.linspace(xa, xb, M)
 y = np.linspace(ya, yb, N)
 X, Y = np.meshgrid(x, x)
-Xv, Yv = np.mgrid[xa:xb:complex(0, M // 2), ya:yb:complex(0, N // 2)]
+Xv, Yv = np.mgrid[xa:xb:complex(0, M // 4), ya:yb:complex(0, N // 4)]
 
 T = 200
 dt = 1e-3#5
@@ -45,12 +45,12 @@ C = 1
 k = 1
 
 
-v1 = lambda x, y: np.cos(y)
+v1 = lambda x, y: np.sin(y)
 v2 = lambda x, y: np.cos(y)
 V = (v1, v2)#vectorialField() #
 
 a = lambda x, y: x*0 + 1 #S(x, y)
-u0 = lambda x, y: 1e1*np.exp(-40*((x+.8)**2 + (y+.8)**2))
+u0 = lambda x, y: 1e1*np.exp(-40*((x-.4)**2 + (y+.6)**2))
 
 plotField(Xv, Yv, V)
 plotScalar(X, Y, a, "Reaction")
@@ -63,7 +63,7 @@ plotScalar(X, Y, u0, "Initial contidion")
 parameters = {
     'u0': u0,#initial,
     'beta0': a,
-    'kappa': 3e-1,
+    'kappa': 3e-3,
     'epsilon': 1e-1,
     'upc': .1,#np.random.rand(M, N),
     'q': 1e-1,#np.ones_like(initial)*.1,
@@ -79,12 +79,14 @@ parameters = {
 ct = wildfire.fire(parameters)
 
 W, B = ct.solvePDE(method='rk4')
-#W = ct.solvePDECheb()
+
+#%%
 
 for i in range(T):
   if i % 10 == 0:
     #ct.plotTemperatures(i, W)
-    ct.plotSimulation(i, W, True)
+    ct.plotSimulation(i, W)
+    ct.plotFuel(i, B)
 #%%
 ct = wildfire.fire(parameters)
 
@@ -97,3 +99,10 @@ for i in range(T):
 for i in range(T):
   if i % 10 == 0:
     ct.plotFuel(i, B, True)
+    
+#%%
+ct.save(W, B, 0)
+
+#%%
+ct.plotExperiment(W, B, 0.1)
+

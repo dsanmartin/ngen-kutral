@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.interpolate import interp2d
+import pathlib, json, inspect
+from datetime import datetime
 
 # Chebyshev differentiation matrix
 def cheb(N):
@@ -368,4 +370,84 @@ class fire:
       plt.savefig('simulation/temperature/' + fig_name + '.png')
       
     plt.show()
+    
+  def plotExperiment(self, U, B, per, directory=""):
+    if per == 0: return
+    
+    X, Y = np.meshgrid(self.x, self.y)
+    Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.M // 4), 
+                      self.y[0]:self.y[-1]:complex(0, self.N // 4)]
+    #fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
+    size = len(U)
+    step = int(size / int(per*size))
+    
+    for i in range(0, size, step):
+      plt.figure(figsize=(12, 8))
+      
+      plt.subplot(1, 2, 1)
+      #fu = interp2d(self.x, self.y, U[i], kind='cubic')
+      #UU = fu(fine, fine)  
+      UU = U[i]
+      im = plt.imshow(UU, origin='lower', cmap=plt.cm.jet, alpha=0.9, 
+                 extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
+      plt.colorbar(im, fraction=0.046, pad=0.04)
+      plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv))  
+      plt.xlabel("x")
+      plt.ylabel("y")
+      
+      plt.subplot(1, 2, 2)
+      #fb = interp2d(self.x, self.y, B[i], kind='cubic')
+      #BB = fb(fine, fine)  
+      BB = B[i]
+      im2 = plt.imshow(BB, origin='lower', cmap=plt.cm.Oranges, alpha=1, 
+                 extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
+      plt.colorbar(im2, fraction=0.046, pad=0.04)
+      plt.xlabel("x")
+      plt.ylabel("y")
+      
+      
+      plt.tight_layout()
+      
+      if directory != "":
+        if i // 10 < 10:
+          fig_name = '0' + str(i // 10)
+        else:
+          fig_name = str(i // 10)        
+
+        pathlib.Path(directory + "figures/").mkdir(parents=True, exist_ok=True) 
+        plt.savefig(directory + "figures/" + fig_name + '.png', dpi=200)
+      
+      
+      plt.show()
+
+    
+  def save(self, U, B, per=0):
+    sec = int(datetime.today().timestamp())
+    directory = "simulation/" + str(sec) + "/"
+
+    pathlib.Path(directory).mkdir(parents=True, exist_ok=True) 
+    np.save(directory + "U.npy", U)
+    np.save(directory + "B.npy", B)
+    
+    parameters = {
+      'u0': inspect.getsourcelines(self.u0)[0][0].strip("['\n']"),
+      'beta0': inspect.getsourcelines(self.beta0)[0][0].strip("['\n']"),
+      'kappa': self.kappa,
+      'epsilon': self.epsilon,
+      'upc': self.upc,
+      'q': self.q,
+      'v': (inspect.getsourcelines(self.v[0])[0][0].strip("['\n']"),
+            inspect.getsourcelines(self.v[1])[0][0].strip("['\n']")),
+      'alpha': self.alpha,
+      'x': (self.x[0], self.x[-1], self.N),
+      'y': (self.y[0], self.y[-1], self.M),
+      't': (self.t[0], self.t[-1], self.T)
+    }
+    
+    with open(directory + 'parameters.json', 'w') as fp:
+      json.dump(parameters, fp)
+    
+    self.plotExperiment(U, B, per, directory)
+    
+    
     
