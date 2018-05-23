@@ -117,11 +117,22 @@ class fire:
     
     diffusion = (self.kappa * self.laplacian(u))
     convection = self.conv(self.v, u)
-    #fuel = self.f(u, beta)
-    #fuel = self.ra * u
+    fuel = self.f(u, beta)
+        
+#    mdif = np.max(diffusion)
+#    mcon = np.max(convection)
+#    mfue = np.max(fuel)
+#    
+#    print("dif", mdif)
+#    print("conv", mcon)
+#    print("fuel", mfue)
+#    
+#    if mdif > 1e14 or mcon > 1e14 or mfue > 1e14:
+#      return
 
-    W = diffusion - convection #+ beta*u #+ fuel
+    #W = diffusion - convection #+ beta*u #+ fuel
     #W = -convection
+    W = diffusion - convection + fuel
     
     W[0,:] = np.zeros(self.N)
     W[-1,:] = np.zeros(self.N)
@@ -157,10 +168,10 @@ class fire:
     return self.kappa * (1 + self.epsilon * u) ** 3 + 1
   
   def f(self, u, beta):
-    return self.s(u) * beta * np.exp(u /(1 + self.epsilon)) - self.alpha * u
+    return self.s(u) * beta * np.exp(u /(1 + self.epsilon*u)) - self.alpha * u
   
   def g(self, u, beta):
-    return -self.s(u) * (self.epsilon / self.q) * beta * np.exp(u /(1 + self.epsilon))
+    return -self.s(u) * (self.epsilon / self.q) * beta * np.exp(u /(1 + self.epsilon*u))
     
   def s(self, u):
     S = np.zeros_like(u)
@@ -185,9 +196,9 @@ class fire:
       U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
       
       bk1 = self.g(U[t-1], B[t-1])
-      bk2 = self.g(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1)
-      bk3 = self.g(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2)
-      bk4 = self.g(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3)
+      bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
+      bk3 = self.g(U[t-1] + 0.5*self.dt*bk2, B[t-1] + 0.5*self.dt*bk2)
+      bk4 = self.g(U[t-1] + self.dt*bk3, B[t-1] + self.dt*bk3)
 
       B[t] = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
       
@@ -316,13 +327,30 @@ class fire:
     plt.colorbar()
     plt.show()
     
-  def plotSimulation(self, t, temperatures):
+  def plotFuel(self, t, fuel, save=False):
     X, Y = np.meshgrid(self.x, self.y)
-    fine = np.linspace(self.x[-1], self.x[1], 2*self.N)
+    fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
+    fu = interp2d(self.x, self.y, fuel[t], kind='cubic')
+    U = fu(fine, fine)
+    plt.imshow(U, origin='lower', cmap=plt.cm.Oranges, alpha=1, 
+               extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
+    plt.colorbar()  
+
+    if save:
+      fig_n = t//10 + 1
+      if fig_n < 10:
+        fig_name = '0' + str(fig_n)
+      else:
+        fig_name = str(fig_n)        
+      plt.savefig('simulation/fuel/' + fig_name + '.png')
+      
+    plt.show()
+    
+  def plotSimulation(self, t, temperatures, save=False):
+    X, Y = np.meshgrid(self.x, self.y)
+    fine = np.linspace(self.x[0], self.x[-1], 2*self.N)
     fu = interp2d(self.x, self.y, temperatures[t], kind='cubic')
     U = fu(fine, fine)
-    #cont = plt.contourf(X, Y, U, cmap=plt.cm.jet, alpha=0.4)
-    #plt.colorbar(cont)
     plt.imshow(U, origin='lower', cmap=plt.cm.jet, alpha=0.9, 
                extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
     plt.colorbar()
@@ -331,12 +359,13 @@ class fire:
                       self.y[0]:self.y[-1]:complex(0, self.N // 2)]
     plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv))      
 
-    fig_n = t//10 + 1
-    if fig_n < 10:
-      fig_name = '0' + str(fig_n)
-    else:
-      fig_name = str(fig_n)
+    if save:
+      fig_n = t//10 + 1
+      if fig_n < 10:
+        fig_name = '0' + str(fig_n)
+      else:
+        fig_name = str(fig_n)        
+      plt.savefig('simulation/temperature/' + fig_name + '.png')
       
-    plt.savefig('simulation/' + fig_name + '.png')
     plt.show()
     

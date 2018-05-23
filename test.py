@@ -13,24 +13,6 @@ def S(x, y):
     - 0.5 * G(3*x - 1.25, 3*y - 1.25) + 0.35 * G(2*x + 1.25, 2*y - 1.25) \
     + 0.8 * G(x - 1.25, 3*y + 1.5) + 1.2 * G(x + 1.25, 3*y - 1.85)
 
-def temperatureFocus(M, N):
-    x = np.linspace(xa, xb, N)
-    y = np.linspace(ya, yb, M)
-    X, Y = np.meshgrid(x, y)
-    A = np.zeros((M,N))
-    A[M//2,N//2] = 1.0
-    A[M//2+1,N//2] = 1.0
-    #A = S(X, Y)
-    #A = A / np.max(A)
-    return 1e3*np.exp(-40*((X-.5)**2 + (Y-.5)**2)), A
-
-def vectorialField():
-  # Vectorial field
-  v1 = lambda x, y: (x*0) + 1
-  v2 = lambda x, y: np.sin(x**2 + y**2)
-  
-  return (v1, v2)
-
 def plotField(Xv, Yv, V):
   plt.quiver(Xv, Yv, V[0](Xv, Yv), V[1](Xv, Yv))  
   plt.title("Wind")
@@ -53,7 +35,7 @@ X, Y = np.meshgrid(x, x)
 Xv, Yv = np.mgrid[xa:xb:complex(0, M // 2), ya:yb:complex(0, N // 2)]
 
 T = 200
-dt = 1e-2#5
+dt = 1e-3#5
 
 T_env = 300
 Ea = 83.68
@@ -62,15 +44,13 @@ rho = 1e2
 C = 1
 k = 1
 
-# Initial conditions
-initial, B = temperatureFocus(M, N)
 
-v1 = lambda x, y: np.sin(x)#-y #+ 1
-v2 = lambda x, y: np.cos(y)#y #np.sin(x**2 + y**2)
-V = (v2, v2)#vectorialField() #
+v1 = lambda x, y: np.cos(y)
+v2 = lambda x, y: np.cos(y)
+V = (v1, v2)#vectorialField() #
 
-a = lambda x, y: 10*S(x, y)
-u0 = lambda x, y: 1e3*np.exp(-40*((x+.8)**2 + (y+.8)**2))
+a = lambda x, y: x*0 + 1 #S(x, y)
+u0 = lambda x, y: 1e1*np.exp(-40*((x+.8)**2 + (y+.8)**2))
 
 plotField(Xv, Yv, V)
 plotScalar(X, Y, a, "Reaction")
@@ -83,12 +63,12 @@ plotScalar(X, Y, u0, "Initial contidion")
 parameters = {
     'u0': u0,#initial,
     'beta0': a,
-    'kappa': 1e-2,
-    'epsilon': .003,
+    'kappa': 3e-1,
+    'epsilon': 1e-1,
     'upc': .1,#np.random.rand(M, N),
-    'q': 1,#np.ones_like(initial)*.1,
+    'q': 1e-1,#np.ones_like(initial)*.1,
     'v': V,
-    'alpha': 1e-5,
+    'alpha': 1e-2,
     'x': np.linspace(xa, xb, M),
     'y': np.linspace(ya, yb, N),
     't': np.linspace(0, dt*T, T)
@@ -104,7 +84,7 @@ W, B = ct.solvePDE(method='rk4')
 for i in range(T):
   if i % 10 == 0:
     #ct.plotTemperatures(i, W)
-    ct.plotSimulation(i, W)
+    ct.plotSimulation(i, W, True)
 #%%
 ct = wildfire.fire(parameters)
 
@@ -115,4 +95,5 @@ for i in range(T):
     ct.plotTemperaturesCheb(i, Wc)
 #%%
 for i in range(T):
-  ct.plotTemperaturesCheb(i, Wc)
+  if i % 10 == 0:
+    ct.plotFuel(i, B, True)
