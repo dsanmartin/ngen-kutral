@@ -48,47 +48,31 @@ class fire:
     f1, f2 = F
     
     # Computing df1/dx and df2/dy
-    df1dx = np.gradient(f1, self.dx, axis=1)
-    df2dy = np.gradient(f2, self.dy, axis=0)
+    df1dx = np.gradient(f1, self.dx, edge_order=2, axis=1)
+    df2dy = np.gradient(f2, self.dy, edge_order=2, axis=0)
     
     return df1dx + df2dy # Divergence (d/dx, d/dy) dot (f1, f2)
   
   
   def gradient(self, f):
     # Computing df/dx and df/dy
-    dfdx = np.gradient(f, self.dx, axis=1)
-    dfdy = np.gradient(f, self.dy, axis=0)
+    dfdx = np.gradient(f, self.dx, edge_order=2, axis=1)
+    dfdy = np.gradient(f, self.dy, edge_order=2, axis=0)
     
     return (dfdx, dfdy) # Gradient (df/dx, df/dy)
     
     
-  def convection(self, v, u):
-    # Grid for evaluation
-    X, Y = np.meshgrid(self.x, self.y)
-    
-    # Evaluate vector field V = (v1, v2)
-    v1 = v[0](X, Y)
-    v2 = v[1](X, Y)
-    
-    # Computing dv1/dx and dv2/dy
-    dv1dx = np.gradient(v1, self.dx, axis=1) 
-    dv2dy = np.gradient(v2, self.dy, axis=0)
-    
-    # Compute u_x and u_y
-    ux = np.gradient(u, self.dx, axis=1)
-    uy = np.gradient(u, self.dy, axis=0) 
-        
-    # Convection = div(u dot V) 
-    return ux*v1 + u*dv1dx + uy*v2 + u*dv2dy
-    
   # Laplacian div(grad u)
   def laplacian(self, u):
     # Compute u_{xx}
-    uxx = (np.roll(u, -1, axis=1) + np.roll(u, 1, axis=1) - 2*u) / self.dx**2
+    #uxx = (np.roll(u, -1, axis=1) + np.roll(u, 1, axis=1) - 2*u) / self.dx**2
+    ux = np.gradient(u, self.dx, edge_order=2, axis=1)
+    uxx = np.gradient(ux, self.dx, edge_order=2, axis=1)
     # Compute u_{yy}
-    uyy = (np.roll(u, -1, axis=0) + np.roll(u, 1, axis=0) - 2*u) / self.dy**2
+    #uyy = (np.roll(u, -1, axis=0) + np.roll(u, 1, axis=0) - 2*u) / self.dy**2
+    uy = np.gradient(u, self.dy, edge_order=2, axis=0)
+    uyy = np.gradient(uy, self.dy, edge_order=2, axis=0)
     return uxx + uyy 
-  
             
   # RHS of PDE
   def F(self, U, B, V):  
@@ -100,47 +84,18 @@ class fire:
     diffusion = (self.kappa * self.laplacian(U)) # k grad u
     convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
     fuel = self.f(U, B)
-        
-#    mdif = np.max(diffusion)
-#    mcon = np.max(convection)
-#    mfue = np.max(fuel)
-#    
-#    midif = np.min(diffusion)
-#    micon = np.min(convection)
-#    mifue = np.min(fuel)
-#    
-#    print("dif", mdif)
-#    print("conv", mcon)
-#    print("fuel", mfue)
-#    
-#    if np.isnan(mdif) or np.isnan(mcon) or np.isnan(mfue) or np.isnan(midif) or np.isnan(micon) or np.isnan(mifue):
-#      return
 
     return diffusion - convection + fuel
   
   
-  def Fcheb(self, W, t, mu, A, V1, V2, Dx, Dy):
-    D2x = np.dot(Dx, Dx)
-    D2y = np.dot(Dy, Dy)
+  def Fcheb(self, W, B, V1, V2, Dx, Dy, D2x, D2y):
     
-    N = Dx.shape[0]
+    diffusion = self.kappa*(np.dot(W, D2x.T) + np.dot(D2y, W))
+    convection = np.dot(W, Dx.T) * V1 + W * np.dot(V1, Dx.T) \
+        + np.dot(Dy, W) * V2 + W * np.dot(Dy, V2)            
+    fuel = self.f(W, B)
     
-    # Reshape W to Matrix
-    W = W.reshape(N, N)
-    diff = mu*(np.dot(W, D2x.T) + np.dot(D2y, W))    
-    conv = np.dot(np.dot(W, Dx.T), V1) + np.dot(W, np.dot(V1, Dx.T)) \
-        + np.dot(np.dot(Dy, W), V2) + np.dot(W, np.dot(Dy, V2))
-    reac = np.dot(A, W)
-    
-    W = diff - conv #+ reac
-    
-    # Boundary conditions
-    W[0,:] = np.zeros(N)
-    W[-1,:] = np.zeros(N)
-    W[:,0] = np.zeros(N)
-    W[:,-1] = np.zeros(N)
-    
-    return W.flatten() # Flatten for odeint
+    return diffusion - convection + fuel
   
   
   def K(self, u):
@@ -196,7 +151,7 @@ class fire:
     return U, B
       
         
-  def solveEuler(self, U0, B0):
+  def solveEuler(self, U0, B0, V):
 
     U = np.zeros((self.T+1, self.M, self.N))
     B = np.zeros((self.T+1, self.M, self.N))
@@ -205,7 +160,7 @@ class fire:
     B[0] = B0
     
     for t in range(1, self.T + 1):
-      U[t] = U[t-1] + self.F(U[t-1], B[t-1]) * self.dt
+      U[t] = U[t-1] + self.F(U[t-1], B[t-1], V) * self.dt
       B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
       
       U[t,0,:] = np.zeros(self.N)
@@ -221,24 +176,86 @@ class fire:
     return U, B
       
   # Solve PDE with cheb
-  def solvePDECheb(self):
-    Dx, x = cheb(self.M)
-    Dy, y = cheb(self.N)
+  def solvePDECheb(self, method='rk4'):
+    
+    Dx, x = cheb(self.N-1)
+    Dy, y = cheb(self.M-1)
+    
+    D2x = np.dot(Dx, Dx)
+    D2y = np.dot(Dy, Dy)
     
     X, Y = np.meshgrid(x, y)
+    
     V1 = self.v[0](X, Y)
     V2 = self.v[1](X, Y)
     
     A = self.beta0(X, Y)
     W = self.u0(X, Y)
     
-    W = odeint(self.Fcheb, W.flatten(), self.t, 
-               args=(self.kappa, A, V1, V2, Dx, Dy))
-    U = []
-    for w in W:
-      U.append(w.reshape(self.M + 1, self.N + 1 ))
+    M, N = W.shape
+    
+    U = np.zeros((self.T+1, M, N))
+    B = np.zeros((self.T+1, M, N))
+    
+    U[0] = W[::-1, ::-1]
+    B[0] = A[::-1, ::-1]
+
+    if method == 'rk4':
+      for t in range(1, self.T + 1):
+        k1 = self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y)
+        k2 = self.Fcheb(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V1, V2, Dx, Dy, D2x, D2y)
+        k3 = self.Fcheb(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V1, V2, Dx, Dy, D2x, D2y)
+        k4 = self.Fcheb(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V1, V2, Dx, Dy, D2x, D2y)
+  
+        tmp = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+        
+        U[t] = tmp[::-1, ::-1]
+        
+        # BC of temperature
+        U[t,0,:] = np.zeros(N)
+        U[t,-1,:] = np.zeros(N)
+        U[t,:,0] = np.zeros(M)
+        U[t,:,-1] = np.zeros(M)
+        
+        
+        bk1 = self.g(U[t-1], B[t-1])
+        bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
+        bk3 = self.g(U[t-1] + 0.5*self.dt*bk2, B[t-1] + 0.5*self.dt*bk2)
+        bk4 = self.g(U[t-1] + self.dt*bk3, B[t-1] + self.dt*bk3)
+  
+        tmp2 = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
+        
+        B[t] = tmp2[::-1, ::-1]
+        
+        # BF of fuel
+        B[t,0,:] = np.zeros(N)
+        B[t,-1,:] = np.zeros(N)
+        B[t,:,0] = np.zeros(M)
+        B[t,:,-1] = np.zeros(M)
+        
+      return U, B
+    
+    else:
+      
+      for t in range(1, self.T + 1):
+        tmp = U[t-1] + self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y) * self.dt
+        tmp2 = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
+        
+        U[t] = tmp[::-1, ::-1]
+        B[t] = tmp2[::-1, ::-1]
+        
+        U[t,0,:] = np.zeros(N)
+        U[t,-1,:] = np.zeros(N)
+        U[t,:,0] = np.zeros(M)
+        U[t,:,-1] = np.zeros(M)
+        
+        B[t,0,:] = np.zeros(N)
+        B[t,-1,:] = np.zeros(N)
+        B[t,:,0] = np.zeros(M)
+        B[t,:,-1] = np.zeros(M)
+        
+      return U, B
           
-    return np.array(U)   
     
   # Solve PDE
   def solvePDE(self, method='rk4'):
@@ -362,7 +379,7 @@ class fire:
       
     plt.show()
     
-  def plots(self, U, B, save=False):
+  def plots(self, U, B, cheb=False, save=False):
     
     sec = int(datetime.today().timestamp())
     DIR_BASE = "simulation/" + str(sec) + "/"
@@ -370,7 +387,9 @@ class fire:
     for i in range(self.T):
       if i % 10 == 0:
         plt.subplot(1, 2, 1)
-        plt.imshow(U[i], origin='lower', cmap=plt.cm.jet, alpha=0.9, vmin=np.min(U),
+        Ua = U[i]
+        #if cheb: Ua = Ua[::-1,::-1]
+        plt.imshow(Ua, origin='lower', cmap=plt.cm.jet, alpha=0.9, vmin=np.min(U),
                    vmax=np.max(U), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
         plt.colorbar(fraction=0.046, pad=0.04)
         
@@ -383,7 +402,9 @@ class fire:
         plt.ylabel("y")
         
         plt.subplot(1, 2, 2)
-        plt.imshow(B[i], origin='lower', cmap=plt.cm.Oranges, alpha=1, vmin=np.min(B),
+        Ba = B[i]
+        #if cheb: Ba = Ba[::-1,::-1]
+        plt.imshow(Ba, origin='lower', cmap=plt.cm.Oranges, alpha=1, vmin=np.min(B),
                    vmax=np.max(B), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
         plt.colorbar(fraction=0.046, pad=0.04)  
         plt.title("Fuel")
