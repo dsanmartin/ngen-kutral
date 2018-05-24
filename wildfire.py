@@ -9,7 +9,7 @@ sec = int(datetime.today().timestamp())
 DIR_BASE = "simulation/" + str(sec) + "/"
 
 # Chebyshev differentiation matrix
-def cheb(N):
+def chebyshevMatrix(N):
     if N == 0:
         D = 0
         x = 1
@@ -178,8 +178,8 @@ class fire:
   # Solve PDE with cheb
   def solvePDECheb(self, method='rk4'):
     
-    Dx, x = cheb(self.N-1)
-    Dy, y = cheb(self.M-1)
+    Dx, x = chebyshevMatrix(self.N-1)
+    Dy, y = chebyshevMatrix(self.M-1)
     
     D2x = np.dot(Dx, Dx)
     D2y = np.dot(Dy, Dy)
@@ -197,37 +197,35 @@ class fire:
     U = np.zeros((self.T+1, M, N))
     B = np.zeros((self.T+1, M, N))
     
-    U[0] = W[::-1, ::-1]
-    B[0] = A[::-1, ::-1]
+    U[0] = W
+    B[0] = A
 
     if method == 'rk4':
       for t in range(1, self.T + 1):
+        
+        # Temperature
         k1 = self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y)
         k2 = self.Fcheb(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V1, V2, Dx, Dy, D2x, D2y)
         k3 = self.Fcheb(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V1, V2, Dx, Dy, D2x, D2y)
         k4 = self.Fcheb(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V1, V2, Dx, Dy, D2x, D2y)
   
-        tmp = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
-        
-        U[t] = tmp[::-1, ::-1]
-        
-        # BC of temperature
+        U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+                
+        # Temperature's BC
         U[t,0,:] = np.zeros(N)
         U[t,-1,:] = np.zeros(N)
         U[t,:,0] = np.zeros(M)
         U[t,:,-1] = np.zeros(M)
         
-        
+        # Fuel
         bk1 = self.g(U[t-1], B[t-1])
         bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
         bk3 = self.g(U[t-1] + 0.5*self.dt*bk2, B[t-1] + 0.5*self.dt*bk2)
         bk4 = self.g(U[t-1] + self.dt*bk3, B[t-1] + self.dt*bk3)
   
-        tmp2 = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
+        B[t] = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
         
-        B[t] = tmp2[::-1, ::-1]
-        
-        # BF of fuel
+        # Fuel's BC
         B[t,0,:] = np.zeros(N)
         B[t,-1,:] = np.zeros(N)
         B[t,:,0] = np.zeros(M)
@@ -238,17 +236,20 @@ class fire:
     else:
       
       for t in range(1, self.T + 1):
-        tmp = U[t-1] + self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y) * self.dt
-        tmp2 = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
         
-        U[t] = tmp[::-1, ::-1]
-        B[t] = tmp2[::-1, ::-1]
+        # Temperature
+        U[t] = U[t-1] + self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y) * self.dt
         
+        # Temperature's BC
         U[t,0,:] = np.zeros(N)
         U[t,-1,:] = np.zeros(N)
         U[t,:,0] = np.zeros(M)
         U[t,:,-1] = np.zeros(M)
         
+        # Fuel
+        B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
+        
+        # Fuel's BC
         B[t,0,:] = np.zeros(N)
         B[t,-1,:] = np.zeros(N)
         B[t,:,0] = np.zeros(M)
@@ -325,8 +326,8 @@ class fire:
   def plotTemperaturesCheb(self, t, temperatures):
     N = temperatures[t].shape[0]
     fine = np.linspace(-1, 1, 2*N)
-    _, x = cheb(N-1)
-    _, y = cheb(N-1)
+    _, x = chebyshevMatrix(N-1)
+    _, y = chebyshevMatrix(N-1)
     fu = interp2d(x, y, temperatures[t], kind='cubic')
     U = fu(fine, fine)
     plt.imshow(U, origin='lower', cmap=plt.cm.jet, extent=[-1, 1, -1, 1])
@@ -384,15 +385,33 @@ class fire:
     sec = int(datetime.today().timestamp())
     DIR_BASE = "simulation/" + str(sec) + "/"
     
+    fineX = np.linspace(self.x[0], self.x[-1], 2*self.N)    
+    fineY = np.linspace(self.y[0], self.y[-1], 2*self.M) 
+    
     for i in range(self.T):
       if i % 10 == 0:
-        plt.subplot(1, 2, 1)
-        Ua = U[i]
-        #if cheb: Ua = Ua[::-1,::-1]
-        plt.imshow(Ua, origin='lower', cmap=plt.cm.jet, alpha=0.9, vmin=np.min(U),
+        
+        if cheb:
+          _, x = chebyshevMatrix(self.N-1)
+          _, y = chebyshevMatrix(self.M-1)
+          fu = interp2d(x, y, U[i], kind='cubic')
+          fb = interp2d(x, y, B[i], kind='cubic')
+        else:
+          fu = interp2d(self.x, self.y, U[i], kind='cubic')
+          fb = interp2d(self.x, self.y, B[i], kind='cubic')
+          
+        Ui = fu(fineX, fineY)
+        Bi = fb(fineX, fineY)
+
+        # Left plot        
+        plt.subplot(1, 2, 1) 
+        
+        # Temperature plot
+        plt.imshow(Ui, origin='lower', cmap=plt.cm.jet, alpha=0.9, vmin=np.min(U),
                    vmax=np.max(U), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
         plt.colorbar(fraction=0.046, pad=0.04)
         
+        # Wind plot
         Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // 2), 
                           self.y[0]:self.y[-1]:complex(0, self.M // 2)]
         plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv)) 
@@ -400,11 +419,12 @@ class fire:
         plt.title("Temperature + Wind")
         plt.xlabel("x")
         plt.ylabel("y")
-        
+
+        # Right plot        
         plt.subplot(1, 2, 2)
-        Ba = B[i]
-        #if cheb: Ba = Ba[::-1,::-1]
-        plt.imshow(Ba, origin='lower', cmap=plt.cm.Oranges, alpha=1, vmin=np.min(B),
+        
+        # Fuel plot
+        plt.imshow(Bi, origin='lower', cmap=plt.cm.Oranges, alpha=1, vmin=np.min(B),
                    vmax=np.max(B), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
         plt.colorbar(fraction=0.046, pad=0.04)  
         plt.title("Fuel")

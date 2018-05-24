@@ -84,7 +84,7 @@ ct = wildfire.fire(parameters)
 Wc, Bc = ct.solvePDECheb()
 
 #%%
-ct.plots(Wc, Bc)
+ct.plots(Wc, Bc, True)
 
 #%%
 for i in range(T):
