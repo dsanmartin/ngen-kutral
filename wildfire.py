@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import odeint
 from scipy.interpolate import interp2d
 import pathlib, json, inspect, os
 from datetime import datetime
@@ -43,7 +42,11 @@ class fire:
     self.dt = self.t[1] - self.t[0]
     
 
+  # Compute divergence 
   def divergence(self, F):
+    """
+    Divergence of F=(f1, f2). div(F) = f1_x + f2_y
+    """
     # Get vector field elements
     f1, f2 = F
     
@@ -53,8 +56,11 @@ class fire:
     
     return df1dx + df2dy # Divergence (d/dx, d/dy) dot (f1, f2)
   
-  
+  # Compute Gradient of f (fx, fy)
   def gradient(self, f):
+    """
+    Gradient of f. grad(f) = (fx, fy)
+    """
     # Computing df/dx and df/dy
     dfdx = np.gradient(f, self.dx, edge_order=2, axis=1)
     dfdy = np.gradient(f, self.dy, edge_order=2, axis=0)
@@ -62,8 +68,11 @@ class fire:
     return (dfdx, dfdy) # Gradient (df/dx, df/dy)
     
     
-  # Laplacian div(grad u)
+  # Compute Laplacian 
   def laplacian(self, u):
+    """
+    Laplacian of u. div(grad u)
+    """
     # Compute u_{xx}
     #uxx = (np.roll(u, -1, axis=1) + np.roll(u, 1, axis=1) - 2*u) / self.dx**2
     ux = np.gradient(u, self.dx, edge_order=2, axis=1)
@@ -75,30 +84,30 @@ class fire:
     return uxx + uyy 
             
   # RHS of PDE
-  def F(self, U, B, V):  
+  def RHS(self, U, B, V, args=None):
+    """
+    Compute right hand side of PDE
+    """
     
-    v1, v2 = V
-    ux, uy = self.gradient(U) # Compute gradient
-    # divV = self.divergence(V) # Compute divergence of V. 
-    # This should be 0 for an incompressible flow. This is an assumption for the model.
+    V1, V2 = V # Unpacking tuple of Vector field
     
-    diffusion = (self.kappa * self.laplacian(U)) # k grad u
-    #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
-    convection = ux*v1 + uy*v2     
-    fuel = self.f(U, B)
-
+    if args is None: # Use finite difference
+      Ux, Uy = self.gradient(U) # Compute gradient
+      # divV = self.divergence(V) # Compute divergence of V. 
+      # This should be 0 for an incompressible flow. This is an assumption for the model.      
+      diffusion = (self.kappa * self.laplacian(U)) # k grad u
+      #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
+      convection = Ux*V1 + Uy*V2     
+      fuel = self.f(U, B)
+      
+    else: # Use Chebyshev
+      Dx, Dy, D2x, D2y = args
+      diffusion = self.kappa*(np.dot(U, D2x.T) + np.dot(D2y, U))
+      convection = np.dot(U, Dx.T) * V1 + U * np.dot(V1, Dx.T) \
+          + np.dot(Dy, U) * V2 + U * np.dot(Dy, V2)            
+      fuel = self.f(U, B)
+    
     return diffusion - convection + fuel
-  
-  
-  def Fcheb(self, W, B, V1, V2, Dx, Dy, D2x, D2y):
-    
-    diffusion = self.kappa*(np.dot(W, D2x.T) + np.dot(D2y, W))
-    convection = np.dot(W, Dx.T) * V1 + W * np.dot(V1, Dx.T) \
-        + np.dot(Dy, W) * V2 + W * np.dot(Dy, V2)            
-    fuel = self.f(W, B)
-    
-    return diffusion - convection + fuel
-  
   
   def K(self, u):
     return self.kappa * (1 + self.epsilon * u) ** 3 + 1
@@ -115,27 +124,29 @@ class fire:
     
     return S
   
-  
-  def solveRK4(self, U0, B0, V):
-    U = np.zeros((self.T+1, self.M, self.N))
-    B = np.zeros((self.T+1, self.M, self.N))
+  # Runge-Kutta 4th order for time 
+  def solveRK4(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    U = np.zeros((self.T+1, M, N))
+    B = np.zeros((self.T+1, M, N))
     
     U[0] = U0
     B[0] = B0
     
     for t in range(1, self.T + 1):
-      k1 = self.F(U[t-1], B[t-1], V)
-      k2 = self.F(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V)
-      k3 = self.F(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V)
-      k4 = self.F(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V)
+      k1 = self.RHS(U[t-1], B[t-1], V, args)
+      k2 = self.RHS(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V, args)
+      k3 = self.RHS(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V, args)
+      k4 = self.RHS(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V, args)
 
       U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
       
       # BC of temperature
-      U[t,0,:] = np.zeros(self.N)
-      U[t,-1,:] = np.zeros(self.N)
-      U[t,:,0] = np.zeros(self.M)
-      U[t,:,-1] = np.zeros(self.M)
+      U[t,0,:] = np.zeros(N)
+      U[t,-1,:] = np.zeros(N)
+      U[t,:,0] = np.zeros(M)
+      U[t,:,-1] = np.zeros(M)
       
       bk1 = self.g(U[t-1], B[t-1])
       bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
@@ -144,133 +155,54 @@ class fire:
 
       B[t] = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
       
-      # BF of fuel
-      B[t,0,:] = np.zeros(self.N)
-      B[t,-1,:] = np.zeros(self.N)
-      B[t,:,0] = np.zeros(self.M)
-      B[t,:,-1] = np.zeros(self.M)
+      # BC of fuel
+      B[t,0,:] = np.zeros(N)
+      B[t,-1,:] = np.zeros(N)
+      B[t,:,0] = np.zeros(M)
+      B[t,:,-1] = np.zeros(M)
       
     return U, B
       
-        
-  def solveEuler(self, U0, B0, V):
-
-    U = np.zeros((self.T+1, self.M, self.N))
-    B = np.zeros((self.T+1, self.M, self.N))
+  # Forward Euler for time
+  def solveEuler(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    U = np.zeros((self.T+1, M, N))
+    B = np.zeros((self.T+1, M, N))
     
     U[0] = U0
     B[0] = B0
     
     for t in range(1, self.T + 1):
-      U[t] = U[t-1] + self.F(U[t-1], B[t-1], V) * self.dt
+      U[t] = U[t-1] + self.RHS(U[t-1], B[t-1], V, args) * self.dt
       B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
       
-      U[t,0,:] = np.zeros(self.N)
-      U[t,-1,:] = np.zeros(self.N)
-      U[t,:,0] = np.zeros(self.M)
-      U[t,:,-1] = np.zeros(self.M)
+      U[t,0,:] = np.zeros(N)
+      U[t,-1,:] = np.zeros(N)
+      U[t,:,0] = np.zeros(M)
+      U[t,:,-1] = np.zeros(M)
       
-      B[t,0,:] = np.zeros(self.N)
-      B[t,-1,:] = np.zeros(self.N)
-      B[t,:,0] = np.zeros(self.M)
-      B[t,:,-1] = np.zeros(self.M)
+      B[t,0,:] = np.zeros(N)
+      B[t,-1,:] = np.zeros(N)
+      B[t,:,0] = np.zeros(M)
+      B[t,:,-1] = np.zeros(M)
       
     return U, B
-      
-  # Solve PDE with cheb
-  def solvePDECheb(self, method='rk4'):
-    
-    Dx, x = chebyshevMatrix(self.N-1)
-    Dy, y = chebyshevMatrix(self.M-1)
-    
-    D2x = np.dot(Dx, Dx)
-    D2y = np.dot(Dy, Dy)
-    
-    X, Y = np.meshgrid(x, y)
-    
-    V1 = self.v[0](X, Y)
-    V2 = self.v[1](X, Y)
-    
-    A = self.beta0(X, Y)
-    W = self.u0(X, Y)
-    
-    M, N = W.shape
-    
-    U = np.zeros((self.T+1, M, N))
-    B = np.zeros((self.T+1, M, N))
-    
-    U[0] = W
-    B[0] = A
-
-    if method == 'rk4':
-      for t in range(1, self.T + 1):
-        
-        # Temperature
-        k1 = self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y)
-        k2 = self.Fcheb(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V1, V2, Dx, Dy, D2x, D2y)
-        k3 = self.Fcheb(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V1, V2, Dx, Dy, D2x, D2y)
-        k4 = self.Fcheb(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V1, V2, Dx, Dy, D2x, D2y)
-  
-        U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
-                
-        # Temperature's BC
-        U[t,0,:] = np.zeros(N)
-        U[t,-1,:] = np.zeros(N)
-        U[t,:,0] = np.zeros(M)
-        U[t,:,-1] = np.zeros(M)
-        
-        # Fuel
-        bk1 = self.g(U[t-1], B[t-1])
-        bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
-        bk3 = self.g(U[t-1] + 0.5*self.dt*bk2, B[t-1] + 0.5*self.dt*bk2)
-        bk4 = self.g(U[t-1] + self.dt*bk3, B[t-1] + self.dt*bk3)
-  
-        B[t] = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
-        
-        # Fuel's BC
-        B[t,0,:] = np.zeros(N)
-        B[t,-1,:] = np.zeros(N)
-        B[t,:,0] = np.zeros(M)
-        B[t,:,-1] = np.zeros(M)
-        
-      return U, B
-    
-    else:
-      
-      for t in range(1, self.T + 1):
-        
-        # Temperature
-        U[t] = U[t-1] + self.Fcheb(U[t-1], B[t-1], V1, V2, Dx, Dy, D2x, D2y) * self.dt
-        
-        # Temperature's BC
-        U[t,0,:] = np.zeros(N)
-        U[t,-1,:] = np.zeros(N)
-        U[t,:,0] = np.zeros(M)
-        U[t,:,-1] = np.zeros(M)
-        
-        # Fuel
-        B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
-        
-        # Fuel's BC
-        B[t,0,:] = np.zeros(N)
-        B[t,-1,:] = np.zeros(N)
-        B[t,:,0] = np.zeros(M)
-        B[t,:,-1] = np.zeros(M)
-        
-      return U, B
           
-    
+  
   # Solve PDE
-  def solvePDE(self, method='rk4'):
+  def solvePDE(self, spatial='fd', time='rk4'):
     """
     Solve PDE model
     
     Parameters
     ----------
-    method : string
-            'rk4' Central Difference spatial with Runge-Kutta 4th order in time
-            'euler' Central Difference spatial with Forward Euler Method in time
-            'Chebyshev' Chebyshev difference matrix spatial with RK4 in time 
+    spatial : string
+            * 'fd' Finite difference
+            * 'cheb' Chebyshev differenciation  
+    time : string
+          * 'euler' Forward Euler
+          * 'rk4' Runge-Kutta 4th order
             
     Returns
     -------
@@ -279,22 +211,46 @@ class fire:
     B : (T, M, N) ndarray  
       Fuels approximation
     """
+        
+    if spatial == 'cheb':
+      Dx, x = chebyshevMatrix(self.N-1)
+      Dy, y = chebyshevMatrix(self.M-1)
+      
+      D2x = np.dot(Dx, Dx)
+      D2y = np.dot(Dy, Dy)
+      
+      X, Y = np.meshgrid(x, y)      
+      
+      U0 = self.u0(X, Y)
+      B0 = self.beta0(X, Y)
+      
+      V1 = self.v[0](X, Y)
+      V2 = self.v[1](X, Y)
+      
+      V = (V1, V2)
+      
+      args = (Dx, Dy, D2x, D2y)
+      
+      
+    elif spatial == "fd":
+      # Grid for functions evaluation
+      X, Y = np.meshgrid(self.x, self.y)
+      
+      U0 = self.u0(X, Y) # Temperature initial condition
+      B0 = self.beta0(X, Y) # Fuel initial condition
+      V = (self.v[0](X, Y), self.v[1](X, Y)) # Vector field
+      
+      args = None
+    else:
+      print("Spatial method error")
     
-    # Grid for functions evaluation
-    X, Y = np.meshgrid(self.x, self.y)
-    
-    U0 = self.u0(X, Y) # Temperature initial condition
-    B0 = self.beta0(X, Y) # Fuel initial condition
-    V = (self.v[0](X, Y), self.v[1](X, Y)) # Vector field
-    
-    # Solver
-    if method == 'rk4':
-      U, B = self.solveRK4(U0, B0, V)
-    elif method == 'euler': 
-      U, B = self.solveEuler(U0, B0, V)
-    elif method == 'cheb':
-      U = self.solvePDECheb('euler')
-      B = np.zeros_like(U)
+    # Time
+    if time == 'rk4':
+      U, B = self.solveRK4(U0, B0, V, args)
+    elif time == 'euler': 
+      U, B = self.solveEuler(U0, B0, V, args)
+    else:
+      print("Time method error")
         
     return U, B
   

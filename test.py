@@ -54,16 +54,16 @@ v2 = lambda x, y: gamma * np.sin(x)
 V = (v1, v2)
 
 # Lambda function for temperature initial condition
-u0 = lambda x, y: 1e2*np.exp(-40*((x+.8)**2 + (y-.4)**2)) 
+u0 = lambda x, y: 1e1*np.exp(-40*((x+.8)**2 + (y-.8)**2)) 
 
 # Lambda function for fuel initial condition
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
 
 # Non dimensional parameters
-kappa = 10*1e-3 # diffusion coefficient
-epsilon = 10*1e-1 # inverse of activation energy
-upc = 10*.1 # u phase change
-q = 10*1e-1 # reaction heat
+kappa = 1*1e-3 # diffusion coefficient
+epsilon = 1*1e-1 # inverse of activation energy
+upc = 1*.1 # u phase change
+q = 1*1e-1 # reaction heat
 alpha = 1e-2 # natural convection
 
 # Plot initial conditions
@@ -88,17 +88,17 @@ parameters = {
 #%%
 # Finite difference in space
 ct = wildfire.fire(parameters)
-W, B = ct.solvePDE()
+W, B = ct.solvePDE('fd', 'rk4')
 #%%
 ct.plots(W, B)
 
 #%%
 # Chebyshev in space
 ct = wildfire.fire(parameters)
-Wc, Bc = ct.solvePDECheb()
+Wc, Bc = ct.solvePDE('cheb', 'rk4')
 
 #%%
-ct.plots(Wc, Bc, True, True)
+ct.plots(Wc, Bc, True)
 
 #%%
 for i in range(T):
