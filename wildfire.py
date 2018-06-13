@@ -43,7 +43,7 @@ class fire:
     
 
   # Compute divergence 
-  def divergence(self, F):
+  def div(self, F):
     """
     Divergence of F=(f1, f2). div(F) = f1_x + f2_y
     """
@@ -51,21 +51,21 @@ class fire:
     f1, f2 = F
     
     # Computing df1/dx and df2/dy
-    df1dx = np.gradient(f1, self.dx, edge_order=2, axis=1)
-    df2dy = np.gradient(f2, self.dy, edge_order=2, axis=0)
+    f1_x = np.gradient(f1, self.dx, edge_order=2, axis=1)
+    f2_y = np.gradient(f2, self.dy, edge_order=2, axis=0)
     
-    return df1dx + df2dy # Divergence (d/dx, d/dy) dot (f1, f2)
+    return f1_x + f2_y # Divergence (d/dx, d/dy) dot (f1, f2)
   
   # Compute Gradient of f (fx, fy)
-  def gradient(self, f):
+  def grad(self, f):
     """
-    Gradient of f. grad(f) = (fx, fy)
+    Gradient of f. grad(f) = (f_x, f_y)
     """
     # Computing df/dx and df/dy
-    dfdx = np.gradient(f, self.dx, edge_order=2, axis=1)
-    dfdy = np.gradient(f, self.dy, edge_order=2, axis=0)
+    f_x = np.gradient(f, self.dx, edge_order=2, axis=1)
+    f_y = np.gradient(f, self.dy, edge_order=2, axis=0)
     
-    return (dfdx, dfdy) # Gradient (df/dx, df/dy)
+    return (f_x, f_y) # Gradient (df/dx, df/dy)
     
     
   # Compute Laplacian 
@@ -73,15 +73,7 @@ class fire:
     """
     Laplacian of u. div(grad u)
     """
-    # Compute u_{xx}
-    #uxx = (np.roll(u, -1, axis=1) + np.roll(u, 1, axis=1) - 2*u) / self.dx**2
-    ux = np.gradient(u, self.dx, edge_order=2, axis=1)
-    uxx = np.gradient(ux, self.dx, edge_order=2, axis=1)
-    # Compute u_{yy}
-    #uyy = (np.roll(u, -1, axis=0) + np.roll(u, 1, axis=0) - 2*u) / self.dy**2
-    uy = np.gradient(u, self.dy, edge_order=2, axis=0)
-    uyy = np.gradient(uy, self.dy, edge_order=2, axis=0)
-    return uxx + uyy 
+    return self.div(self.grad(u)) 
             
   # RHS of PDE
   def RHS(self, U, B, V, args=None):
@@ -92,10 +84,10 @@ class fire:
     V1, V2 = V # Unpacking tuple of Vector field
     
     if args is None: # Use finite difference
-      Ux, Uy = self.gradient(U) # Compute gradient
-      # divV = self.divergence(V) # Compute divergence of V. 
+      Ux, Uy = self.grad(U) # Compute gradient
+      # divV = self.div(V) # Compute divergence of V. 
       # This should be 0 for an incompressible flow. This is an assumption for the model.      
-      diffusion = (self.kappa * self.laplacian(U)) # k grad u
+      diffusion = (self.kappa * self.laplacian(U)) # k nabla u
       #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
       convection = Ux*V1 + Uy*V2     
       fuel = self.f(U, B)

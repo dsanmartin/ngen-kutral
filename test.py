@@ -27,7 +27,7 @@ def plotScalar(X, Y, U, title, cmap_):
   
 # Domain: [-1, 1]^2 x [0, T]
 M, N = 50, 50 # Resolution
-T = 1500 # Max time
+T = 100 # Max time
 dt = 1e-3 # Timestep
 xa, xb = -1, 1 # x domain limit
 ya, yb = -1, 1 # y domain limit
