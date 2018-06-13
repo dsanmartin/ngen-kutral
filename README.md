@@ -1,2 +1,2 @@
-# master-thesis-code
-Master thesis code
+# Master Thesis Code
+## Daniel San Martin

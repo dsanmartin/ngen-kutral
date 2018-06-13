@@ -79,10 +79,12 @@ class fire:
     
     v1, v2 = V
     ux, uy = self.gradient(U) # Compute gradient
-    divV = self.divergence(V) # Compute divergence
+    # divV = self.divergence(V) # Compute divergence of V. 
+    # This should be 0 for an incompressible flow. This is an assumption for the model.
     
     diffusion = (self.kappa * self.laplacian(U)) # k grad u
-    convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
+    #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
+    convection = ux*v1 + uy*v2     
     fuel = self.f(U, B)
 
     return diffusion - convection + fuel
@@ -102,7 +104,7 @@ class fire:
     return self.kappa * (1 + self.epsilon * u) ** 3 + 1
   
   def f(self, u, beta):
-    return self.s(u) * beta * np.exp(u /(1 + self.epsilon*u)) - self.alpha * u
+    return self.s(u) * beta * np.exp(u / (1 + self.epsilon*u)) - self.alpha * u
   
   def g(self, u, beta):
     return -self.s(u) * (self.epsilon / self.q) * beta * np.exp(u /(1 + self.epsilon*u))
@@ -260,6 +262,23 @@ class fire:
     
   # Solve PDE
   def solvePDE(self, method='rk4'):
+    """
+    Solve PDE model
+    
+    Parameters
+    ----------
+    method : string
+            'rk4' Central Difference spatial with Runge-Kutta 4th order in time
+            'euler' Central Difference spatial with Forward Euler Method in time
+            'Chebyshev' Chebyshev difference matrix spatial with RK4 in time 
+            
+    Returns
+    -------
+    U : (T, M, N) ndarray
+      Temperatures approximation
+    B : (T, M, N) ndarray  
+      Fuels approximation
+    """
     
     # Grid for functions evaluation
     X, Y = np.meshgrid(self.x, self.y)
@@ -274,7 +293,7 @@ class fire:
     elif method == 'euler': 
       U, B = self.solveEuler(U0, B0, V)
     elif method == 'cheb':
-      U = self.solvePDECheb()
+      U = self.solvePDECheb('euler')
       B = np.zeros_like(U)
         
     return U, B
@@ -388,17 +407,20 @@ class fire:
     fineX = np.linspace(self.x[0], self.x[-1], 2*self.N)    
     fineY = np.linspace(self.y[0], self.y[-1], 2*self.M) 
     
+    
     for i in range(self.T):
       if i % 10 == 0:
+        if i == 0: kind_ = "linear"
+        else: kind_ = "cubic"
         
         if cheb:
           _, x = chebyshevMatrix(self.N-1)
           _, y = chebyshevMatrix(self.M-1)
-          fu = interp2d(x, y, U[i], kind='cubic')
-          fb = interp2d(x, y, B[i], kind='cubic')
+          fu = interp2d(x, y, U[i], kind='cubic')          
+          fb = interp2d(x, y, B[i], kind=kind_)
         else:
           fu = interp2d(self.x, self.y, U[i], kind='cubic')
-          fb = interp2d(self.x, self.y, B[i], kind='cubic')
+          fb = interp2d(self.x, self.y, B[i], kind=kind_)
           
         Ui = fu(fineX, fineY)
         Bi = fb(fineX, fineY)
@@ -406,10 +428,19 @@ class fire:
         # Left plot        
         plt.subplot(1, 2, 1) 
         
+        #fig = plt.figure(figsize=(14, 8)) 
+        
+        Xf, Yf = np.meshgrid(fineX, fineY)
         # Temperature plot
-        plt.imshow(Ui, origin='lower', cmap=plt.cm.jet, alpha=0.9, vmin=np.min(U),
+        temp = plt.imshow(Ui, origin='lower', cmap=plt.cm.jet, alpha=0.8, vmin=np.min(U),
                    vmax=np.max(U), extent=[self.x[0], self.x[-1], self.y[0], self.y[-1]])
-        plt.colorbar(fraction=0.046, pad=0.04)
+        #temp = plt.contour(Xf, Yf, Ui, cmap=plt.cm.jet, alpha=0.8)
+        #fig.colorbar(temp)#, 
+        plt.colorbar(temp, fraction=0.046, pad=0.04)
+        
+        
+        #fuel_cont = plt.contour(Xf, Yf, Bi, cmap=plt.cm.Oranges, alpha=0.8)
+        #fig.colorbar(fuel_cont)#, fraction=0.046, pad=0.04)
         
         # Wind plot
         Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // 2), 
@@ -436,6 +467,8 @@ class fire:
         if save:
           fig_n = i // 10 + 1
           if fig_n < 10:
+            fig_name = '00' + str(fig_n)
+          elif fig_n < 100:
             fig_name = '0' + str(fig_n)
           else:
             fig_name = str(fig_n)             
