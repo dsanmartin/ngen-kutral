@@ -25,8 +25,8 @@ def plotScalar(X, Y, U, title, cmap_):
   plt.colorbar()
   plt.show()
   
-# Domain: [-1, 1]^2 x [0, T]
-M, N = 50, 50 # Resolution
+# Domain: [-1, 1]^2 x [0, T*dt]
+M, N = 25, 25 # Resolution
 T = 100 # Max time
 dt = 1e-3 # Timestep
 xa, xb = -1, 1 # x domain limit
@@ -39,7 +39,7 @@ t = np.linspace(0, dt*T, T) # t domain
 X, Y = np.meshgrid(x, y)
 Xv, Yv = np.mgrid[xa:xb:complex(0, N // 4), ya:yb:complex(0, M // 4)]
 
-# TODO: define parameters in function of real ones
+# TODO: define parameters in function of real conditions
 #T_env = 300
 #Ea = 83.68
 #A = 1e9
@@ -49,8 +49,8 @@ Xv, Yv = np.mgrid[xa:xb:complex(0, N // 4), ya:yb:complex(0, M // 4)]
 
 # Vector field V = (v1, v2). "Incompressible flow div(V) = 0"
 gamma = 1
-v1 = lambda x, y: gamma * np.cos(y) 
-v2 = lambda x, y: gamma * np.sin(x)
+v1 = lambda x, y: gamma * np.cos(7/4*np.pi) 
+v2 = lambda x, y: gamma * np.sin(7/4*np.pi)
 V = (v1, v2)
 
 # Lambda function for temperature initial condition
@@ -60,7 +60,7 @@ u0 = lambda x, y: 1e1*np.exp(-40*((x+.8)**2 + (y-.8)**2))
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
 
 # Non dimensional parameters
-kappa = 1*1e-3 # diffusion coefficient
+kappa = 1*1e-2 # diffusion coefficient
 epsilon = 1*1e-1 # inverse of activation energy
 upc = 1*.1 # u phase change
 q = 1*1e-1 # reaction heat
@@ -69,7 +69,7 @@ alpha = 1e-2 # natural convection
 # Plot initial conditions
 plotField(Xv, Yv, V)
 plotScalar(X, Y, b0, "Fuel", plt.cm.Oranges)
-plotScalar(X, Y, u0, "Initial contidion", plt.cm.jet)
+plotScalar(X, Y, u0, "Initial condition", plt.cm.jet)
 
 # Parameters for the model
 parameters = {
@@ -85,18 +85,17 @@ parameters = {
     'y': y,
     't': t
 }
+
+ct = wildfire.fire(parameters)
 #%%
 # Finite difference in space
-ct = wildfire.fire(parameters)
-W, B = ct.solvePDE('fd', 'rk4')
+W, B = ct.solvePDE('fd', 'euler')
 #%%
 ct.plots(W, B)
 
 #%%
 # Chebyshev in space
-ct = wildfire.fire(parameters)
 Wc, Bc = ct.solvePDE('cheb', 'rk4')
-
 #%%
 ct.plots(Wc, Bc, True)
 
@@ -107,3 +106,25 @@ for i in range(T):
     ct.plotFuel(i, B, True)  
 #%%
 ct.save(W, B, 0)
+#%%
+nodes = np.array([25, 50, 100, 200])
+fd_times = np.array([0.994, 1.3, 2.93, 9.36]) #8.89
+cheb_times = np.array([.302, 0.581, 1.98, 9.42])
+plt.plot(nodes, fd_times, 'r-*', label='FD')
+plt.plot(nodes, cheb_times, 'b-o', label='Cheb')
+plt.legend()
+plt.grid(True)
+plt.xlabel("N")
+plt.ylabel("t [s]")
+plt.show()
+#%%
+nodes = np.array([5, 10, 25, 50])
+fd_err = np.array([0.068, 0.051, 0.314, 0.66])
+cheb_err = np.array([0.078, 0.012, 0.244, 0.425])
+plt.plot(nodes, fd_err, 'r-*', label='FD')
+plt.plot(nodes, cheb_err, 'b-o', label='Cheb')
+plt.legend()
+plt.grid(True)
+plt.xlabel("N")
+plt.ylabel("Error")
+plt.show()

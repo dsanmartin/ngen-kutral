@@ -3,23 +3,13 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp2d
 import pathlib, json, inspect, os
 from datetime import datetime
+from scipy import optimize
+from diffmat import FD1Matrix, FD2Matrix, chebyshevMatrix
+
 
 sec = int(datetime.today().timestamp())
 DIR_BASE = "simulation/" + str(sec) + "/"
 
-# Chebyshev differentiation matrix
-def chebyshevMatrix(N):
-    if N == 0:
-        D = 0
-        x = 1
-        return D, x
-    x = np.cos(np.pi * np.arange(N + 1) / N)
-    c = np.hstack((2, np.ones(N - 1), 2)) * ((-1.)**np.arange(N + 1))
-    X = np.tile(x, (N + 1, 1)).T
-    dX = X - X.T
-    D = np.outer(c, 1./c) / (dX + np.eye(N + 1))
-    D = D - np.diag(np.sum(D.T, axis=0))
-    return D, x
 
 class fire:
   
@@ -40,32 +30,45 @@ class fire:
     self.dx = self.x[1] - self.x[0]
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
-    
+        
 
   # Compute divergence 
   def div(self, F):
     """
-    Divergence of F=(f1, f2). div(F) = f1_x + f2_y
+    Divergence of F=(f1, f2). 
+    div(F) = (d/dx, d/dy) dot (f1, f2) = f1_x + f2_y
     """
     # Get vector field elements
     f1, f2 = F
     
-    # Computing df1/dx and df2/dy
-    f1_x = np.gradient(f1, self.dx, edge_order=2, axis=1)
-    f2_y = np.gradient(f2, self.dy, edge_order=2, axis=0)
+    Dx = FD1Matrix(self.N, self.dx).T
+    Dy = FD1Matrix(self.M, self.dy)
+      
     
-    return f1_x + f2_y # Divergence (d/dx, d/dy) dot (f1, f2)
+    # Computing df1/dx and df2/dy
+    #f1_x = np.gradient(f1, self.dx, edge_order=2, axis=1)
+    #f2_y = np.gradient(f2, self.dy, edge_order=2, axis=0)
+    f1_x = np.dot(f1, Dx)
+    f2_y = np.dot(Dy, f2)
+    
+    return f1_x + f2_y 
   
-  # Compute Gradient of f (fx, fy)
+  # Compute Gradient
   def grad(self, f):
     """
-    Gradient of f. grad(f) = (f_x, f_y)
+    Gradient of f. 
+    grad(f) = (f_x, f_y)
     """
-    # Computing df/dx and df/dy
-    f_x = np.gradient(f, self.dx, edge_order=2, axis=1)
-    f_y = np.gradient(f, self.dy, edge_order=2, axis=0)
+    Dx = FD1Matrix(self.N, self.dx).T
+    Dy = FD1Matrix(self.M, self.dy)
     
-    return (f_x, f_y) # Gradient (df/dx, df/dy)
+    # Computing df/dx and df/dy
+    #f_x = np.gradient(f, self.dx, edge_order=2, axis=1)
+    #f_y = np.gradient(f, self.dy, edge_order=2, axis=0)
+    f_x = np.dot(f, Dx)
+    f_y = np.dot(Dy, f)
+    
+    return (f_x, f_y)
     
     
   # Compute Laplacian 
@@ -83,24 +86,51 @@ class fire:
     
     V1, V2 = V # Unpacking tuple of Vector field
     
-    if args is None: # Use finite difference
-      Ux, Uy = self.grad(U) # Compute gradient
-      # divV = self.div(V) # Compute divergence of V. 
-      # This should be 0 for an incompressible flow. This is an assumption for the model.      
-      diffusion = (self.kappa * self.laplacian(U)) # k nabla u
-      #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
-      convection = Ux*V1 + Uy*V2     
-      fuel = self.f(U, B)
-      
-    else: # Use Chebyshev
-      Dx, Dy, D2x, D2y = args
-      diffusion = self.kappa*(np.dot(U, D2x.T) + np.dot(D2y, U))
-      convection = np.dot(U, Dx.T) * V1 + U * np.dot(V1, Dx.T) \
-          + np.dot(Dy, U) * V2 + U * np.dot(Dy, V2)            
-      fuel = self.f(U, B)
+#    if args is None: # Use finite difference
+#      Ux, Uy = self.grad(U) # Compute gradient
+#      # divV = self.div(V) # Compute divergence of V. 
+#      # This should be 0 for an incompressible flow. This is an assumption for the model.      
+#      diffusion = (self.kappa * self.laplacian(U)) # k nabla u
+#      #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
+#      convection = Ux*V1 + Uy*V2     
+#      fuel = self.f(U, B)
+#      
+#    else: # Use Chebyshev
+#      Dx, Dy, D2x, D2y = args
+#      
+#      diffusion = self.kappa*(np.dot(U, D2x.T) + np.dot(D2y, U))
+#      #convection = np.dot(U, Dx.T) * V1 + U * np.dot(V1, Dx.T) \
+#      #    + np.dot(Dy, U) * V2 + U * np.dot(Dy, V2)   
+#      convection = np.dot(U, Dx.T) * V1 + np.dot(Dy, U) * V2         
+#      fuel = self.f(U, B)
+#      
+##    print(np.min(diffusion), np.min(convection), np.min(fuel))
+##    print(np.max(diffusion), np.max(convection), np.max(fuel))
+    
+    Dx, Dy, D2x, D2y = args
+    
+    diffusion = self.kappa*(np.dot(U, D2x.T) + np.dot(D2y, U))
+    dd = self.kappa*self.laplacian(U)
+    print(np.linalg.norm(diffusion - dd))
+    #convection = np.dot(U, Dx.T) * V1 + U * np.dot(V1, Dx.T) \
+    #    + np.dot(Dy, U) * V2 + U * np.dot(Dy, V2)   
+    convection = np.dot(U, Dx.T) * V1 + np.dot(Dy, U) * V2         
+    fuel = self.f(U, B)
     
     return diffusion - convection + fuel
   
+  def FFF(self, x, V, B, f):
+    N = self.N #int(np.sqrt(len(x)))
+    U = x.reshape(N, N)
+    #print(U.shape)
+    
+    evaluation = self.RHS(U, B, V) * self.dt - f
+    
+    #print(evaluation.shape)
+   
+    return evaluation.flatten()
+    
+    
   def K(self, u):
     return self.kappa * (1 + self.epsilon * u) ** 3 + 1
   
@@ -133,6 +163,12 @@ class fire:
       k4 = self.RHS(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V, args)
 
       U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+      
+#      maxU = np.max(U[t])
+#      print(maxU)
+#      
+#      if np.isnan(maxU):
+#        return
       
       # BC of temperature
       U[t,0,:] = np.zeros(N)
@@ -180,6 +216,47 @@ class fire:
       B[t,:,-1] = np.zeros(M)
       
     return U, B
+  
+  
+  def solveImpEuler(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    U = np.zeros((self.T+1, M, N))
+    B = np.zeros((self.T+1, M, N))
+    
+    U[0] = U0
+    B[0] = B0
+    
+    for t in range(1, self.T + 1):
+      #U[t] = U[t-1] + self.RHS(U[t-1], B[t-1], V, args) * self.dt
+      #B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
+      
+      #U[t] = np.linalg.solve(self.RHS(U[t-1], B[t-1], V, args) * self.dt, U[t-1])
+      #B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
+      #B[t] = np.linalg.solve(self.g(U[t-1], B[t-1]) * self.dt, B[t-1])
+      
+      solU = optimize.root(self.FFF, U[t-1], args=(V, B[t-1], U[t-1],), method='lm')
+      B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
+      
+      #print(solU)
+      U[t] = solU.x.reshape(M, N)
+      
+      plt.imshow(U[t])
+      plt.show()
+      
+      U[t,0,:] = np.zeros(N)
+      U[t,-1,:] = np.zeros(N)
+      U[t,:,0] = np.zeros(M)
+      U[t,:,-1] = np.zeros(M)
+      
+      B[t,0,:] = np.zeros(N)
+      B[t,-1,:] = np.zeros(N)
+      B[t,:,0] = np.zeros(M)
+      B[t,:,-1] = np.zeros(M)
+      
+    return U, B
+    
+    
           
   
   # Solve PDE
@@ -223,6 +300,17 @@ class fire:
       
       args = (Dx, Dy, D2x, D2y)
       
+#      diffusion = self.kappa*(np.dot(U0, D2x.T) + np.dot(D2y, U0))
+#      convection = np.dot(U0, Dx.T) * V1 + np.dot(Dy, U0) * V2 
+#      
+#      error_cheb = convection - diffusion - self.f(U0, B0)
+#      
+#      np.save('data/error.npy', error_cheb)
+#      
+#      print(np.linalg.norm(error_cheb))
+#      plt.imshow(error_cheb)
+#      plt.colorbar()
+#      plt.show()
       
     elif spatial == "fd":
       # Grid for functions evaluation
@@ -230,9 +318,30 @@ class fire:
       
       U0 = self.u0(X, Y) # Temperature initial condition
       B0 = self.beta0(X, Y) # Fuel initial condition
-      V = (self.v[0](X, Y), self.v[1](X, Y)) # Vector field
+      V1 = self.v[0](X, Y)
+      V2 = self.v[1](X, Y)
+      V = (V1, V2) # Vector field
       
-      args = None
+#      Ux, Uy = self.grad(U0)
+#      diffusion = self.kappa * self.laplacian(U0)
+#      convection = V1*Ux + V2*Uy
+#      error_FD = convection - diffusion - self.f(U0, B0)
+#      
+#      np.save('data/error_fd.npy', error_FD)
+#      
+#      
+#      print(np.linalg.norm(error_FD))
+#      plt.imshow(error_FD)
+#      plt.colorbar()
+#      plt.show()
+      
+      #args = None
+      Dx = FD1Matrix(self.N, self.dx)
+      Dy = FD1Matrix(self.M, self.dy)
+      D2x = FD2Matrix(self.N, self.dx)
+      D2y = FD2Matrix(self.M, self.dy)
+      
+      args = (Dx, Dy, D2x, D2y)
     else:
       print("Spatial method error")
     
@@ -241,6 +350,8 @@ class fire:
       U, B = self.solveRK4(U0, B0, V, args)
     elif time == 'euler': 
       U, B = self.solveEuler(U0, B0, V, args)
+    elif time == 'ieuler':
+      U, B = self.solveImpEuler(U0, B0, V, args)
     else:
       print("Time method error")
         
