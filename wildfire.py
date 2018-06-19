@@ -31,52 +31,6 @@ class fire:
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
         
-
-  # Compute divergence 
-  def div(self, F):
-    """
-    Divergence of F=(f1, f2). 
-    div(F) = (d/dx, d/dy) dot (f1, f2) = f1_x + f2_y
-    """
-    # Get vector field elements
-    f1, f2 = F
-    
-    Dx = FD1Matrix(self.N, self.dx).T
-    Dy = FD1Matrix(self.M, self.dy)
-      
-    
-    # Computing df1/dx and df2/dy
-    #f1_x = np.gradient(f1, self.dx, edge_order=2, axis=1)
-    #f2_y = np.gradient(f2, self.dy, edge_order=2, axis=0)
-    f1_x = np.dot(f1, Dx)
-    f2_y = np.dot(Dy, f2)
-    
-    return f1_x + f2_y 
-  
-  # Compute Gradient
-  def grad(self, f):
-    """
-    Gradient of f. 
-    grad(f) = (f_x, f_y)
-    """
-    Dx = FD1Matrix(self.N, self.dx).T
-    Dy = FD1Matrix(self.M, self.dy)
-    
-    # Computing df/dx and df/dy
-    #f_x = np.gradient(f, self.dx, edge_order=2, axis=1)
-    #f_y = np.gradient(f, self.dy, edge_order=2, axis=0)
-    f_x = np.dot(f, Dx)
-    f_y = np.dot(Dy, f)
-    
-    return (f_x, f_y)
-    
-    
-  # Compute Laplacian 
-  def laplacian(self, u):
-    """
-    Laplacian of u. div(grad u)
-    """
-    return self.div(self.grad(u)) 
             
   # RHS of PDE
   def RHS(self, U, B, V, args=None):
@@ -84,40 +38,22 @@ class fire:
     Compute right hand side of PDE
     """
     
-    V1, V2 = V # Unpacking tuple of Vector field
+    Dx, Dy, D2x, D2y = args # Unpack differentiation matrices
+    V1, V2 = V # Unpack tuple of Vector field
     
-#    if args is None: # Use finite difference
-#      Ux, Uy = self.grad(U) # Compute gradient
-#      # divV = self.div(V) # Compute divergence of V. 
-#      # This should be 0 for an incompressible flow. This is an assumption for the model.      
-#      diffusion = (self.kappa * self.laplacian(U)) # k nabla u
-#      #convection = U * divV + ux*v1 + uy*v2 # div(uV) = u div(F) + V dot grad u
-#      convection = Ux*V1 + Uy*V2     
-#      fuel = self.f(U, B)
-#      
-#    else: # Use Chebyshev
-#      Dx, Dy, D2x, D2y = args
-#      
-#      diffusion = self.kappa*(np.dot(U, D2x.T) + np.dot(D2y, U))
-#      #convection = np.dot(U, Dx.T) * V1 + U * np.dot(V1, Dx.T) \
-#      #    + np.dot(Dy, U) * V2 + U * np.dot(Dy, V2)   
-#      convection = np.dot(U, Dx.T) * V1 + np.dot(Dy, U) * V2         
-#      fuel = self.f(U, B)
-#      
-##    print(np.min(diffusion), np.min(convection), np.min(fuel))
-##    print(np.max(diffusion), np.max(convection), np.max(fuel))
+    # Compute gradient of U, grad(U) = (U_x, U_y)
+    Ux, Uy = np.dot(U, Dx.T), np.dot(Dy, U)
     
-    Dx, Dy, D2x, D2y = args
-    
-    diffusion = self.kappa*(np.dot(U, D2x.T) + np.dot(D2y, U))
-    dd = self.kappa*self.laplacian(U)
-    print(np.linalg.norm(diffusion - dd))
-    #convection = np.dot(U, Dx.T) * V1 + U * np.dot(V1, Dx.T) \
-    #    + np.dot(Dy, U) * V2 + U * np.dot(Dy, V2)   
-    convection = np.dot(U, Dx.T) * V1 + np.dot(Dy, U) * V2         
-    fuel = self.f(U, B)
+    # Compute laplacian of U, div(grad U) = Uxx + Uyy
+    Uxx, Uyy = np.dot(U, D2x.T), np.dot(D2y, U)
+    lapU = Uxx + Uyy
+
+    diffusion = self.kappa * lapU # k \nabla U
+    convection = Ux * V1 + Uy * V2 # v \dot grad u.    
+    fuel = self.f(U, B) # eval fuel
     
     return diffusion - convection + fuel
+  
   
   def FFF(self, x, V, B, f):
     N = self.N #int(np.sqrt(len(x)))
@@ -468,7 +404,7 @@ class fire:
     
     
     for i in range(self.T):
-      if i % 10 == 0:
+      if i % 20 == 0:
         if i == 0: kind_ = "linear"
         else: kind_ = "cubic"
         

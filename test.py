@@ -26,9 +26,9 @@ def plotScalar(X, Y, U, title, cmap_):
   plt.show()
   
 # Domain: [-1, 1]^2 x [0, T*dt]
-M, N = 25, 25 # Resolution
-T = 100 # Max time
-dt = 1e-3 # Timestep
+M, N = 50, 50 # Resolution
+T = 2000 # Max time
+dt = 1e-4 # Timestep
 xa, xb = -1, 1 # x domain limit
 ya, yb = -1, 1 # y domain limit
 x = np.linspace(xa, xb, N) # x domain
@@ -60,7 +60,7 @@ u0 = lambda x, y: 1e1*np.exp(-40*((x+.8)**2 + (y-.8)**2))
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
 
 # Non dimensional parameters
-kappa = 1*1e-2 # diffusion coefficient
+kappa = 1*1e-1 # diffusion coefficient
 epsilon = 1*1e-1 # inverse of activation energy
 upc = 1*.1 # u phase change
 q = 1*1e-1 # reaction heat
@@ -89,7 +89,7 @@ parameters = {
 ct = wildfire.fire(parameters)
 #%%
 # Finite difference in space
-W, B = ct.solvePDE('fd', 'euler')
+W, B = ct.solvePDE('fd', 'rk4')
 #%%
 ct.plots(W, B)
 
