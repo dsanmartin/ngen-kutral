@@ -86,13 +86,18 @@ class fire:
   def solveRK4(self, U0, B0, V, args):
     M, N = U0.shape
     
-    U = np.zeros((self.T+1, M, N))
-    B = np.zeros((self.T+1, M, N))
+    U = np.zeros((self.T, M, N))
+    B = np.zeros((self.T, M, N))
     
     U[0] = U0
     B[0] = B0
     
-    for t in range(1, self.T + 1):
+    X, Y = np.meshgrid(self.x, self.y)
+    
+    for t in range(1, self.T):
+      V1 = self.v[0](X, Y, self.t[t])
+      V2 = self.v[1](X, Y, self.t[t])
+      V = (V1, V2) # Vector field
       k1 = self.RHS(U[t-1], B[t-1], V, args)
       k2 = self.RHS(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V, args)
       k3 = self.RHS(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V, args)
@@ -131,13 +136,13 @@ class fire:
   def solveEuler(self, U0, B0, V, args):
     M, N = U0.shape
     
-    U = np.zeros((self.T+1, M, N))
-    B = np.zeros((self.T+1, M, N))
+    U = np.zeros((self.T, M, N))
+    B = np.zeros((self.T, M, N))
     
     U[0] = U0
     B[0] = B0
     
-    for t in range(1, self.T + 1):
+    for t in range(1, self.T):
       U[t] = U[t-1] + self.RHS(U[t-1], B[t-1], V, args) * self.dt
       B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
       
@@ -157,8 +162,8 @@ class fire:
   def solveImpEuler(self, U0, B0, V, args):
     M, N = U0.shape
     
-    U = np.zeros((self.T+1, M, N))
-    B = np.zeros((self.T+1, M, N))
+    U = np.zeros((self.T, M, N))
+    B = np.zeros((self.T, M, N))
     
     U[0] = U0
     B[0] = B0
@@ -254,8 +259,8 @@ class fire:
       
       U0 = self.u0(X, Y) # Temperature initial condition
       B0 = self.beta0(X, Y) # Fuel initial condition
-      V1 = self.v[0](X, Y)
-      V2 = self.v[1](X, Y)
+      V1 = self.v[0](X, Y, 0)
+      V2 = self.v[1](X, Y, 0)
       V = (V1, V2) # Vector field
       
 #      Ux, Uy = self.grad(U0)
@@ -402,9 +407,13 @@ class fire:
     fineX = np.linspace(self.x[0], self.x[-1], 2*self.N)    
     fineY = np.linspace(self.y[0], self.y[-1], 2*self.M) 
     
+    #A = 1e9
+    #t0 = np.exp(1/self.epsilon)*self.epsilon/self.q * A
     
     for i in range(self.T):
       if i % 20 == 0:
+        #plt.figure(figsize=(12, 8)) 
+        
         if i == 0: kind_ = "linear"
         else: kind_ = "cubic"
         
@@ -438,9 +447,9 @@ class fire:
         #fig.colorbar(fuel_cont)#, fraction=0.046, pad=0.04)
         
         # Wind plot
-        Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // 2), 
-                          self.y[0]:self.y[-1]:complex(0, self.M // 2)]
-        plt.quiver(Xv, Yv, self.v[0](Xv, Yv), self.v[1](Xv, Yv)) 
+        Xv, Yv = np.mgrid[self.x[0]:self.x[-1]:complex(0, self.N // np.sqrt(self.N)), 
+                          self.y[0]:self.y[-1]:complex(0, self.M // np.sqrt(self.M))]
+        plt.quiver(Xv, Yv, self.v[0](Xv, Yv, self.t[i]), self.v[1](Xv, Yv, self.t[i])) 
         
         plt.title("Temperature + Wind")
         plt.xlabel("x")

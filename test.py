@@ -1,7 +1,7 @@
 import wildfire
 import numpy as np
 import matplotlib.pyplot as plt
-
+#%%
 # Helper to build reaction rate
 # Gaussian basis
 def G(x, y):
@@ -14,7 +14,7 @@ def S(x, y):
     + 0.8 * G(x - 1.25, 3*y + 1.5) + 1.2 * G(x + 1.25, 3*y - 1.85)
 
 def plotField(Xv, Yv, V):
-  plt.quiver(Xv, Yv, V[0](Xv, Yv), V[1](Xv, Yv))  
+  plt.quiver(Xv, Yv, V[0](Xv, Yv, 0), V[1](Xv, Yv, 0))  
   plt.title("Wind")
   plt.show()
   
@@ -26,9 +26,9 @@ def plotScalar(X, Y, U, title, cmap_):
   plt.show()
   
 # Domain: [-1, 1]^2 x [0, T*dt]
-M, N = 50, 50 # Resolution
-T = 2000 # Max time
-dt = 1e-4 # Timestep
+M, N = 64, 64 # Resolution
+T = 1000 # Timesteps
+dt = 1e-3 # dt
 xa, xb = -1, 1 # x domain limit
 ya, yb = -1, 1 # y domain limit
 x = np.linspace(xa, xb, N) # x domain
@@ -37,7 +37,7 @@ t = np.linspace(0, dt*T, T) # t domain
 
 # Meshes for initial condition plots
 X, Y = np.meshgrid(x, y)
-Xv, Yv = np.mgrid[xa:xb:complex(0, N // 4), ya:yb:complex(0, M // 4)]
+Xv, Yv = np.mgrid[xa:xb:complex(0, N // np.sqrt(N)), ya:yb:complex(0, M // np.sqrt(M))]
 
 # TODO: define parameters in function of real conditions
 #T_env = 300
@@ -49,22 +49,22 @@ Xv, Yv = np.mgrid[xa:xb:complex(0, N // 4), ya:yb:complex(0, M // 4)]
 
 # Vector field V = (v1, v2). "Incompressible flow div(V) = 0"
 gamma = 1
-v1 = lambda x, y: gamma * np.cos(7/4*np.pi) 
-v2 = lambda x, y: gamma * np.sin(7/4*np.pi)
+v1 = lambda x, y, t: gamma * np.cos((7/4+.5*t)*np.pi) 
+v2 = lambda x, y, t: gamma * np.sin((7/4+.5*t)*np.pi)
 V = (v1, v2)
 
 # Lambda function for temperature initial condition
-u0 = lambda x, y: 1e1*np.exp(-40*((x+.8)**2 + (y-.8)**2)) 
+u0 = lambda x, y: 1e1*np.exp(-150*((x+.5)**2 + (y-.25)**2)) 
 
 # Lambda function for fuel initial condition
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
 
 # Non dimensional parameters
-kappa = 1*1e-1 # diffusion coefficient
+kappa = 5e-3 # diffusion coefficient
 epsilon = 1*1e-1 # inverse of activation energy
 upc = 1*.1 # u phase change
 q = 1*1e-1 # reaction heat
-alpha = 1e-2 # natural convection
+alpha = 0#1e-1 # natural convection
 
 # Plot initial conditions
 plotField(Xv, Yv, V)
@@ -100,31 +100,25 @@ Wc, Bc = ct.solvePDE('cheb', 'rk4')
 ct.plots(Wc, Bc, True)
 
 #%%
-for i in range(T):
-  if i % 10 == 0:
-    ct.plotSimulation(i, W, True)
-    ct.plotFuel(i, B, True)  
+W_1024 = np.load('data/last_W_1024.npy')
+W_512 = np.load('data/last_W_512.npy')
+W_256 = np.load('data/last_W_256.npy')
+W_128 = np.load('data/last_W_128.npy')
 #%%
-ct.save(W, B, 0)
+#errors = np.array([
+#    np.max(np.abs(W_128 - W_1024[::8, ::8])),
+#    np.max(np.abs(W_256 - W_1024[::4, ::4])),
+#    np.max(np.abs(W_512 - W_1024[::2, ::2]))
+#    ])
+errors = np.array([
+    np.linalg.norm((W_128 - W_1024[::8, ::8]).flatten(), np.inf),
+    np.linalg.norm((W_256 - W_1024[::4, ::4]).flatten(), np.inf),
+    np.linalg.norm((W_512 - W_1024[::2, ::2]).flatten(), np.inf),
+    ])
+h = np.array([2/(2**i) for i in range(7, 10)])
 #%%
-nodes = np.array([25, 50, 100, 200])
-fd_times = np.array([0.994, 1.3, 2.93, 9.36]) #8.89
-cheb_times = np.array([.302, 0.581, 1.98, 9.42])
-plt.plot(nodes, fd_times, 'r-*', label='FD')
-plt.plot(nodes, cheb_times, 'b-o', label='Cheb')
-plt.legend()
+plt.plot(h, errors, '-x')
+plt.xlabel("h")
 plt.grid(True)
-plt.xlabel("N")
-plt.ylabel("t [s]")
 plt.show()
-#%%
-nodes = np.array([5, 10, 25, 50])
-fd_err = np.array([0.068, 0.051, 0.314, 0.66])
-cheb_err = np.array([0.078, 0.012, 0.244, 0.425])
-plt.plot(nodes, fd_err, 'r-*', label='FD')
-plt.plot(nodes, cheb_err, 'b-o', label='Cheb')
-plt.legend()
-plt.grid(True)
-plt.xlabel("N")
-plt.ylabel("Error")
-plt.show()
+
