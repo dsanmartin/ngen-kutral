@@ -5,6 +5,8 @@ Differentiation matrices
 """
 import numpy as np
 import scipy as sp
+from scipy.linalg import circulant, toeplitz
+from scipy.sparse import csr_matrix
 
 # First derivative with Finite Difference Matrix
 def FD1Matrix(N, h, sparse=False):
@@ -32,10 +34,10 @@ def FD1Matrix(N, h, sparse=False):
   d1[1] = -1
   d1[-1] = 1
   
-  D1 = (2*h) ** -1 * sp.linalg.circulant(d1)
+  D1 = (2*h) ** -1 * circulant(d1)
   
   if sparse:
-    sD1 = sp.csr_matrix(D1)
+    sD1 = csr_matrix(D1)
     return sD1
   else:
     return D1
@@ -67,10 +69,10 @@ def FD2Matrix(N, h, sparse=False):
   d2[1] = 1
   d2[-1] = 1
   
-  D2 = h ** -2 * sp.linalg.circulant(d2)
+  D2 = h ** -2 * circulant(d2)
   
   if sparse:
-    sD2 = sp.csr_matrix(D2)
+    sD2 = csr_matrix(D2)
     return sD2
   else:
     return D2
@@ -134,7 +136,7 @@ def P4D1Matrix(N, h, sparse=False):
   d1[-2] = -1/12
   d1[-1] = 2/3
   
-  D1 = h ** -1 * sp.linalg.circulant(d1)
+  D1 = h ** -1 * circulant(d1)
   
   if sparse:
     sD1 = sp.csr_matrix(D1)
@@ -170,8 +172,7 @@ def SD1Matrix(N, h, sparse=False):
   r = np.zeros(N)
   r[0] = c[0]
   r[1:] = c[-1:0:-1]
-  D = sp.linalg.toeplitz(c, r=r)
-  
+  D = toeplitz(c, r=r)
 
   if sparse:
     sD = sp.csr_matrix(D)
@@ -199,5 +200,5 @@ def spectralD2(N, h):
     #print(c)
     c[1:]=-0.5*((-1)**j)/(np.sin(j*h/2.)**2)
     #print(c)
-    D2=sp.linalg.toeplitz(c)
+    D2 = toeplitz(c)
     return D2

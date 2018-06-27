@@ -30,6 +30,7 @@ class fire:
     self.dx = self.x[1] - self.x[0]
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
+    self.sparse = parameters['sparse']
         
             
   # RHS of PDE
@@ -42,10 +43,16 @@ class fire:
     V1, V2 = V # Unpack tuple of Vector field
     
     # Compute gradient of U, grad(U) = (U_x, U_y)
-    Ux, Uy = np.dot(U, Dx.T), np.dot(Dy, U)
+    if self.sparse:
+      Ux, Uy = (Dx.dot(U.T)).T, Dy.dot(U)
+    else:
+      Ux, Uy = np.dot(U, Dx.T), np.dot(Dy, U)
     
     # Compute laplacian of U, div(grad U) = Uxx + Uyy
-    Uxx, Uyy = np.dot(U, D2x.T), np.dot(D2y, U)
+    if self.sparse:
+      Uxx, Uyy = (D2x.dot(U.T)).T, D2y.dot(U)
+    else:
+      Uxx, Uyy = np.dot(U, D2x.T), np.dot(D2y, U)
     lapU = Uxx + Uyy
 
     diffusion = self.kappa * lapU # k \nabla U
@@ -277,10 +284,10 @@ class fire:
 #      plt.show()
       
       #args = None
-      Dx = FD1Matrix(self.N, self.dx)
-      Dy = FD1Matrix(self.M, self.dy)
-      D2x = FD2Matrix(self.N, self.dx)
-      D2y = FD2Matrix(self.M, self.dy)
+      Dx = FD1Matrix(self.N, self.dx, self.sparse)
+      Dy = FD1Matrix(self.M, self.dy, self.sparse)
+      D2x = FD2Matrix(self.N, self.dx, self.sparse)
+      D2y = FD2Matrix(self.M, self.dy, self.sparse)
       
       args = (Dx, Dy, D2x, D2y)
     else:

@@ -1,6 +1,7 @@
 import wildfire
 import numpy as np
 import matplotlib.pyplot as plt
+#from scipy import interpolate
 #%%
 # Helper to build reaction rate
 # Gaussian basis
@@ -26,9 +27,9 @@ def plotScalar(X, Y, U, title, cmap_):
   plt.show()
   
 # Domain: [-1, 1]^2 x [0, T*dt]
-M, N = 64, 64 # Resolution
-T = 1000 # Timesteps
-dt = 1e-3 # dt
+M, N = 512, 512 # Resolution
+T = 2000 # Timesteps
+dt = 1e-4 # dt
 xa, xb = -1, 1 # x domain limit
 ya, yb = -1, 1 # y domain limit
 x = np.linspace(xa, xb, N) # x domain
@@ -47,10 +48,16 @@ Xv, Yv = np.mgrid[xa:xb:complex(0, N // np.sqrt(N)), ya:yb:complex(0, M // np.sq
 #C = 1
 #k = 1
 
+# ''gradient'' test
+xi = 0
+t1 = lambda x, y: -xi * np.sin(x**2 + y**2)
+t2 = lambda x, y: -xi * np.cos(x**2 + y**2)
+T = (t1, t2)
+
 # Vector field V = (v1, v2). "Incompressible flow div(V) = 0"
 gamma = 1
-v1 = lambda x, y, t: gamma * np.cos((7/4+.5*t)*np.pi) 
-v2 = lambda x, y, t: gamma * np.sin((7/4+.5*t)*np.pi)
+v1 = lambda x, y, t: gamma * np.cos((7/4+.0*t)*np.pi) - t1(x, y)
+v2 = lambda x, y, t: gamma * np.sin((7/4+.0*t)*np.pi) - t2(x, y)
 V = (v1, v2)
 
 # Lambda function for temperature initial condition
@@ -83,7 +90,8 @@ parameters = {
     'alpha': alpha, 
     'x': x, 
     'y': y,
-    't': t
+    't': t,
+    'sparse': True
 }
 
 ct = wildfire.fire(parameters)
