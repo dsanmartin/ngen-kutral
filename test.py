@@ -2,7 +2,7 @@ import wildfire
 import numpy as np
 import matplotlib.pyplot as plt
 #from scipy import interpolate
-#%%
+
 # Helper to build reaction rate
 # Gaussian basis
 def G(x, y):
@@ -29,9 +29,10 @@ def plotScalar(X, Y, U, title, cmap_):
   plt.colorbar()
   plt.show()
   
+#%%
 # Domain: [-1, 1]^2 x [0, T*dt]
-M, N = 128, 128 # Resolution
-L = 1000 # Timesteps
+M, N = 64, 64 # Resolution
+L = 1500 # Timesteps
 dt = 1e-3 # dt
 xa, xb = -1, 1 # x domain limit
 ya, yb = -1, 1 # y domain limit
@@ -41,7 +42,6 @@ t = np.linspace(0, dt*L, L) # t domain
 
 # Meshes for initial condition plots
 X, Y = np.meshgrid(x, y)
-#Xv, Yv = np.mgrid[xa:xb:complex(0, N // np.sqrt(N)), ya:yb:complex(0, M // np.sqrt(M))]
 
 # TODO: define parameters in function of real conditions
 #T_env = 300
@@ -60,8 +60,8 @@ T = (t1, t2)
 
 # Vector field V = (v1, v2). "Incompressible flow div(V) = 0"
 gamma = 1
-w1 = lambda x, y, t: gamma * np.cos((7/4+.0*t)*np.pi)
-w2 = lambda x, y, t: gamma * np.sin((7/4+.0*t)*np.pi)
+w1 = lambda x, y, t: gamma * np.cos((7/4+.01*t)*np.pi)
+w2 = lambda x, y, t: gamma * np.sin((7/4+.01*t)*np.pi)
 W = (w1, w2)
 
 
@@ -71,7 +71,7 @@ v2 = lambda x, y, t: w2(x, y, t) + t2(x, y)
 V = (v1, v2)
 
 # Lambda function for temperature initial condition
-u0 = lambda x, y: 1e1*np.exp(-150*((x+.5)**2 + (y-.25)**2)) 
+u0 = lambda x, y: 1e1*np.exp(-150*((x+.8)**2 + (y-.8)**2)) 
 
 # Lambda function for fuel initial condition
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
@@ -97,7 +97,7 @@ plotField(X[::s,::s], Y[::s,::s], V, "Topography + Wind", 0)
 parameters = {
     'u0': u0, 
     'beta0': b0,
-    'v': W,#V,
+    'v': V,
     'kappa': kappa, 
     'epsilon': epsilon, 
     'upc': upc, 
@@ -109,12 +109,53 @@ parameters = {
     'sparse': True
 }
 
+#%%
 ct = wildfire.fire(parameters)
 #%%
 # Finite difference in space
 U, B = ct.solvePDE('fd', 'rk4')
 #%%
-ct.plots(W, B)
+ct.plots(U, B)
+
+#%% Times experiment
+x_t = np.array([0.8, 0.4, 0.0, -0.4, -0.8])
+y_t = np.array([-0.8, -0.4, 0.0, 0.4, 0.8])
+
+for i in range(5):
+  for j in range(5):
+    u0 = lambda x, y: 1e1*np.exp(-150*((x+x_t[j])**2 + (y+y_t[i])**2)) 
+    parameters['u0'] = u0
+    ct = wildfire.fire(parameters)
+    U, B = ct.solvePDE('fd', 'rk4')
+    
+    u_name = 'experiments/times/U' + str(i) + str(j) + '.npy'
+    b_name = 'experiments/times/B' + str(i) + str(j) + '.npy'
+    
+    np.save(u_name, U)
+    np.save(b_name, B)
+    
+#%%
+    
+per = 0.1
+times_burnt = np.zeros((5, 5))
+
+for i in range(5):
+  for j in range(5):
+    
+    B = np.load('experiments/times/B' + str(i) + str(j) + '.npy')
+    
+    for k in range(len(B)):
+      # Count elements < 0.5 without boundary
+      burnt = (np.asarray(B[k,1:-2,1:-2]) < 0.5).sum()
+      
+      if burnt >= int(per * 64**2):
+        times_burnt[i, j] = t[k]
+        break
+
+#plt.imshow(B[-1])
+plt.imshow(times_burnt, extent=[-1, 1, -1, 1])
+plt.colorbar()
+
 
 #%% PLOT JCC
 
