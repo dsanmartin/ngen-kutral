@@ -269,3 +269,32 @@ c3 = plt.contourf(X, Y, np.exp(F2/F), cmap=plt.cm.jet)
 plt.colorbar(c3)
 
 plt.show()
+#%% GRADIENT TEST
+import numpy as np
+import matplotlib.pyplot as plt
+
+M, N = 100, 100
+
+
+x = np.linspace(-1, 1, N)
+y = np.linspace(-1, 1, M)
+dx = 2/N
+dy = 2/M
+
+f = lambda x, y: 1e1*(np.exp(-25*((x+.5)**2 + (y)**2)) + np.exp(-25*((x-.5)**2 + y**2)))
+fx = lambda x, y: -500*((x+.5) * np.exp(-25*((x+.5)**2 + y**2)) + (x-.5) * np.exp(-25*((x-.5)**2 + y**2)))
+fy = lambda x, y: -500*(y * np.exp(-25*((x+.5)**2 + y**2)) + y * np.exp(-25*((x-.5)**2 + y**2)))
+
+
+X, Y = np.meshgrid(x, y)
+F = f(X, Y)
+Fx = np.gradient(F, dx, axis=1)
+Fy = np.gradient(F, dy, axis=0)
+
+plt.contourf(X, Y, f(X, Y))
+
+#plt.quiver(X[::4,::4], Y[::4,::4], Fx[::4,::4], Fy[::4,::4])
+plt.quiver(X[::4,::4], Y[::4,::4], fx(X[::4,::4], Y[::4,::4]), fy(X[::4,::4],Y[::4,::4]))
+
+plt.show()
+

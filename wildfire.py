@@ -266,6 +266,10 @@ class fire:
       
       U0 = self.u0(X, Y) # Temperature initial condition
       B0 = self.beta0(X, Y) # Fuel initial condition
+      B0[0,:] = np.zeros(self.N)
+      B0[:,0] = np.zeros(self.M)
+      B0[-1,:] = np.zeros(self.N)
+      B0[:,-2] = np.zeros(self.M)
       V1 = self.v[0](X, Y, 0)
       V2 = self.v[1](X, Y, 0)
       V = (V1, V2) # Vector field
