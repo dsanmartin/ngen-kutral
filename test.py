@@ -1,45 +1,24 @@
 import wildfire
 import numpy as np
 import matplotlib.pyplot as plt
+import plots as p
 #from scipy import interpolate
 
-# Helper to build reaction rate
-# Gaussian basis
-def G(x, y):
-  return np.exp(-((x)**2 + (y)**2))
-
-# Superposition of gaussians based in https://commons.wikimedia.org/wiki/File:Scalar_field.png
-def S(x, y):
-  return G(2*x, 2*y) + 0.8 * G(2*x + 1.25, 2*y + 1.25) + 0.5 * G(2*x - 1.25, 4*y + 1.25) \
-    - 0.5 * G(3*x - 1.25, 3*y - 1.25) + 0.35 * G(2*x + 1.25, 2*y - 1.25) \
-    + 0.8 * G(x - 1.25, 3*y + 1.5) + 1.2 * G(x + 1.25, 3*y - 1.85)
-
-def plotField(Xv, Yv, V, title, t=None):
-  if t is None:
-    plt.quiver(Xv, Yv, V[0](Xv, Yv), V[1](Xv, Yv))
-  else:
-    plt.quiver(Xv, Yv, V[0](Xv, Yv, t), V[1](Xv, Yv, t))  
-  plt.title(title)
-  plt.show()
-  
-def plotScalar(X, Y, U, title, cmap_):
-  plt.imshow(U(X,Y), origin="lower", cmap=cmap_, 
-             extent=[X[0,0], X[-1, -1], Y[0, 0], Y[-1, -1]])
-  plt.title(title)
-  plt.colorbar()
-  plt.show()
   
 #%%
 # Domain: [-1, 1]^2 x [0, T*dt]
-M, N = 64, 64 # Resolution
-L = 1500 # Timesteps
+#M, N = 16, 16 # Resolution
+M, N = 128, 128
+L = 5000 # Timesteps
 dt = 1e-3 # dt
-xa, xb = -1, 1 # x domain limit
-ya, yb = -1, 1 # y domain limit
+xa, xb = -100, 100 # x domain limit
+ya, yb = -100, 100 # y domain limit
 x = np.linspace(xa, xb, N) # x domain
 y = np.linspace(ya, yb, M) # y domain
 t = np.linspace(0, dt*L, L) # t domain
 
+dx = x[1]-x[0]
+    
 # Meshes for initial condition plots
 X, Y = np.meshgrid(x, y)
 
@@ -52,16 +31,25 @@ X, Y = np.meshgrid(x, y)
 #k = 1
 
 # Topography test
-xi = 1e-2
-top = lambda x, y: 1e1*(np.exp(-25*((x+.5)**2 + (y)**2)) + np.exp(-25*((x-.5)**2 + y**2)))
-t1 = lambda x, y: xi*-500*((x+.5) * np.exp(-25*((x+.5)**2 + y**2)) + (x-.5) * np.exp(-25*((x-.5)**2 + y**2)))
-t2 = lambda x, y: xi*-500*(y * np.exp(-25*((x+.5)**2 + y**2)) + y * np.exp(-25*((x-.5)**2 + y**2)))
+xi = 0#1e-1
+#top = lambda x, y: 1e1*(np.exp(-25*((x+.5)**2 + (y)**2)) + np.exp(-25*((x-.5)**2 + y**2)))
+#t1 = lambda x, y: xi*-500*((x+.5) * np.exp(-25*((x+.5)**2 + y**2)) + (x-.5) * np.exp(-25*((x-.5)**2 + y**2)))
+#t2 = lambda x, y: xi*-500*(y * np.exp(-25*((x+.5)**2 + y**2)) + y * np.exp(-25*((x-.5)**2 + y**2)))
+top = lambda x, y: 1e0*(np.exp(-2e-3*((x+30)**2 + (y)**2)) + np.exp(-2e-3*((x-30)**2 + y**2)))
+t1 = lambda x, y: xi*-4e-1**((x+30) * np.exp(-2e-3*((x+30)**2 + y**2)) + (x-30) * np.exp(-2e-3*((x-30)**2 + y**2)))
+t2 = lambda x, y: xi*-4e-1*(y * np.exp(-2e-3*((x+30)**2 + y**2)) + y * np.exp(-2e-3*((x-30)**2 + y**2)))
 T = (t1, t2)
 
 # Vector field V = (v1, v2). "Incompressible flow div(V) = 0"
 gamma = 1
-w1 = lambda x, y, t: gamma * np.cos((7/4+.01*t)*np.pi)
-w2 = lambda x, y, t: gamma * np.sin((7/4+.01*t)*np.pi)
+#w1 = lambda x, y, t: gamma * np.cos((7/4+.01*t)*np.pi)
+#w2 = lambda x, y, t: gamma * np.sin((7/4+.01*t)*np.pi)
+#w1 = lambda x, y, t: gamma * np.cos(-np.pi/2)
+#w2 = lambda x, y, t: gamma * np.sin(-np.pi/2)
+w1 = lambda x, y, t: gamma * np.cos(0)
+w2 = lambda x, y, t: gamma * np.sin(0)
+#w1 = lambda x, y, t: gamma * np.cos(np.pi/4)
+#w2 = lambda x, y, t: gamma * np.sin(np.pi/4)
 W = (w1, w2)
 
 
@@ -71,27 +59,37 @@ v2 = lambda x, y, t: w2(x, y, t) + t2(x, y)
 V = (v1, v2)
 
 # Lambda function for temperature initial condition
-u0 = lambda x, y: 1e1*np.exp(-150*((x+.8)**2 + (y-.8)**2)) 
+#u0 = lambda x, y: 1e1*np.exp(-150*((x+.8)**2 + (y-.8)**2)) 
+#u0 = lambda x,y: 1e1*np.exp(-(5e3*(x+0.9)**2 + 1e1*(y)**2))
+#u0 = lambda x, y: 6e1*np.exp(-9e-3*((x+60)**2 + (y+60)**2)) 
+#u0 = lambda x, y: 6e1*np.exp(-1e2*((x+.7)**2 + (y+.7)**2)) 
+u0 = lambda x,y: 6e1*np.exp(-(1e-1*(x+90)**2 + 1e-3*(y)**2))
 
 # Lambda function for fuel initial condition
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
 
 # Non dimensional parameters
-kappa = 5e-3 # diffusion coefficient
-epsilon = 1*1e-1 # inverse of activation energy
-upc = 1*.1 # u phase change
-q = 1*1e-1 # reaction heat
-alpha = 0#1e-1 # natural convection
+#kappa = 1e-2#5e-3 # diffusion coefficient
+#epsilon = 1e-1 # inverse of activation energy
+#upc = 1e-1 # u phase change
+#q = 1e-1 # reaction heat
+#alpha = 1e1#1e1#1e-1 # natural convection
+
+kappa = 1e-1#5e-3 # diffusion coefficient
+epsilon = 3e-1#3e-1 # inverse of activation energy
+upc = 3e1 # u phase change
+q = 1e-0 # reaction heat
+alpha = 1e-1#1e-3#1e1#1e-1 # natural convection
 
 # Plot initial conditions
-s = 4
-plotScalar(X, Y, u0, "Initial condition", plt.cm.jet)
-plotScalar(X, Y, b0, "Fuel", plt.cm.Oranges)
-plotScalar(X, Y, top, "Topography", plt.cm.Oranges)
-plotField(X[::s,::s], Y[::s,::s], T, "Topography Gradient")
-plotField(X[::s,::s], Y[::s,::s], W, "Wind", 0)
-plotField(X[::s,::s], Y[::s,::s], V, "Topography + Wind", 0)
-
+s = 8
+#plotScalar(X, Y, u0, "Initial condition", plt.cm.jet)
+#plotScalar(X, Y, b0, "Fuel", plt.cm.Oranges)
+#plotScalar(X, Y, top, "Topography", plt.cm.Oranges)
+#plotField(X[::s,::s], Y[::s,::s], T, "Topography Gradient")
+#p.plotField(X[::s,::s], Y[::s,::s], W, "Wind", 0)
+#plotField(X[::s,::s], Y[::s,::s], V, "Topography + Wind", 0)
+p.plotIC(X, Y, u0, b0, V, W, T, top)
 
 # Parameters for the model
 parameters = {
@@ -115,9 +113,12 @@ ct = wildfire.fire(parameters)
 # Finite difference in space
 U, B = ct.solvePDE('fd', 'rk4')
 #%%
-ct.plots(U, B)
+#ct.plots(U, B)
 
-#%% Times experiment
+#%% PLOT JCC
+p.plotJCC(t, X, Y, U, B, W)
+
+  #%% Times experiment
 x_t = np.array([0.8, 0.4, 0.0, -0.4, -0.8])
 y_t = np.array([-0.8, -0.4, 0.0, 0.4, 0.8])
 
@@ -157,12 +158,12 @@ plt.imshow(times_burnt, extent=[-1, 1, -1, 1])
 plt.colorbar()
 
 
-#%% PLOT JCC
-
+#%%
 s = 10
 f, axarr = plt.subplots(4, 2, sharex='col', sharey='row', figsize=(24, 16))
 #f.tight_layout()
 f.subplots_adjust(left=0.3, right=0.6)
+
 p00 = axarr[0, 0].imshow(U[0], origin='lower', cmap=plt.cm.jet, alpha=0.9, 
      vmin=np.min(U), vmax=np.max(U), extent=[-1, 1, -1, 1])
 axarr[0, 0].quiver(X[::s,::s], Y[::s,::s], w1(X[::s,::s], Y[::s,::s], t[0]), w2(X[::s,::s], Y[::s,::s], t[0])) 
@@ -230,10 +231,8 @@ cb7.ax.tick_params(labelsize=12)
 cb8.ax.tick_params(labelsize=12)
 
 plt.rc('axes', labelsize=12)
-
-plt.savefig('simulation.eps', format='eps', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
-
-#plt.show()
+#plt.savefig('simulation.eps', format='eps', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
+plt.show()
 
 
 
@@ -267,3 +266,22 @@ plt.xlabel("h")
 plt.grid(True)
 plt.show()
 
+#%%
+MN = np.array([1024, 4096, 16384, 65536])
+mean_time = np.array([1.59, 3.37, 9.58, 43.8])
+std_time = np.array([0.0565, 0.00761, 0.0261, 1.6])
+plt.plot(MN, mean_time, 's-r')
+plt.plot(MN, mean_time + std_time)
+plt.plot(MN, mean_time - std_time)
+plt.grid(True)
+plt.xscale('log')
+plt.yscale('log')
+plt.show()
+
+
+#%%
+plt.contour(X,Y,U[0])
+plt.contour(X,Y,U[3000])
+plt.contour(X,Y,U[4000])
+plt.contour(X,Y,U[5000-1])
+plt.show()

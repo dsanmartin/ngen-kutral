@@ -297,4 +297,18 @@ plt.contourf(X, Y, f(X, Y))
 plt.quiver(X[::4,::4], Y[::4,::4], fx(X[::4,::4], Y[::4,::4]), fy(X[::4,::4],Y[::4,::4]))
 
 plt.show()
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
 
+f = lambda x,y: 1e1*np.exp(-(1e1*(x)**2 + 1e3*(y-0.9)**2))
+
+x = np.linspace(-1, 1, 100)
+y = np.linspace(-1, 1, 100)
+
+X, Y = np.meshgrid(x, y)
+
+F = f(X, Y)
+
+plt.contourf(X, Y, F)
+plt.show()

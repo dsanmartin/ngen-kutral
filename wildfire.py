@@ -38,10 +38,9 @@ class fire:
     """
     Compute right hand side of PDE
     """
-    
     Dx, Dy, D2x, D2y = args # Unpack differentiation matrices
     V1, V2 = V # Unpack tuple of Vector field
-    
+
     # Compute gradient of U, grad(U) = (U_x, U_y)
     if self.sparse:
       Ux, Uy = (Dx.dot(U.T)).T, Dy.dot(U)
@@ -104,19 +103,15 @@ class fire:
     for t in range(1, self.T):
       V1 = self.v[0](X, Y, self.t[t])
       V2 = self.v[1](X, Y, self.t[t])
-      V = (V1, V2) # Vector field
-      k1 = self.RHS(U[t-1], B[t-1], V, args)
-      k2 = self.RHS(U[t-1] + 0.5*self.dt*k1, B[t-1] + 0.5*self.dt*k1, V, args)
-      k3 = self.RHS(U[t-1] + 0.5*self.dt*k2, B[t-1] + 0.5*self.dt*k2, V, args)
-      k4 = self.RHS(U[t-1] + self.dt*k3, B[t-1] + self.dt*k3, V, args)
 
-      U[t] = U[t-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+      V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
       
-#      maxU = np.max(U[t])
-#      print(maxU)
-#      
-#      if np.isnan(maxU):
-#        return
+      k1 = self.RHS(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1], V, args)
+      k2 = self.RHS(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*k1, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*k1, V, args)
+      k3 = self.RHS(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*k2, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*k2, V, args)
+      k4 = self.RHS(U[t-1, 1:-1, 1:-1] + self.dt*k3, B[t-1, 1:-1, 1:-1] + self.dt*k3, V, args)
+
+      U[t, 1:-1, 1:-1] = U[t-1, 1:-1, 1:-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
       
       # BC of temperature
       U[t,0,:] = np.zeros(N)
@@ -124,12 +119,12 @@ class fire:
       U[t,:,0] = np.zeros(M)
       U[t,:,-1] = np.zeros(M)
       
-      bk1 = self.g(U[t-1], B[t-1])
-      bk2 = self.g(U[t-1] + 0.5*self.dt*bk1, B[t-1] + 0.5*self.dt*bk1)
-      bk3 = self.g(U[t-1] + 0.5*self.dt*bk2, B[t-1] + 0.5*self.dt*bk2)
-      bk4 = self.g(U[t-1] + self.dt*bk3, B[t-1] + self.dt*bk3)
+      bk1 = self.g(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1])
+      bk2 = self.g(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk1, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk1)
+      bk3 = self.g(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk2, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk2)
+      bk4 = self.g(U[t-1, 1:-1, 1:-1] + self.dt*bk3, B[t-1, 1:-1, 1:-1] + self.dt*bk3)
 
-      B[t] = B[t-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
+      B[t, 1:-1, 1:-1] = B[t-1, 1:-1, 1:-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
       
       # BC of fuel
       B[t,0,:] = np.zeros(N)
@@ -292,8 +287,8 @@ class fire:
       Dy = FD1Matrix(self.M, self.dy, self.sparse)
       D2x = FD2Matrix(self.N, self.dx, self.sparse)
       D2y = FD2Matrix(self.M, self.dy, self.sparse)
-      
-      args = (Dx, Dy, D2x, D2y)
+
+      args = (Dx[1:-1, 1:-1], Dy[1:-1, 1:-1], D2x[1:-1, 1:-1], D2y[1:-1, 1:-1])
     else:
       print("Spatial method error")
     
