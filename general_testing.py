@@ -297,18 +297,44 @@ plt.contourf(X, Y, f(X, Y))
 plt.quiver(X[::4,::4], Y[::4,::4], fx(X[::4,::4], Y[::4,::4]), fy(X[::4,::4],Y[::4,::4]))
 
 plt.show()
-#%%
+#%% Scenario Test
 import numpy as np
 import matplotlib.pyplot as plt
 
-f = lambda x,y: 1e1*np.exp(-(1e1*(x)**2 + 1e3*(y-0.9)**2))
+# Gaussian basis
+def G(x, y, s=1):
+  return np.exp(-1/s*(x**2 + y**2))
+
+t = lambda x, y: 0.2 * G(x+.5, y+.5, .6) + 0.2 * G(x-.9, y-.9, .9)
+f = lambda x, y: 0.2 * G(x+.75, y-.75, .6) + 0.2 * G(x-.75, y+.75, 1) \
+  + 0.16 * G(x+.65, y+.65, .3) + 0.15 * G(x-.65, y-.65, .7)
+u = lambda x, y: G(x, y, 5e-3)
+  
+w1 = lambda x, y: np.cos(7/4 * np.pi + x*0)
+w2 = lambda x, y: np.sin(7/4 * np.pi + y*0)
 
 x = np.linspace(-1, 1, 100)
 y = np.linspace(-1, 1, 100)
 
 X, Y = np.meshgrid(x, y)
 
+T = t(X, Y)
 F = f(X, Y)
+step = 7
+Xs = X[::step,::step]
+Ys = Y[::step,::step]
+W1 = w1(Xs, Ys)
+W2 = w2(Xs, Ys)
 
-plt.contourf(X, Y, F)
+xc = np.array([-.8, -.4, 0, .4, .8])
+yc = np.array([-.8, -.4, 0, .4, .8])
+
+plt.contour(X, Y, T, cmap=plt.cm.Oranges)
+plt.pcolor(X, Y, F, cmap=plt.cm.Greens, alpha=1)
+for j in range(5):
+  for i in range(5):
+    U = u(X-xc[i], Y-yc[j])
+    plt.contour(X, Y, U, cmap=plt.cm.hot, alpha=.5)
+#plt.contourf(X, Y, U, cmap=plt.cm.hot, alpha=.5)
+plt.quiver(Xs, Ys, W1, W2)
 plt.show()

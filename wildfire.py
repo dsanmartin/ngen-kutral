@@ -31,6 +31,8 @@ class fire:
     self.dy = self.y[1] - self.y[0]
     self.dt = self.t[1] - self.t[0]
     self.sparse = parameters['sparse']
+    self.show = parameters['show']
+    self.complete = parameters['complete']
         
             
   # RHS of PDE
@@ -52,9 +54,17 @@ class fire:
       Uxx, Uyy = (D2x.dot(U.T)).T, D2y.dot(U)
     else:
       Uxx, Uyy = np.dot(U, D2x.T), np.dot(D2y, U)
+      
     lapU = Uxx + Uyy
-
-    diffusion = self.kappa * lapU # k \nabla U
+    
+    if self.complete:
+      K = self.K(U)
+      Kx = self.Ku(U) * Ux #(Dx.dot(K.T)).T
+      Ky = self.Ku(U) * Uy #Dy.dot(K)
+      diffusion = Kx * Ux + Ky * Uy + K * lapU
+    else:
+      diffusion = self.kappa * lapU # k \nabla U
+    
     convection = Ux * V1 + Uy * V2 # v \dot grad u.    
     fuel = self.f(U, B) # eval fuel
     
@@ -76,7 +86,17 @@ class fire:
   def K(self, u):
     return self.kappa * (1 + self.epsilon * u) ** 3 + 1
   
+  def Ku(self, u):
+    return 3 * self.epsilon * self.kappa * (1 + self.epsilon * u) ** 2
+  
   def f(self, u, beta):
+    if self.show:
+      print("max u: ", np.max(u))
+      print("max b: ", np.max(beta))
+      print("g: ", np.max(self.g(u, beta)))
+      print("exp:", np.max(np.exp(u / (1 + self.epsilon*u))))
+      if np.isnan(np.max(u)) or np.isnan(np.max(beta)) or np.isnan(np.max(self.g(u, beta))):
+        return
     return self.s(u) * beta * np.exp(u / (1 + self.epsilon*u)) - self.alpha * u
   
   def g(self, u, beta):
