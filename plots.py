@@ -4,22 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
-# Helper to build reaction rate
-# Gaussian basis
-def G(x, y):
-  return np.exp(-((x)**2 + (y)**2))
 
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
     new_cmap = colors.LinearSegmentedColormap.from_list(
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
     return new_cmap
-
-# Superposition of gaussians based in https://commons.wikimedia.org/wiki/File:Scalar_field.png
-def S(x, y):
-  return G(2*x, 2*y) + 0.8 * G(2*x + 1.25, 2*y + 1.25) + 0.5 * G(2*x - 1.25, 4*y + 1.25) \
-    - 0.5 * G(3*x - 1.25, 3*y - 1.25) + 0.35 * G(2*x + 1.25, 2*y - 1.25) \
-    + 0.8 * G(x - 1.25, 3*y + 1.5) + 1.2 * G(x + 1.25, 3*y - 1.85)
 
 def plotField(Xv, Yv, V, title, t=None):
   if t is None:
@@ -118,8 +108,6 @@ def plotJCC(t, X, Y, U, B, W, T=None, row=4, col=2, save=False):
   if save:
     from datetime import datetime
     sec = int(datetime.today().timestamp())
-    plt.savefig('simulation_' + str(sec) + '.pdf', format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
-    #plt.savefig('simulation_' + str(sec) + '.png', format='png', transparent=True, bbox_inches='tight', pad_inches=0)
-
+    plt.savefig('experiments/simulations/' + str(sec) + '.pdf', format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
   else:
     plt.show()

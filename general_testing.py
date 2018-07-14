@@ -338,3 +338,106 @@ for j in range(5):
 #plt.contourf(X, Y, U, cmap=plt.cm.hot, alpha=.5)
 plt.quiver(Xs, Ys, W1, W2)
 plt.show()
+
+#%%
+# Fourier Second derivative
+import numpy as np
+import matplotlib.pyplot as plt
+
+#M, N = 50, 50
+#a, b = -np.pi, np.pi
+#
+#f = lambda x, y: np.cos(x**2 + y**2)
+#fx = lambda x, y: -2*x*np.sin(x**2 + y**2)
+#fy = lambda x, y: -2*y*np.sin(x**2 + y**2)
+#
+#x = np.linspace(a, b, N, endpoint=False)
+#y = np.linspace(a, b, M, endpoint=False)
+#
+#X, Y = np.meshgrid(x, y)
+#F = f(X, Y)
+#
+#Ff = np.fft.fft2(F)
+N = 20
+
+kx = np.linspace(-1/2, 1/2, N, endpoint=False)
+ky = np.linspace(-1/2, 1/2, N, endpoint=False)
+
+X, Y = np.meshgrid(kx, ky)
+#F = np.sin(X*2*np.pi - Y*2*np.pi)
+#Fx = np.cos(X*2*np.pi - Y*2*np.pi)*2*np.pi
+#Fy = -np.cos(X*2*np.pi - Y*2*np.pi)*2*np.pi
+#Fxx = -np.sin(X*2*np.pi - Y*2*np.pi)*4*np.pi**2
+#Fyy = -np.sin(X*2*np.pi - Y*2*np.pi)*4*np.pi**2
+F = (2*np.pi*X)**2 + (2*np.pi*Y)**2
+Fx = 4*np.pi*X
+Fy = 4*np.pi*Y
+Fxx = 4*np.pi
+Fyy = 4*np.pi
+
+#f = lambda x, y: np.cos(x**2 + y**2)
+#fx = lambda x, y: -2*x*np.sin(x**2 + y**2)
+#fy = lambda x, y: -2*y*np.sin(x**2 + y**2)
+#F = f(X, Y)
+#Fx = fx(X, Y)
+
+# Compute 2D FFT
+Ff = np.fft.fft2(F)
+
+# Compute grid of wavenumbers
+KX, KY = np.meshgrid(np.fft.ifftshift(kx), np.fft.ifftshift(ky))
+#
+# Compute 2D derivative
+Ffx = 1j*2*np.pi*KX*Ff*N
+Ffy = 1j*2*np.pi*KY*Ff*N
+
+#Ffxx = -4*np.pi**2*KX**2*Ff*N
+#Ffyy = -4*np.pi**2*KY**2*Ff*N
+Ffxx = (1j*2*np.pi*KX*N)**2 * Ff
+Ffyy = (1j*2*np.pi*KY*N)**2 * Ff
+ 
+# Convert back to space domain
+Fdx = np.real(np.fft.ifft2(Ffx))
+Fdy = np.real(np.fft.ifft2(Ffy))
+Fdxx = np.real(np.fft.ifft2(Ffxx))
+Fdyy = np.real(np.fft.ifft2(Ffyy))
+
+
+print("FDX")
+plt.imshow(Fdx)
+plt.colorbar()
+plt.show()
+
+plt.imshow(Fx)
+plt.colorbar()
+plt.show()
+
+print("FDY")
+plt.imshow(Fdy)
+plt.colorbar()
+plt.show()
+
+plt.imshow(Fy)
+plt.colorbar()
+plt.show()
+
+print("FDXX")
+plt.imshow(Fdxx)
+plt.colorbar()
+plt.show()
+
+plt.imshow(Fxx)
+plt.colorbar()
+plt.show()
+
+print("FDYY")
+plt.imshow(Fdyy)
+plt.colorbar()
+plt.show()
+
+plt.imshow(Fyy)
+plt.colorbar()
+plt.show()
+
+print(np.linalg.norm(Fxx - Fdxx))
+

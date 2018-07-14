@@ -28,8 +28,8 @@ b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)#x*0 + 
 
 # Wind effect
 gamma = 1e-2#e-3
-w1 = lambda x, y, t: gamma * 300 + x*0 # gamma * np.cos(np.pi/4 + x*0) 
-w2 = lambda x, y, t: gamma * 300 + y*0 # gamma * np.sin(np.pi/4 + x*0) # gamma * 300 + y*0 
+w1 = lambda x, y, t: gamma * 300 + x*0 
+w2 = lambda x, y, t: gamma * 300 + y*0 
 W = (w1, w2)
 
 # Vector

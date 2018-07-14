@@ -153,6 +153,52 @@ class fire:
       B[t,:,-1] = np.zeros(M)
       
     return U, B
+  
+  # Only save last value
+  def solveRK4last(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    U = U0
+    B = B0
+    
+    X, Y = np.meshgrid(self.x, self.y)
+    
+    for t in range(1, self.T):
+      V1 = self.v[0](X, Y, self.t[t])
+      V2 = self.v[1](X, Y, self.t[t])
+
+      V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
+      
+      Uc = np.copy(U)
+      Bc = np.copy(B)
+      
+      k1 = self.RHS(Uc[1:-1, 1:-1], Bc[1:-1, 1:-1], V, args)
+      k2 = self.RHS(Uc[1:-1, 1:-1] + 0.5*self.dt*k1, Bc[1:-1, 1:-1] + 0.5*self.dt*k1, V, args)
+      k3 = self.RHS(Uc[1:-1, 1:-1] + 0.5*self.dt*k2, Bc[1:-1, 1:-1] + 0.5*self.dt*k2, V, args)
+      k4 = self.RHS(Uc[1:-1, 1:-1] + self.dt*k3, Bc[1:-1, 1:-1] + self.dt*k3, V, args)
+
+      U[1:-1, 1:-1] = Uc[1:-1, 1:-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+      
+      # BC of temperature
+      U[0,:] = np.zeros(N)
+      U[-1,:] = np.zeros(N)
+      U[:,0] = np.zeros(M)
+      U[:,-1] = np.zeros(M)
+      
+      bk1 = self.g(Uc[1:-1, 1:-1], Bc[1:-1, 1:-1])
+      bk2 = self.g(Uc[1:-1, 1:-1] + 0.5*self.dt*bk1, Bc[1:-1, 1:-1] + 0.5*self.dt*bk1)
+      bk3 = self.g(Uc[1:-1, 1:-1] + 0.5*self.dt*bk2, Bc[1:-1, 1:-1] + 0.5*self.dt*bk2)
+      bk4 = self.g(Uc[1:-1, 1:-1] + self.dt*bk3, Bc[1:-1, 1:-1] + self.dt*bk3)
+
+      B[1:-1, 1:-1] = Bc[1:-1, 1:-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
+      
+      # BC of fuel
+      B[0,:] = np.zeros(N)
+      B[-1,:] = np.zeros(N)
+      B[:,0] = np.zeros(M)
+      B[:,-1] = np.zeros(M)
+      
+    return U, B
       
   # Forward Euler for time
   def solveEuler(self, U0, B0, V, args):
@@ -165,8 +211,8 @@ class fire:
     B[0] = B0
     
     for t in range(1, self.T):
-      U[t] = U[t-1] + self.RHS(U[t-1], B[t-1], V, args) * self.dt
-      B[t] = B[t-1] + self.g(U[t-1], B[t-1]) * self.dt
+      U[t] = U[t-1] + self.RHS(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1], V, args) * self.dt
+      B[t] = B[t-1] + self.g(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1]) * self.dt
       
       U[t,0,:] = np.zeros(N)
       U[t,-1,:] = np.zeros(N)
@@ -319,6 +365,8 @@ class fire:
       U, B = self.solveEuler(U0, B0, V, args)
     elif time == 'ieuler':
       U, B = self.solveImpEuler(U0, B0, V, args)
+    elif time == 'last':
+      U, B = self.solveRK4last(U0, B0, V, args)
     else:
       print("Time method error")
         

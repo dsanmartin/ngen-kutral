@@ -17,7 +17,7 @@ t = np.linspace(0, dt*L, L) # t domain
 X, Y = np.meshgrid(x, y)
 
 # Topography test
-xi = 1
+xi = 1e-1
 top = lambda x, y: 1e1*(np.exp(-25*((x+.5)**2 + (y)**2)) + np.exp(-25*((x-.5)**2 + y**2)))
 t1 = lambda x, y: xi*-500*((x+.5) * np.exp(-25*((x+.5)**2 + y**2)) + (x-.5) * np.exp(-25*((x-.5)**2 + y**2)))
 t2 = lambda x, y: xi*-500*(y * np.exp(-25*((x+.5)**2 + y**2)) + y * np.exp(-25*((x-.5)**2 + y**2)))
@@ -45,11 +45,11 @@ u0 = lambda x, y: 1e1*np.exp(-150*((x+.7)**2 + (y-.7)**2))
 b0 = lambda x, y: x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
 
 # Non dimensional parameters
-kappa = 5e-3#5e-3 # diffusion coefficient
-epsilon = 1e-1 # inverse of activation energy
-upc = 1e-1 # u phase change
-q = 1e-1 # reaction heat
-alpha = 1e1#1e1#1e-1 # natural convection
+kappa = 1e-2#5e-3 # diffusion coefficient
+epsilon = 3e-1#1e-1 # inverse of activation energy
+upc = 1#1e-1 # u phase change
+q = 1#1e-1 # reaction heat
+alpha = 1e-3#1e1#1e-1 # natural convection
 #%% TESTING
 M, N = 128, 128
 L = 1000 # Timesteps
@@ -99,7 +99,7 @@ q = 5e-3 # reaction heat
 alpha = 1e-3#1e-3 # natural convection
 #%% Asensio 2002 experiment
 M, N = 128, 128
-L = 3000 # Timesteps
+L = 500#3000 # Timesteps
 dt = 1e-2 # dt
 xa, xb = 0, 90 # x domain limit
 ya, yb = 0, 90 # y domain limit
@@ -189,10 +189,10 @@ q = 3#1 # reaction heat
 alpha = 1e-2#1e-4 # natural convection
 #%%
 # Meshes for initial condition plots
-X, Y = np.meshgrid(x, y)
+#X, Y = np.meshgrid(x, y)
 
 # Plot initial conditions
-p.plotIC(X, Y, u0, b0, V, W, T=None, top=None)
+#p.plotIC(X, Y, u0, b0, V, W, T=None, top=None)
 
 # Parameters for the model
 parameters = {
@@ -216,13 +216,14 @@ ct = wildfire.fire(parameters)
 #%%
 # Finite difference in space
 U, B = ct.solvePDE('fd', 'rk4')
+#timeit U, B = ct.solvePDE('fd', 'last')
 #%%
-#ct.plots(U, B)
+ct.plots(U, B)
 
 #%% PLOT JCC
-p.plotJCC(t, X, Y, U, B, W, T=None, save=True)
+p.plotJCC(t, X, Y, U, B, W, T=T, save=False)
 
-#%%
+#%% BURNT RATE PLOT
 plt.figure(figsize=(6, 4))
 
 dif_b = (B[1:] - B[:-1]) / dt
@@ -289,17 +290,17 @@ Wc, Bc = ct.solvePDE('cheb', 'rk4')
 ct.plots(Wc, Bc, True)
 
 #%%
-U_1024 = np.load('experiments/convergence/last_u_1024.npy')
-U_512 = np.load('experiments/convergence/last_u_512.npy')
-U_256 = np.load('experiments/convergence/last_u_256.npy')
-U_128 = np.load('experiments/convergence/last_u_128.npy')
-U_64 = np.load('experiments/convergence/last_u_64.npy')
+U_1024 = np.load('experiments/convergence/500/U_1024.npy')
+U_512 = np.load('experiments/convergence/500/U_512.npy')
+U_256 = np.load('experiments/convergence/500/U_256.npy')
+U_128 = np.load('experiments/convergence/500/U_128.npy')
+U_64 = np.load('experiments/convergence/500/U_64.npy')
 
-B_1024 = np.load('experiments/convergence/last_b_1024.npy')
-B_512 = np.load('experiments/convergence/last_b_512.npy')
-B_256 = np.load('experiments/convergence/last_b_256.npy')
-B_128 = np.load('experiments/convergence/last_b_128.npy')
-B_64 = np.load('experiments/convergence/last_b_64.npy')
+B_1024 = np.load('experiments/convergence/500/B_1024.npy')
+B_512 = np.load('experiments/convergence/500/B_512.npy')
+B_256 = np.load('experiments/convergence/500/B_256.npy')
+B_128 = np.load('experiments/convergence/500/B_128.npy')
+B_64 = np.load('experiments/convergence/500/B_64.npy')
 #%%
 errors_u = np.array([
     np.linalg.norm((U_64 - U_1024[::16, ::16]).flatten(), np.inf),
@@ -315,7 +316,7 @@ errors_b = np.array([
     np.linalg.norm((B_512 - B_1024[::2, ::2]).flatten(), np.inf),
     ])
   
-h = np.array([200/(2**i) for i in range(6, 10)])
+h = np.array([90/(2**i) for i in range(6, 10)])
 #%%
 #plt.plot(h, errors_u, 'b-x')
 plt.plot(h, errors_b, 'r-o')
@@ -327,8 +328,8 @@ plt.show()
 
 #%%
 MN = np.array([1024, 4096, 16384, 65536])
-mean_time = np.array([1.59, 3.37, 9.58, 43.8])
-std_time = np.array([0.0565, 0.00761, 0.0261, 1.6])
+mean_time = np.array([0.467, 0.978, 3.55, 18.2])
+std_time = np.array([0.282, 0.0718, 0.136, 0.248])
 plt.plot(MN, mean_time, 's-r')
 plt.plot(MN, mean_time + std_time)
 plt.plot(MN, mean_time - std_time)
