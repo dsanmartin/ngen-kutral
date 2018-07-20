@@ -90,6 +90,8 @@ def plotJCC(t, X, Y, U, B, W, T=None, row=4, col=2, save=False):
       axarr[i,1].quiver(X_t, Y_t, T1(X_t, Y_t), T2(X_t, Y_t))
     cb[r] = plt.colorbar(up[i], ax=axarr[i,0], fraction=0.046, pad=0.04)
     cb[r+1] = plt.colorbar(bp[i], ax=axarr[i,1], fraction=0.046, pad=0.04)
+    cb[r].set_label("Temperature", size=14)
+    cb[r+1].set_label("Fuel fraction", size=14)
     
     axarr[i,0].tick_params(axis='both', which='major', labelsize=12)
     axarr[i,1].tick_params(axis='both', which='major', labelsize=12)

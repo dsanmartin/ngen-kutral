@@ -71,6 +71,7 @@ u0 = lambda x, y: 6e0 * G(x+.5, y-.5, 1e-2) #9
 b0 = lambda x, y: 0.5 * G(x+.75, y-.75, .6) + 0.9 * G(x-.75, y+.75, 1) \
   + 0.016 * G(x+.65, y+.65, .3) + 0.015 * G(x-.65, y-.65, .7) #+ 0.8
 
+#np.random.seed(666)
 #b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)
 
 # Wind effect
@@ -99,8 +100,8 @@ q = 5e-3 # reaction heat
 alpha = 1e-3#1e-3 # natural convection
 #%% Asensio 2002 experiment
 M, N = 128, 128
-L = 500#3000 # Timesteps
-dt = 1e-2 # dt
+L = 500 #3000 # Timesteps
+dt = 1e-4 # 1e-2 # dt
 xa, xb = 0, 90 # x domain limit
 ya, yb = 0, 90 # y domain limit
 x = np.linspace(xa, xb, N) # x domain
@@ -149,22 +150,22 @@ y = np.linspace(ya, yb, M) # y domain
 t = np.linspace(0, dt*L, L) # t domain
 
 # Temperature initial condition
-u0 = lambda x, y: 6e0*np.exp(-2e-2*((x+90)**2 + (y)**2)) #1e2
+#u0 = lambda x, y: 6e0*np.exp(-2e-2*((x+90)**2 + (y)**2)) #1e2
 #u0 = lambda x, y: 6e1*(np.zeros((x.shape)) + np.ones((x.shape[0], 2)))
-#def u0(x, y):
-#  out = np.zeros((x.shape))
+def u0(x, y):
+  out = np.zeros((x.shape))
 #  #out[20:-20, :5] = 6*np.ones((x.shape[0]-40, 5))
-#  out[35:-35, :4] = 6*np.ones((x.shape[0]-70, 4))
+  out[35:-35, :4] = 6*np.ones((x.shape[0]-70, 4))
 #  #out[5:15, :4] = 6*np.ones((10, 4))
 #  #out[-15:-5, :4] = 6*np.ones((10, 4))
-#  return out
+  return out
 
 # Fuel initial condition
 #b0 = lambda x, y: x*0 + 1
 b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)
 
 # Wind effect
-gamma = 2.5 #1
+gamma = 1#2.5 #1
 w1 = lambda x, y, t: gamma * np.cos(0 + x*0)
 w2 = lambda x, y, t: gamma * np.sin(0 + x*0)
 W = (w1, w2)
@@ -188,11 +189,14 @@ upc = 1e0 # u phase change
 q = 3#1 # reaction heat
 alpha = 1e-2#1e-4 # natural convection
 #%%
+#M, N = 2048, 2048
+#x = np.linspace(xa, xb, N) # x domain
+#y = np.linspace(ya, yb, M) # y domain
 # Meshes for initial condition plots
-#X, Y = np.meshgrid(x, y)
+X, Y = np.meshgrid(x, y)
 
 # Plot initial conditions
-#p.plotIC(X, Y, u0, b0, V, W, T=None, top=None)
+p.plotIC(X, Y, u0, b0, V, W, T=T, top=top)
 
 # Parameters for the model
 parameters = {
@@ -215,13 +219,18 @@ parameters = {
 ct = wildfire.fire(parameters)
 #%%
 # Finite difference in space
-U, B = ct.solvePDE('fd', 'rk4')
-#timeit U, B = ct.solvePDE('fd', 'last')
+#U, B = ct.solvePDE('fd', 'rk4')
+# Only last solution
+U, B = ct.solvePDE('fd', 'last')
+#%%
+np.save('experiments/convergence/500/1e-3/U_' + str(M), U)
+np.save('experiments/convergence/500/1e-3/B_' + str(M), B)
+
 #%%
 ct.plots(U, B)
 
 #%% PLOT JCC
-p.plotJCC(t, X, Y, U, B, W, T=T, save=False)
+p.plotJCC(t, X, Y, U, B, W, T=None, save=True)
 
 #%% BURNT RATE PLOT
 plt.figure(figsize=(6, 4))
@@ -240,49 +249,116 @@ for i in range(row):
 
 plt.xlabel(r"$x$", fontsize=16)
 plt.ylabel(r"$y$", fontsize=16)
-plt.colorbar()
+cbbr = plt.colorbar()
+cbbr.set_label("Fuel consumption rate", size=14)
 #plt.show()
 plt.savefig('burnt_rate.eps', format='eps', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 
 
-#%% Times experiment
+#%% 
+# Times experiment. Generate simulations
+import datetime, pathlib
+
+now = datetime.datetime.now() 
+SIM_NAME = now.strftime("%Y%m%d%H%M%S")
+DIR_BASE = "experiments/times/" + SIM_NAME + "/"
+pathlib.Path(DIR_BASE).mkdir(parents=True, exist_ok=True)
+
+#%%
 x_t = np.array([0.8, 0.4, 0.0, -0.4, -0.8])
 y_t = np.array([-0.8, -0.4, 0.0, 0.4, 0.8])
+#x_t = np.array([0.75, 0.5, 0.25, 0.0, -0.25, -0.5, -0.75])
+#y_t = np.array([-0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75])
 
-for i in range(5):
-  for j in range(5):
-    u0 = lambda x, y: 1e1*np.exp(-150*((x+x_t[j])**2 + (y+y_t[i])**2)) 
+for i in range(len(y_t)):
+  for j in range(len(x_t)):
+    u0 = lambda x, y: 6e0 * G(x+x_t[j], y+y_t[i], 1e-2)
     parameters['u0'] = u0
     ct = wildfire.fire(parameters)
     U, B = ct.solvePDE('fd', 'rk4')
     
-    u_name = 'experiments/times/U' + str(i) + str(j) + '.npy'
-    b_name = 'experiments/times/B' + str(i) + str(j) + '.npy'
+    #u_name = DIR_BASE + 'U' + str(i) + str(j) + '.npy'
+    b_name = DIR_BASE + 'B_' + str(i) + '-' + str(j) + '.npy'
     
-    np.save(u_name, U)
+    #np.save(u_name, U)
     np.save(b_name, B)
     
 #%%
-    
+# Get times that % of total fuel is per. 
+# Fuel is consumend with fraction fuel is < 0.1.
+Nt = len(x_t)
 per = 0.1
-times_burnt = np.zeros((5, 5))
+times_burnt = np.zeros((Nt, Nt))
 
-for i in range(5):
-  for j in range(5):
+for i in range(Nt):
+  for j in range(Nt):
     
-    B = np.load('experiments/times/B' + str(i) + str(j) + '.npy')
+    B = np.load(DIR_BASE + 'B_' + str(i) + '-' + str(j) + '.npy')
     
     for k in range(len(B)):
       # Count elements < 0.5 without boundary
-      burnt = (np.asarray(B[k,1:-2,1:-2]) < 0.5).sum()
+      burnt = (np.asarray(B[k,1:-1,1:-1]) < 0.1).sum()
       
-      if burnt >= int(per * 64**2):
+      if burnt >= int(per * M * N):
         times_burnt[i, j] = t[k]
         break
 
-#plt.imshow(B[-1])
-plt.imshow(times_burnt, extent=[-1, 1, -1, 1])
-plt.colorbar()
+#%%
+# Plot times
+plt.figure(figsize=(10, 8))
+s = 4
+X_s, Y_s = X[::s,::s], Y[::s,::s]
+X_t, Y_t = np.meshgrid(np.linspace(-1, 1, len(times_burnt)), np.linspace(-1, 1, len(times_burnt))) 
+plt.subplot(1, 2, 1)
+new_hot = p.truncate_colormap(plt.cm.hot, 0.2, 1)
+times = plt.pcolor(X_t, Y_t, times_burnt, cmap=new_hot)
+plt.xlabel(r"$x$", fontsize=14)
+plt.ylabel(r"$y$", fontsize=14)
+cb1 = plt.colorbar(times)#, fraction=0.046, pad=0.04)
+plt.subplot(1, 2, 2)
+new_cmap = p.truncate_colormap(plt.cm.gray, 0, .3)
+fuel = plt.contourf(X, Y, b0(X, Y), cmap=plt.cm.Oranges, alpha=0.5)
+topo = plt.contour(X, Y, top(X,Y), vmin=np.min(top(X,Y)), cmap=new_cmap)
+plt.clabel(topo, inline=1, fontsize=10)
+plt.quiver(X_s, Y_s, W[0](X_s, Y_s, 0), W[1](X_s, Y_s, 0))
+cb2 = plt.colorbar(fuel)#, fraction=0.046, pad=0.04)
+plt.ylabel(r"$y$", fontsize=14)
+#plt.xlabel(r"$x$")
+
+plt.tight_layout()
+cb1.set_label("Time", size=14)
+cb2.set_label("Initial Fuel Fraction", size=14)
+plt.show()
+#%%
+plt.figure(figsize=(6, 9))
+s = 4
+X_s, Y_s = X[::s,::s], Y[::s,::s]
+X_t, Y_t = np.meshgrid(np.linspace(-1, 1, len(times_burnt)), np.linspace(-1, 1, len(times_burnt))) 
+plt.subplot(2, 1, 1)
+
+new_cmap = p.truncate_colormap(plt.cm.gray, 0, .3)
+fuel = plt.contourf(X, Y, b0(X, Y), cmap=plt.cm.Oranges, alpha=0.5)
+topo = plt.contour(X, Y, top(X,Y), vmin=np.min(top(X,Y)), cmap=new_cmap)
+plt.clabel(topo, inline=1, fontsize=10)
+plt.quiver(X_s, Y_s, W[0](X_s, Y_s, 0), W[1](X_s, Y_s, 0))
+cb2 = plt.colorbar(fuel)#, fraction=0.046, pad=0.04)
+plt.ylabel(r"$y$", fontsize=14)
+
+plt.subplot(2, 1, 2)
+
+new_hot = p.truncate_colormap(plt.cm.hot, 0.2, 1)
+times = plt.pcolor(X_t, Y_t, times_burnt, cmap=new_hot)
+plt.xlabel(r"$x$", fontsize=14)
+plt.ylabel(r"$y$", fontsize=14)
+cb1 = plt.colorbar(times)#, fraction=0.046, pad=0.04)
+
+
+plt.tight_layout()
+cb1.set_label("Time to consume 10% of total area", size=14)
+cb2.set_label("Initial Fuel Fraction", size=14)
+plt.show()
+
+#plt.savefig('experiments/simulations/risk_maps/' + SIM_NAME + '.pdf', format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 #%%
 # Chebyshev in space
 Wc, Bc = ct.solvePDE('cheb', 'rk4')
@@ -290,18 +366,26 @@ Wc, Bc = ct.solvePDE('cheb', 'rk4')
 ct.plots(Wc, Bc, True)
 
 #%%
-U_1024 = np.load('experiments/convergence/500/U_1024.npy')
-U_512 = np.load('experiments/convergence/500/U_512.npy')
-U_256 = np.load('experiments/convergence/500/U_256.npy')
-U_128 = np.load('experiments/convergence/500/U_128.npy')
-U_64 = np.load('experiments/convergence/500/U_64.npy')
+# CONVERGENCE TEST
+L_dir = '500'
+dt_dir = '1e-3'
+exp_dir = L_dir + "/" + dt_dir + "/"
 
-B_1024 = np.load('experiments/convergence/500/B_1024.npy')
-B_512 = np.load('experiments/convergence/500/B_512.npy')
-B_256 = np.load('experiments/convergence/500/B_256.npy')
-B_128 = np.load('experiments/convergence/500/B_128.npy')
-B_64 = np.load('experiments/convergence/500/B_64.npy')
+U_2048 = np.load('experiments/convergence/' + exp_dir + 'U_2048.npy')
+U_1024 = np.load('experiments/convergence/' + exp_dir + 'U_1024.npy')
+U_512 = np.load('experiments/convergence/' + exp_dir + 'U_512.npy')
+U_256 = np.load('experiments/convergence/' + exp_dir + 'U_256.npy')
+U_128 = np.load('experiments/convergence/' + exp_dir + 'U_128.npy')
+U_64 = np.load('experiments/convergence/' + exp_dir + 'U_64.npy')
+
+B_2048 = np.load('experiments/convergence/' + exp_dir + 'B_2048.npy')
+B_1024 = np.load('experiments/convergence/' + exp_dir + 'B_1024.npy')
+B_512 = np.load('experiments/convergence/' + exp_dir + 'B_512.npy')
+B_256 = np.load('experiments/convergence/' + exp_dir + 'B_256.npy')
+B_128 = np.load('experiments/convergence/' + exp_dir + 'B_128.npy')
+B_64 = np.load('experiments/convergence/' + exp_dir + 'B_64.npy')
 #%%
+# Reference 1024
 errors_u = np.array([
     np.linalg.norm((U_64 - U_1024[::16, ::16]).flatten(), np.inf),
     np.linalg.norm((U_128 - U_1024[::8, ::8]).flatten(), np.inf),
@@ -315,11 +399,30 @@ errors_b = np.array([
     np.linalg.norm((B_256 - B_1024[::4, ::4]).flatten(), np.inf),
     np.linalg.norm((B_512 - B_1024[::2, ::2]).flatten(), np.inf),
     ])
-  
-h = np.array([90/(2**i) for i in range(6, 10)])
 #%%
-#plt.plot(h, errors_u, 'b-x')
-plt.plot(h, errors_b, 'r-o')
+# Reference 2048
+errors_u = np.array([
+    np.linalg.norm((U_64 - U_2048[::32, ::32]).flatten(), np.inf),
+    np.linalg.norm((U_128 - U_2048[::16, ::16]).flatten(), np.inf),
+    np.linalg.norm((U_256 - U_2048[::8, ::8]).flatten(), np.inf),
+    np.linalg.norm((U_512 - U_2048[::4, ::4]).flatten(), np.inf),
+    np.linalg.norm((U_1024 - U_2048[::2, ::2]).flatten(), np.inf),
+    ])
+
+errors_b = np.array([
+    np.linalg.norm((B_64 - B_2048[::32, ::32]).flatten(), np.inf),
+    np.linalg.norm((B_128 - B_2048[::16, ::16]).flatten(), np.inf),
+    np.linalg.norm((B_256 - B_2048[::8, ::8]).flatten(), np.inf),
+    np.linalg.norm((B_512 - B_2048[::4, ::4]).flatten(), np.inf),
+    np.linalg.norm((B_1024 - B_2048[::2, ::2]).flatten(), np.inf),
+    ])
+#%%
+h = np.array([90/(2**i) for i in range(6, 11)])
+#%%
+plt.plot(h, errors_u, 'b-x')
+plt.plot(h, h)
+plt.plot(h, h**2)
+#plt.plot(h, errors_b, 'r-o')
 plt.xlabel("h")
 plt.grid(True)
 plt.xscale('log')
