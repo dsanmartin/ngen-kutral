@@ -1,8 +1,7 @@
 import numpy as np
 import sys
-sys.path.append('../')
-import wildfire
-import plots as p
+from wildfire.fire import Fire
+from wildfire import plots as p
 #%%
 # Asensio 2002 experiment
 M, N = 128, 128
@@ -59,12 +58,10 @@ parameters = {
     'complete': False
 }
 
-ct = wildfire.fire(parameters)
+ct = Fire(parameters)
 
 #%%
 # Finite difference in space
 U, B = ct.solvePDE('fd', 'rk4')
 #%%
-# Plot!
-import plots as p
-p.plotJCC(t, X, Y, U, B, V, T=None, save=True)
+p.plotJCC(t, X, Y, U, B, V, T=None, save=None)

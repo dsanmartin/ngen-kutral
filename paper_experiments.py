@@ -1,4 +1,5 @@
-import wildfire
+#import wildfire as wf
+from wildfire.fire import Fire
 import numpy as np
 import matplotlib.pyplot as plt
 import plots as p
@@ -196,7 +197,7 @@ alpha = 1e-2#1e-4 # natural convection
 X, Y = np.meshgrid(x, y)
 
 # Plot initial conditions
-p.plotIC(X, Y, u0, b0, V, W, T=T, top=top)
+p.plotIC(X, Y, u0, b0, V, T=T, top=top)
 
 # Parameters for the model
 parameters = {
@@ -216,7 +217,7 @@ parameters = {
     'complete': False
 }
 
-ct = wildfire.fire(parameters)
+ct = Fire(parameters)
 #%%
 # Finite difference in space
 #U, B = ct.solvePDE('fd', 'rk4')

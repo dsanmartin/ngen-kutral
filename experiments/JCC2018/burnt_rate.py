@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import wildfire
+from wildfire.fire import Fire
 import plots as p
 
 #%% Mell 2006 experiment
@@ -65,7 +65,7 @@ parameters = {
     'complete': False
 }
 
-ct = wildfire.fire(parameters)
+ct = Fire(parameters)
 #%%
 # Finite difference in space
 U, B = ct.solvePDE('fd', 'rk4')
