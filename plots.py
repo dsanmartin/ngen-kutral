@@ -26,7 +26,7 @@ def plotScalar(X, Y, U, title, cmap_):
   plt.colorbar()
   plt.show()
   
-def plotIC(X, Y, U, B, V, W, T, top):
+def plotIC(X, Y, U, B, W, T, top):
   m = len(X)
   s = m // int(0.1*m)
   plt.figure(figsize=(10, 4))
@@ -65,8 +65,7 @@ def plotJCC(t, X, Y, U, B, W, T=None, row=4, col=2, save=False):
   cb = [None] * (row * col)
   
   f, axarr = plt.subplots(4, 2, sharex='col', sharey='row', figsize=(24, 16))
-  #f.tight_layout()
-  f.subplots_adjust(left=0.35, right=0.7)
+  f.subplots_adjust(left=0.2, right=0.48)
   tim = L // (row - 1)
   X_s = X[::step,::step]
   Y_s = Y[::step,::step]
@@ -106,10 +105,11 @@ def plotJCC(t, X, Y, U, B, W, T=None, row=4, col=2, save=False):
     r += 1
       
   plt.rc('axes', labelsize=12)
+  #f.tight_layout()
   
   if save:
     from datetime import datetime
     sec = int(datetime.today().timestamp())
-    plt.savefig('experiments/simulations/' + str(sec) + '.pdf', format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
+    plt.savefig('experiments/JCC2018/simulations/' + str(sec) + '.pdf', format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
   else:
     plt.show()
