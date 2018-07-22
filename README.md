@@ -1,5 +1,5 @@
 # Ngen Kütral
-## Open Source Framework for Chilean Wildfire Study 
+## Open Source Framework for Chilean Wildfire Spreading
 
 Source code of Master's degree thesis 
 
