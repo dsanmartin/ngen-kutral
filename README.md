@@ -2,6 +2,7 @@
 ## Open Source Framework for Chilean Wildfire Study 
 
 Source code of Master's degree thesis 
+
 Also includes JCC2018 experiments for paper *Toward an Open Source Framework for Chilean Wildfire Spreading* by Daniel San Martin & Claudio E. Torres
 
 ### Prerequisites
@@ -32,5 +33,5 @@ export PYTHONPATH=$PYTHONPATH:/path/you/put/the/repository/ngen-kutral/widlfire
 
 Execute the following command inside repository directory
 ```console
-user@host:~$ python python experiments/JCC2018/experiment_you_want.py
+user@host:~$ python experiments/JCC2018/experiment_you_want.py
 ```
