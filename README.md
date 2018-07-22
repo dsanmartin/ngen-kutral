@@ -10,10 +10,10 @@ Also includes JCC2018 experiments for paper *Toward an Open Source Framework for
 To use our framework you must install
 
 ```
-Python >= 3.6
-Numpy
-Scipy
-Matplotlib
+Python >= 3.6.5
+Numpy >= 1.13.3
+Scipy >= 1.1.0
+Matplotlib >= 2.2.2
 ```
 
 ### Installing
@@ -24,7 +24,7 @@ user@host:~$ git clone https://github.com/dsanmartin/ngen-kutral.git
 
 ```
 
-Add the following line to your ~/.profile or ~/.bash_profile file.
+Add the following line to your ~/.profile, ~/.bash_profile or ~/.bashrc file according to SO configuration.
 ```
 export PYTHONPATH=$PYTHONPATH:/path/you/put/the/repository/ngen-kutral/widlfire
 ```

@@ -1,8 +1,6 @@
 # Convergence Analysis with Asension 2002 Experiment
 import numpy as np
-import sys
-sys.path.append('../')
-import wildfire
+from wildfire.fire import Fire
 
 # For reproducibility of random fuel
 np.random.seed(666)
@@ -59,7 +57,7 @@ parameters = {
     'complete': False
 }
 
-ct = wildfire.fire(parameters)
+ct = Fire(parameters)
 
 # Solve PDE, keep only last approximation
 U, B = ct.solvePDE('fd', 'last')

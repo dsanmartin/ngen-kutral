@@ -1,5 +1,4 @@
 import numpy as np
-import sys
 from wildfire.fire import Fire
 from wildfire import plots as p
 #%%

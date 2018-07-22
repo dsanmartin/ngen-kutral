@@ -4,7 +4,7 @@ from scipy.interpolate import interp2d
 import pathlib, json, inspect, os
 from datetime import datetime
 from scipy import optimize
-from diffmat import FD1Matrix, FD2Matrix, chebyshevMatrix
+from wildfire.diffmat import FD1Matrix, FD2Matrix, chebyshevMatrix
 
 
 sec = int(datetime.today().timestamp())
