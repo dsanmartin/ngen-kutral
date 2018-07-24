@@ -2,10 +2,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime, pathlib
-import sys
-sys.path.append('../')
-import wildfire
-import plots as p
+from wildfire.fire import Fire
+from wildfire import plots as p
 
 # Create folder for experiment
 now = datetime.datetime.now() 
@@ -102,7 +100,7 @@ for i in range(Nt):
     np.random.seed(666) # For reproducibility of random fuel
     b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2) # Initial fuel
     parameters['beta0'] = b0
-    ct = wildfire.fire(parameters)
+    ct = Fire(parameters)
     U, B = ct.solvePDE('fd', 'rk4')
   
     #u_name = DIR_BASE + 'U' + str(i) + str(j) + '.npy'
@@ -146,7 +144,7 @@ plt.figure(figsize=(6, 14))
 s = 8
 X_s, Y_s = X[::s,::s], Y[::s,::s]
 X_t, Y_t = np.meshgrid(np.linspace(-1, 1, Nt), np.linspace(-1, 1, Nt)) 
-plt.subplot(3, 1, 1)
+ax1 = plt.subplot(3, 1, 1)
 
 new_cmap = p.truncate_colormap(plt.cm.gray, 0, .05)
 fuel = plt.contourf(X, Y, b0(X, Y), cmap=plt.cm.Oranges, alpha=0.5)
@@ -154,25 +152,29 @@ topo = plt.contour(X, Y, top(X,Y), vmin=np.min(top(X,Y)), cmap=new_cmap)
 plt.clabel(topo, inline=1, fontsize=10)
 plt.quiver(X_s, Y_s, W[0](X_s, Y_s, 0), W[1](X_s, Y_s, 0))
 cb1 = plt.colorbar(fuel, fraction=0.046, pad=0.04)
-plt.ylabel(r"$y$", fontsize=14)
+plt.ylabel(r"$y$", fontsize=16)
+plt.setp(ax1.get_xticklabels(), visible=False)
+ax1.tick_params(axis='both', which='major', labelsize=12)
 
-plt.subplot(3, 1, 2)
+ax2 = plt.subplot(3, 1, 2)
 
 new_hot = p.truncate_colormap(plt.cm.hot, 0.1, .55)
 my_cmap = new_hot
 my_cmap.set_under('w')
 times = plt.imshow(times_burnt, vmin=1e-10, cmap=my_cmap, extent=[-1, 1, -1, 1])
-plt.ylabel(r"$y$", fontsize=14)
+plt.ylabel(r"$y$", fontsize=16)
 cb2 = plt.colorbar(times, fraction=0.046, pad=0.04)
+plt.setp(ax2.get_xticklabels(), visible=False)
+ax2.tick_params(axis='both', which='major', labelsize=12)
 
-plt.subplot(3, 1, 3)
+ax3 = plt.subplot(3, 1, 3)
 
 #new_hot = p.truncate_colormap(plt.cm.hot, 0, .8)
 burn_per = plt.imshow(burnt_per, extent=[-1, 1, -1, 1])
-plt.xlabel(r"$x$", fontsize=14)
-plt.ylabel(r"$y$", fontsize=14)
+plt.xlabel(r"$x$", fontsize=16)
+plt.ylabel(r"$y$", fontsize=16)
 cb3 = plt.colorbar(burn_per, fraction=0.046, pad=0.04)
-
+ax3.tick_params(axis='both', which='major', labelsize=12)
 
 plt.tight_layout()
 cb1.set_label("Initial Fuel Fraction", size=14)
@@ -183,9 +185,9 @@ cb3.set_label("% of fuel burnt at end of simulation", size=14)
 #plt.savefig(DIR_BASE + SIM_NAME + '.pdf', 
 #            format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 
-#plt.savefig('risk_map_simulation_gauss.pdf', 
-#            format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
+plt.savefig('new_risk_map_simulation_gauss.pdf', 
+            format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 
 # Show
-plt.show()
+#plt.show()
 

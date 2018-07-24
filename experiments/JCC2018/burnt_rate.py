@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from wildfire.fire import Fire
-import plots as p
+from wildfire import plots as p
 
 #%% Mell 2006 experiment
 M, N = 128, 128
@@ -89,5 +89,5 @@ plt.xlabel(r"$x$", fontsize=16)
 plt.ylabel(r"$y$", fontsize=16)
 cbbr = plt.colorbar()
 cbbr.set_label("Fuel consumption rate", size=14)
-#plt.show()
-plt.savefig('./experiments/JCC2018/burnt_rate.eps', format='eps', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
+plt.show()
+#plt.savefig('./experiments/JCC2018/burnt_rate.eps', format='eps', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
