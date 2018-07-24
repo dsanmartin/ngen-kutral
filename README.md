@@ -24,7 +24,7 @@ user@host:~$ git clone https://github.com/dsanmartin/ngen-kutral.git
 
 ```
 
-Add the following line to your ~/.profile, ~/.bash_profile or ~/.bashrc file according to SO configuration.
+Add the following line to your ~/.profile, ~/.bash_profile or ~/.bashrc file according to your SO configuration.
 ```
 export PYTHONPATH=$PYTHONPATH:/path/you/put/the/repository/ngen-kutral/widlfire
 ```
