@@ -65,7 +65,7 @@ class Fire:
     else:
       diffusion = self.kappa * lapU # k \nabla U
     
-    convection = Ux * V1 + Uy * V2 # v \dot grad u.    
+    convection = Ux * V1 + Uy * V2 # v \cdot grad u.    
     fuel = self.f(U, B) # eval fuel
     
     return diffusion - convection + fuel

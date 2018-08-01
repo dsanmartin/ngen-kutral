@@ -113,3 +113,16 @@ def plotJCC(t, X, Y, U, B, W, T=None, row=4, col=2, save=False):
     plt.savefig('experiments/JCC2018/simulations/' + str(sec) + '.pdf', format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
   else:
     plt.show()
+
+def plotUB(t, X, Y, U, B, V):
+  s =  len(X) // int(0.1 * len(X))
+  X_s, Y_s = X[::s,::s], Y[::s,::s]
+  plt.figure(figsize=(10, 4))
+  plt.subplot(1, 2, 1)
+  temp = plt.pcolor(X, Y, U[t], cmap=plt.cm.jet, alpha=0.8)
+  plt.quiver(X_s, Y_s, V[0](X_s, Y_s, 0), V[1](X_s, Y_s, 0))
+  plt.colorbar(temp)
+  plt.subplot(1, 2, 2)
+  fuel = plt.pcolor(X, Y, B[t], cmap=plt.cm.Oranges)
+  plt.colorbar(fuel)
+  plt.show()
