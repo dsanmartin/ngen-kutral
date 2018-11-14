@@ -4,8 +4,8 @@ from wildfire import plots as p
 #%%
 # Asensio 2002 experiment
 M, N = 128, 128
-L = 3000 # Timesteps
-dt = 1e-2 # dt
+L = 5000 # Timesteps
+dt = 1e-3 # dt
 xa, xb = 0, 90 # x domain limit
 ya, yb = 0, 90 # y domain limit
 x = np.linspace(xa, xb, N) # x domain
@@ -13,11 +13,12 @@ y = np.linspace(ya, yb, M) # y domain
 t = np.linspace(0, dt*L, L) # t domain
 
 # Temperature initial condition
-u0 = lambda x, y: 6e0*np.exp(-5e-2*((x-20)**2 + (y-20)**2)) 
+u0 = lambda x, y: 6e0*np.exp(-5e-2*((x-45)**2 + (y-45)**2)) 
 
 # Fuel initial condition
 np.random.seed(666)
-b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)#x*0 + 1 #S(x+.25, y+.25) #x*0 + 1
+b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)
+#b0 = lambda x, y: x*0
 
 # Wind effect
 gamma = 1
@@ -26,7 +27,7 @@ v2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x*0) # 300
 V = (v1, v2)
 
 # Parameters
-kappa = 1e-1 # diffusion coefficient
+kappa = 1e-0 # diffusion coefficient
 epsilon = 3e-1#3e-2 # inverse of activation energy
 upc = 3e0 # u phase change
 q = 1 # reaction heat
@@ -61,18 +62,9 @@ ct = Fire(parameters)
 
 #%%
 # Finite difference in space
-U, B = ct.solvePDE('fd', 'rk4')
+U, B = ct.solvePDE('fd', 'euler')
 #%%
-p.plotJCC(t, X, Y, U, B, V, T=None, save=False)
-#p.plotJCCCols(t, X, Y, U, B, V, T=None, save=True)
-#%%
-UU = np.zeros((N*M, 3))
-BB = np.zeros_like(UU)
-UU[:,0] = X.flatten()
-UU[:,1] = Y.flatten()
-UU[:,2] = U[-1].flatten() 
-BB[:,0] = X.flatten()
-BB[:,1] = Y.flatten()
-BB[:,2] = B[-1].flatten() 
-#np.savetxt("U30.csv", UU, delimiter=" ", fmt='%.8f')
-#np.savetxt("B30.csv", BB, delimiter=" ", fmt='%.8f')
+# Plot approximations
+for i in range(L):
+  if i%500 != 0: continue
+  p.plotUBs(i, t, X, Y, U, B, V)

@@ -1,4 +1,4 @@
-import wildfire
+from wildfire.fire import Fire
 import numpy as np
 import plots as p
 
@@ -68,7 +68,7 @@ parameters = {
     'complete': True
 }
 
-ct = wildfire.fire(parameters)
+ct = Fire(parameters)
 
 
 # Finite difference in space

@@ -58,7 +58,7 @@ class Fire:
     lapU = Uxx + Uyy
     
     if self.complete:
-      K = self.K(U)
+      K = self.K(U) 
       Kx = self.Ku(U) * Ux #(Dx.dot(K.T)).T
       Ky = self.Ku(U) * Uy #Dy.dot(K)
       diffusion = Kx * Ux + Ky * Uy + K * lapU
@@ -154,6 +154,54 @@ class Fire:
       
     return U, B
   
+   # Runge-Kutta 4th order for time 
+  def solveRK4Noise(self, U0, B0, V, args, s1, s2):
+    M, N = U0.shape
+    
+    U = np.zeros((self.T, M, N))
+    B = np.zeros((self.T, M, N))
+    
+    U[0] = U0
+    B[0] = B0
+    
+    X, Y = np.meshgrid(self.x, self.y)
+    
+    for t in range(1, self.T):
+      V1 = self.v[0](X, Y, self.t[t])
+      V2 = self.v[1](X, Y, self.t[t])
+
+      V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
+      
+      k1 = self.RHS(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1], V, args)
+      k2 = self.RHS(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*k1, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*k1, V, args)
+      k3 = self.RHS(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*k2, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*k2, V, args)
+      k4 = self.RHS(U[t-1, 1:-1, 1:-1] + self.dt*k3, B[t-1, 1:-1, 1:-1] + self.dt*k3, V, args)
+
+      noise1 = np.random.normal(scale=s1, size=(M-2, N-2))
+      U[t, 1:-1, 1:-1] = U[t-1, 1:-1, 1:-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4) + noise1
+      
+      # BC of temperature
+      U[t,0,:] = np.zeros(N)
+      U[t,-1,:] = np.zeros(N)
+      U[t,:,0] = np.zeros(M)
+      U[t,:,-1] = np.zeros(M)
+      
+      bk1 = self.g(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1])
+      bk2 = self.g(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk1, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk1)
+      bk3 = self.g(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk2, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk2)
+      bk4 = self.g(U[t-1, 1:-1, 1:-1] + self.dt*bk3, B[t-1, 1:-1, 1:-1] + self.dt*bk3)
+
+      noise2 = np.random.normal(scale=s2, size=(M-2, N-2))
+      B[t, 1:-1, 1:-1] = B[t-1, 1:-1, 1:-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4) + noise2
+      
+      # BC of fuel
+      B[t,0,:] = np.zeros(N)
+      B[t,-1,:] = np.zeros(N)
+      B[t,:,0] = np.zeros(M)
+      B[t,:,-1] = np.zeros(M)
+      
+    return U, B
+  
   # Only save last value
   def solveRK4last(self, U0, B0, V, args):
     M, N = U0.shape
@@ -199,6 +247,55 @@ class Fire:
       B[:,-1] = np.zeros(M)
       
     return U, B
+  
+  def solveRK4Data(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    U = np.zeros((self.T, M, N))
+    B = np.zeros((self.T, M, N))
+    
+    U[0] = U0
+    B[0] = B0
+    
+    X, Y = np.meshgrid(self.x, self.y)
+    
+    for t in range(1, self.T):
+      V1 = self.v[t-1, 0]
+      V2 = self.v[t-1, 1]
+      
+      #print(V1, V2)
+
+      #V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
+      V = (V1*np.ones((self.M-2, self.N-2)), V2*np.ones((self.M-2, self.N-2)))
+      
+      
+      k1 = self.RHS(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1], V, args)
+      k2 = self.RHS(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*k1, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*k1, V, args)
+      k3 = self.RHS(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*k2, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*k2, V, args)
+      k4 = self.RHS(U[t-1, 1:-1, 1:-1] + self.dt*k3, B[t-1, 1:-1, 1:-1] + self.dt*k3, V, args)
+
+      U[t, 1:-1, 1:-1] = U[t-1, 1:-1, 1:-1] + (1/6)*self.dt*(k1 + 2*k2 + 2*k3 + k4)
+      
+      # BC of temperature
+      U[t,0,:] = np.zeros(N)
+      U[t,-1,:] = np.zeros(N)
+      U[t,:,0] = np.zeros(M)
+      U[t,:,-1] = np.zeros(M)
+      
+      bk1 = self.g(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1])
+      bk2 = self.g(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk1, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk1)
+      bk3 = self.g(U[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk2, B[t-1, 1:-1, 1:-1] + 0.5*self.dt*bk2)
+      bk4 = self.g(U[t-1, 1:-1, 1:-1] + self.dt*bk3, B[t-1, 1:-1, 1:-1] + self.dt*bk3)
+
+      B[t, 1:-1, 1:-1] = B[t-1, 1:-1, 1:-1] + (1/6)*self.dt*(bk1 + 2*bk2 + 2*bk3 + bk4)
+      
+      # BC of fuel
+      B[t,0,:] = np.zeros(N)
+      B[t,-1,:] = np.zeros(N)
+      B[t,:,0] = np.zeros(M)
+      B[t,:,-1] = np.zeros(M)
+      
+    return U, B
       
   # Forward Euler for time
   def solveEuler(self, U0, B0, V, args):
@@ -210,9 +307,16 @@ class Fire:
     U[0] = U0
     B[0] = B0
     
+    X, Y = np.meshgrid(self.x, self.y)
+    
     for t in range(1, self.T):
-      U[t] = U[t-1] + self.RHS(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1], V, args) * self.dt
-      B[t] = B[t-1] + self.g(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1]) * self.dt
+      V1 = self.v[0](X, Y, self.t[t])
+      V2 = self.v[1](X, Y, self.t[t])
+
+      V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
+      
+      U[t, 1:-1, 1:-1] = U[t-1, 1:-1, 1:-1] + self.RHS(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1], V, args) * self.dt
+      B[t, 1:-1, 1:-1] = B[t-1, 1:-1, 1:-1] + self.g(U[t-1, 1:-1, 1:-1], B[t-1, 1:-1, 1:-1]) * self.dt
       
       U[t,0,:] = np.zeros(N)
       U[t,-1,:] = np.zeros(N)
@@ -269,7 +373,86 @@ class Fire:
           
   
   # Solve PDE
-  def solvePDE(self, spatial='fd', time='rk4'):
+  def solvePDE(self, spatial='fd', time='rk4', s1=0, s2=0):
+    """
+    Solve PDE model
+    
+    Parameters
+    ----------
+    spatial : string
+            * 'fd' Finite difference
+            * 'cheb' Chebyshev differenciation  
+    time : string
+          * 'euler' Forward Euler
+          * 'rk4' Runge-Kutta 4th order
+            
+    Returns
+    -------
+    U : (T, M, N) ndarray
+      Temperatures approximation
+    B : (T, M, N) ndarray  
+      Fuels approximation
+    """
+        
+    if spatial == 'cheb':
+      Dx, x = chebyshevMatrix(self.N-1)
+      Dy, y = chebyshevMatrix(self.M-1)
+      
+      D2x = np.dot(Dx, Dx)
+      D2y = np.dot(Dy, Dy)
+      
+      X, Y = np.meshgrid(x, y)      
+      
+      U0 = self.u0(X, Y)
+      B0 = self.beta0(X, Y)
+      
+      V1 = self.v[0](X, Y, 0)
+      V2 = self.v[1](X, Y, 0)
+      
+      V = (V1, V2)
+      
+      args = (Dx[1:-1, 1:-1], Dy[1:-1, 1:-1], D2x[1:-1, 1:-1], D2y[1:-1, 1:-1])
+      
+    elif spatial == "fd":
+      # Grid for functions evaluation
+      X, Y = np.meshgrid(self.x, self.y)
+      
+      U0 = self.u0(X, Y) # Temperature initial condition
+      B0 = self.beta0(X, Y) # Fuel initial condition
+      B0[0,:] = np.zeros(self.N)
+      B0[:,0] = np.zeros(self.M)
+      B0[-1,:] = np.zeros(self.N)
+      B0[:,-1] = np.zeros(self.M)
+      V1 = self.v[0](X, Y, 0)
+      V2 = self.v[1](X, Y, 0)
+      V = (V1, V2) # Vector field
+      
+      Dx = FD1Matrix(self.N, self.dx, self.sparse)
+      Dy = FD1Matrix(self.M, self.dy, self.sparse)
+      D2x = FD2Matrix(self.N, self.dx, self.sparse)
+      D2y = FD2Matrix(self.M, self.dy, self.sparse)
+
+      args = (Dx[1:-1, 1:-1], Dy[1:-1, 1:-1], D2x[1:-1, 1:-1], D2y[1:-1, 1:-1])
+    else:
+      print("Spatial method error")
+    
+    # Time
+    if time == 'rk4':
+      U, B = self.solveRK4(U0, B0, V, args)
+    elif time == 'euler': 
+      U, B = self.solveEuler(U0, B0, V, args)
+    elif time == 'ieuler':
+      U, B = self.solveImpEuler(U0, B0, V, args)
+    elif time == 'last':
+      U, B = self.solveRK4last(U0, B0, V, args)
+    elif time == 'random':
+      U, B = self.solveRK4Noise(U0, B0, V, args, s1, s2)
+    else:
+      print("Time method error")
+        
+    return U, B
+  
+  def solvePDEData(self, spatial='fd', time='rk4'):
     """
     Solve PDE model
     
@@ -309,18 +492,6 @@ class Fire:
       
       args = (Dx, Dy, D2x, D2y)
       
-#      diffusion = self.kappa*(np.dot(U0, D2x.T) + np.dot(D2y, U0))
-#      convection = np.dot(U0, Dx.T) * V1 + np.dot(Dy, U0) * V2 
-#      
-#      error_cheb = convection - diffusion - self.f(U0, B0)
-#      
-#      np.save('data/error.npy', error_cheb)
-#      
-#      print(np.linalg.norm(error_cheb))
-#      plt.imshow(error_cheb)
-#      plt.colorbar()
-#      plt.show()
-      
     elif spatial == "fd":
       # Grid for functions evaluation
       X, Y = np.meshgrid(self.x, self.y)
@@ -331,24 +502,11 @@ class Fire:
       B0[:,0] = np.zeros(self.M)
       B0[-1,:] = np.zeros(self.N)
       B0[:,-1] = np.zeros(self.M)
-      V1 = self.v[0](X, Y, 0)
-      V2 = self.v[1](X, Y, 0)
-      V = (V1, V2) # Vector field
+      #V1 = self.v[0](X, Y, 0)
+      #V2 = self.v[1](X, Y, 0)
+      #V = (V1, V2) # Vector field
+      V = self.v
       
-#      Ux, Uy = self.grad(U0)
-#      diffusion = self.kappa * self.laplacian(U0)
-#      convection = V1*Ux + V2*Uy
-#      error_FD = convection - diffusion - self.f(U0, B0)
-#      
-#      np.save('data/error_fd.npy', error_FD)
-#      
-#      
-#      print(np.linalg.norm(error_FD))
-#      plt.imshow(error_FD)
-#      plt.colorbar()
-#      plt.show()
-      
-      #args = None
       Dx = FD1Matrix(self.N, self.dx, self.sparse)
       Dy = FD1Matrix(self.M, self.dy, self.sparse)
       D2x = FD2Matrix(self.N, self.dx, self.sparse)
@@ -360,19 +518,14 @@ class Fire:
     
     # Time
     if time == 'rk4':
-      U, B = self.solveRK4(U0, B0, V, args)
+      U, B = self.solveRK4Data(U0, B0, V, args)
     elif time == 'euler': 
       U, B = self.solveEuler(U0, B0, V, args)
-    elif time == 'ieuler':
-      U, B = self.solveImpEuler(U0, B0, V, args)
-    elif time == 'last':
-      U, B = self.solveRK4last(U0, B0, V, args)
     else:
       print("Time method error")
         
     return U, B
   
-
   def solveSPDE1(self, sigma):
     # Solve
     U = np.zeros((self.T+1, self.M, self.N))

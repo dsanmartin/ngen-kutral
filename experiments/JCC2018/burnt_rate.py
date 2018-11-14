@@ -69,6 +69,8 @@ ct = Fire(parameters)
 #%%
 # Finite difference in space
 U, B = ct.solvePDE('fd', 'rk4')
+#%%
+p.plotJCC(t, X, Y, U, B, V, T=None, save=False)
 #%% 
 # BURNT RATE PLOT
 plt.figure(figsize=(6, 4))

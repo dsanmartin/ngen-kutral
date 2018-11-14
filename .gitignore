@@ -102,3 +102,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# Data folders
+data/
+experiments/JCC2018/convergence/
+experiments/JCC2018/risk_maps/
+experiments/JCC2018/simulations/
+experiments/misc/fdvscheb/
+experiments/simulations/

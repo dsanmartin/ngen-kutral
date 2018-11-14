@@ -5,12 +5,13 @@ import datetime, pathlib
 from wildfire.fire import Fire
 from wildfire import plots as p
 
+#%%
 # Create folder for experiment
 now = datetime.datetime.now() 
 #SIM_NAME = now.strftime("%Y%m%d%H%M%S")
 SIM_NAME = "20180719215925"
-DIR_BASE = "/media/dsanmartin/My Passport/Data/Thesis/risk_map/" + SIM_NAME + "/"
-#DIR_BASE = "/Volumes/My Passport/Data/Thesis/risk_map/" + SIM_NAME + "/"
+#DIR_BASE = "/media/dsanmartin/My Passport/Data/Thesis/risk_map/" + SIM_NAME + "/"
+DIR_BASE = "/Volumes/My Passport/Data/Thesis/risk_map/" + SIM_NAME + "/"
 
 #SIM_NAME = "test2"
 #DIR_BASE = "/home/dsanmartin/Desktop/" + SIM_NAME + "/"
@@ -140,11 +141,13 @@ for i in range(Nt):
 #%%
 # PLOTS 
 
-plt.figure(figsize=(6, 14))
+#plt.figure(figsize=(6, 14))
+plt.figure(figsize=(14, 4))
 s = 8
 X_s, Y_s = X[::s,::s], Y[::s,::s]
 X_t, Y_t = np.meshgrid(np.linspace(-1, 1, Nt), np.linspace(-1, 1, Nt)) 
-ax1 = plt.subplot(3, 1, 1)
+#ax1 = plt.subplot(3, 1, 1)
+ax1 = plt.subplot(1, 3, 1)
 
 new_cmap = p.truncate_colormap(plt.cm.gray, 0, .05)
 fuel = plt.contourf(X, Y, b0(X, Y), cmap=plt.cm.Oranges, alpha=0.5)
@@ -152,42 +155,89 @@ topo = plt.contour(X, Y, top(X,Y), vmin=np.min(top(X,Y)), cmap=new_cmap)
 plt.clabel(topo, inline=1, fontsize=10)
 plt.quiver(X_s, Y_s, W[0](X_s, Y_s, 0), W[1](X_s, Y_s, 0))
 cb1 = plt.colorbar(fuel, fraction=0.046, pad=0.04)
+plt.xlabel(r"$x$", fontsize=16)
 plt.ylabel(r"$y$", fontsize=16)
-plt.setp(ax1.get_xticklabels(), visible=False)
+#plt.setp(ax1.get_xticklabels(), visible=False)
 ax1.tick_params(axis='both', which='major', labelsize=12)
+plt.title("Condiciones Iniciales")
 
-ax2 = plt.subplot(3, 1, 2)
+#ax2 = plt.subplot(3, 1, 2)
+ax2 = plt.subplot(1, 3, 2)
 
 new_hot = p.truncate_colormap(plt.cm.hot, 0.1, .55)
 my_cmap = new_hot
 my_cmap.set_under('w')
 times = plt.imshow(times_burnt, vmin=1e-10, cmap=my_cmap, extent=[-1, 1, -1, 1])
-plt.ylabel(r"$y$", fontsize=16)
+plt.xlabel(r"$x$", fontsize=16)
+#plt.ylabel(r"$y$", fontsize=16)
 cb2 = plt.colorbar(times, fraction=0.046, pad=0.04)
-plt.setp(ax2.get_xticklabels(), visible=False)
+plt.setp(ax2.get_yticklabels(), visible=False)
 ax2.tick_params(axis='both', which='major', labelsize=12)
+plt.title("Tiempo de consumo")
 
-ax3 = plt.subplot(3, 1, 3)
+#ax3 = plt.subplot(3, 1, 3)
+ax3 = plt.subplot(1, 3, 3)
 
 #new_hot = p.truncate_colormap(plt.cm.hot, 0, .8)
 burn_per = plt.imshow(burnt_per, extent=[-1, 1, -1, 1])
 plt.xlabel(r"$x$", fontsize=16)
-plt.ylabel(r"$y$", fontsize=16)
+#plt.ylabel(r"$y$", fontsize=16)
 cb3 = plt.colorbar(burn_per, fraction=0.046, pad=0.04)
+plt.setp(ax3.get_yticklabels(), visible=False)
 ax3.tick_params(axis='both', which='major', labelsize=12)
+plt.title("Combustible quemado")
 
 plt.tight_layout()
-cb1.set_label("Initial Fuel Fraction", size=14)
-cb2.set_label("Time to consume 10% of total area", size=14)
-cb3.set_label("% of fuel burnt at end of simulation", size=14)
+#cb1.set_label("Initial Fuel Fraction", size=14)
+#cb2.set_label("Time to consume 10% of total area", size=14)
+#cb3.set_label("% of fuel burnt at end of simulation", size=14)
+cb1.set_label("Fracción de Combustible", size=14)
+cb2.set_label("Tiempo", size=14)
+cb3.set_label("% de combustible", size=14)
 
 # Save
 #plt.savefig(DIR_BASE + SIM_NAME + '.pdf', 
 #            format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 
-plt.savefig('new_risk_map_simulation_gauss.pdf', 
+plt.savefig('risk_map_presentation.pdf', 
             format='pdf', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 
 # Show
 #plt.show()
 
+#%%
+burnt_per = np.load('experiments/JCC2018/risk_maps/fuel.npy')
+times_burnt = np.load('experiments/JCC2018/risk_maps/times.npy')
+#%%
+Nt = 33
+x_t = np.linspace(-.8, .8, Nt)
+y_t = x_t[::-1]
+
+Xt, Yt = np.meshgrid(x_t, y_t)
+#%%
+plt.contourf(Xt, Yt, burnt_per)
+plt.show()
+plt.contourf(Xt, Yt, times_burnt)
+plt.show()
+#%%
+times_test = times_burnt.copy()
+times_test[times_test <= 0.01] = -1
+#%%
+burnt_ = np.zeros((Nt*Nt, 3))
+times_ = np.zeros_like(burnt_)
+burnt_[:, 0] = Xt.flatten()
+burnt_[:, 1] = Yt.flatten()
+burnt_[:, 2] = burnt_per.flatten() * 100
+times_[:, 0] = Xt.flatten()
+times_[:, 1] = Yt.flatten()
+times_[:, 2] = times_burnt.flatten()
+#%%
+np.savetxt("burnt.csv", burnt_, delimiter=" ", fmt='%.3f')
+np.savetxt("times.csv", times_, delimiter=" ", fmt='%.8f')
+#%%
+times_test_ = np.zeros_like(burnt_)
+times_test_[:, 0] = Xt.flatten()
+times_test_[:, 1] = Yt.flatten()
+times_test_[:, 2] = times_test.flatten()
+#%%
+np.savetxt("times2.csv", times_test_, delimiter=" ", fmt='%.8f')
