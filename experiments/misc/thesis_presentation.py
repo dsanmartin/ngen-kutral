@@ -145,7 +145,8 @@ parameters = {
     't': t,
     'sparse': True,
     'show': False,
-    'complete': False
+    'complete': False,
+    'components': (1, 1, 1)
 }
 
 ct = Fire(parameters)

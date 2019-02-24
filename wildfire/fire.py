@@ -127,13 +127,6 @@ class Fire:
     return 3 * self.epsilon * self.kappa * (1 + self.epsilon * u) ** 2
   
   def f(self, u, beta):
-    if self.show:
-      print("max u: ", np.max(u))
-      print("max b: ", np.max(beta))
-      print("g: ", np.max(self.g(u, beta)))
-      print("exp:", np.max(np.exp(u / (1 + self.epsilon*u))))
-      if np.isnan(np.max(u)) or np.isnan(np.max(beta)) or np.isnan(np.max(self.g(u, beta))):
-        return
     return self.s(u) * beta * np.exp(u / (1 + self.epsilon*u)) - self.alpha * u
   
   def g(self, u, beta):
@@ -196,6 +189,30 @@ class Fire:
       k4 = self.RHSvec(yc + self.dt*k3, V, args)
 
       y = yc + (1/6) * self.dt * (k1 + 2*k2 + 2*k3 + k4)
+      
+    return y[:M * N].reshape(M, N), y[M * N:].reshape(M, N)
+  
+  def solveEulerVecLast(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    y = np.zeros((2 * M * N))
+    
+    y[:M * N] = U0.flatten()
+    y[M * N:] = B0.flatten()
+    
+    X, Y = np.meshgrid(self.x, self.y)
+    
+    for t in range(1, self.T):
+      V1 = self.v[0](X, Y, self.t[t])
+      V2 = self.v[1](X, Y, self.t[t])
+
+      V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
+      
+      yc = np.copy(y)
+      
+      yn = self.RHSvec(yc, V, args)
+
+      y = yc + self.dt * yn
       
     return y[:M * N].reshape(M, N), y[M * N:].reshape(M, N)
   
@@ -514,6 +531,8 @@ class Fire:
       U, B = self.solveRK4vec(U0, B0, V, args)
     elif time == 'veclast':
       U, B = self.solveRK4vecLast(U0, B0, V, args)
+    elif time == 'eulveclast':
+      U, B = self.solveEulerVecLast(U0, B0, V, args)
     elif time == 'odeint':
       U, B = self.solveODEIntLast(U0, B0, V, args)
     else:
