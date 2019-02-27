@@ -3,16 +3,17 @@ import sys, datetime, pathlib, time
 from wildfire.fire import Fire
 #from wildfire import plots as p
 
-SIM_ID = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-BASE_DIR = './experiments/misc/test/output/' + SIM_ID + '/'
-pathlib.Path(BASE_DIR).mkdir(parents=True, exist_ok=True)
-
-print("Simulation ID: " + SIM_ID)
-
 # Arguments
 L = int(sys.argv[1])
 x_ign_n = int(sys.argv[2])
 y_ign_n = int(sys.argv[3])
+n_exp = sys.argv[4]
+
+SIM_ID = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + n_exp
+BASE_DIR = './experiments/misc/test/output/' + SIM_ID + '/'
+pathlib.Path(BASE_DIR).mkdir(parents=True, exist_ok=True)
+
+print("Simulation ID: " + SIM_ID)
 
 # Functions
 gaussian = lambda A, sigma_x, sigma_y, x, y:  A * np.exp((x**2) / sigma_x + (y**2) / sigma_y)
@@ -39,6 +40,7 @@ t = np.linspace(0, t_max, L + 1) # t domain
 dx = x[1] - x[0]
 dy = y[1] - y[0]
 
+print("Number of numerical simulations: " + str(x_ign_n * y_ign_n))
 print("Finite Difference in space")
 print('dx: ', dx)
 print('dy: ', dy)
@@ -112,8 +114,8 @@ for i in range(y_ign_n):
     B0[0,:] = np.zeros(N); B0[-1,:] = np.zeros(N)
     B0[:,0] = np.zeros(M); B0[:,-1] = np.zeros(M)
     
-    np.savetxt(BASE_DIR + "U0_" + str(i) + str(j) + ".txt", U0, delimiter=" ", fmt='%.8f')
-    np.savetxt(BASE_DIR + "B0_" + str(i) + str(j) + ".txt", B0, delimiter=" ", fmt='%.8f')
+    #np.savetxt(BASE_DIR + "U0_" + str(i) + str(j) + ".txt", U0, delimiter=" ", fmt='%.8f')
+    #np.savetxt(BASE_DIR + "B0_" + str(i) + str(j) + ".txt", B0, delimiter=" ", fmt='%.8f')
 
     # Create wildfire
     ct = Fire(parameters)
@@ -128,8 +130,8 @@ for i in range(y_ign_n):
     exe_time += (stop - start)
     
     # Save approximation
-    np.savetxt(BASE_DIR + "U_" + str(i) + str(j) + ".txt", U, delimiter=" ", fmt='%.8f')
-    np.savetxt(BASE_DIR + "B_" + str(i) + str(j) + ".txt", B, delimiter=" ", fmt='%.8f')
+    #np.savetxt(BASE_DIR + "U_" + str(i) + str(j) + ".txt", U, delimiter=" ", fmt='%.8f')
+    #np.savetxt(BASE_DIR + "B_" + str(i) + str(j) + ".txt", B, delimiter=" ", fmt='%.8f')
 
 print("Execution time: ", exe_time, " [s]")
 
