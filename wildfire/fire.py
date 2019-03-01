@@ -164,6 +164,29 @@ class Fire:
       
     return y[:, :M * N].reshape(self.T, M, N), y[:, M * N:].reshape(self.T, M, N)
   
+  # Euler for time 
+  def solveEulerVec(self, U0, B0, V, args):
+    M, N = U0.shape
+    
+    y = np.zeros((self.T, 2 * M * N))
+    
+    y[0, :M * N] = U0.flatten()
+    y[0, M * N:] = B0.flatten()
+    
+    X, Y = np.meshgrid(self.x, self.y)
+    
+    for t in range(1, self.T):
+      V1 = self.v[0](X, Y, self.t[t])
+      V2 = self.v[1](X, Y, self.t[t])
+
+      V = (V1[1:-1, 1:-1], V2[1:-1, 1:-1]) # Vector field
+      
+      y_new = self.RHSvec(y[t-1], V, args)
+
+      y[t] = y[t-1] + self.dt * y_new
+      
+    return y[:, :M * N].reshape(self.T, M, N), y[:, M * N:].reshape(self.T, M, N)
+  
   # Runge-Kutta 4th order for time 
   def solveRK4vecLast(self, U0, B0, V, args):
     M, N = U0.shape
@@ -525,6 +548,8 @@ class Fire:
       U, B = self.solveRK4(U0, B0, V, args)
     elif time == 'euler': 
       U, B = self.solveEuler(U0, B0, V, args)
+    elif time == 'eulvec': 
+      U, B = self.solveEulerVec(U0, B0, V, args)
     elif time == 'last':
       U, B = self.solveRK4last(U0, B0, V, args)
     elif time == 'vec':
