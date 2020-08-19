@@ -1,0 +1,1 @@
+from .wildfire import Fire
