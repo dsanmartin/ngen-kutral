@@ -16,7 +16,7 @@ t_min, t_max = 0, 30
 
 # Numerical #
 # Space
-space_method = 'fft'
+space_method = 'fd'
 Nx = 128
 Ny = 128
 acc = 2
@@ -64,7 +64,7 @@ physical_parameters = {
 }
 
 wildfire_ = wildfire.Fire(**physical_parameters)
-t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method)
+t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method, acc=acc, sparse=sparse)
 
 ## Plot last results.
 plots.UB(t, X, Y, U, B, V)

@@ -163,6 +163,10 @@ class Fire:
 			# Get reshaper for approximations
 			reshaper = FD.reshaper
 
+			# Initial condition evaluation
+			U0 = u0 if type(u0) is np.ndarray else u0(X, Y)
+			B0 = b0 if type(b0) is np.ndarray else b0(X, Y)
+
 		elif space_method == 'fft':
 
 			Nx -= 1 # Remove one node for periodic boundary
@@ -180,6 +184,17 @@ class Fire:
 			# Reshaper for approximations
 			reshaper = FFTD.reshaper
 
+			# Remove last row and column if FFT is used (for boundary).
+			if type(u0) is np.ndarray:
+				U0 = u0[:-1, :-1]
+			else:
+				U0 = u0(X, Y)
+				
+			if type(b0) is np.ndarray:
+				B0 = b0[:-1, :-1]
+			else:
+				B0 = b0(X, Y)
+
 		else:
 			raise Exception("Spatial method error. Please select available space approximation method.")
 
@@ -188,10 +203,6 @@ class Fire:
 		integrator = Integration(Nt, (self.t_min, self.t_max), time_method, last)
 		t = integrator.getT()
 
-		# Check if initial conditions are arrays or lambda function. If lambda function, then evaluate.
-		U0 = u0 if type(u0) is np.ndarray else u0(X, Y)
-		B0 = b0 if type(b0) is np.ndarray else b0(X, Y)
-		
 		# Vectorize variables for Method of Lines. [vec(U), vec(B)]^T
 		y0 = np.zeros((2 * Ny * Nx))
 		y0[:Ny * Nx] = U0.flatten('F')

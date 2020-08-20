@@ -55,4 +55,11 @@ def saveTimeError(DIR_BASE, times, errors):
   np.save(DIR_BASE + 'times', times)
   np.save(DIR_BASE + 'errors', errors)
   
+def openFile(dir):
+	if '.npy' in dir:
+		return np.load(F)
+	elif '.csv' in dir:
+		return np.loadtxt(dir)
+	else:
+		raise Exception("File extension not supported.")
 
