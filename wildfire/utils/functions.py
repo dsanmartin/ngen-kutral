@@ -1,6 +1,6 @@
 """Functions utilities.
 
-Utils functions for implementation.
+Some functions for implementation.
 
 """
 import numpy as np
