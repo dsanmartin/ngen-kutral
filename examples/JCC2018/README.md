@@ -7,6 +7,6 @@
 ## Execution
 
 ```console
-python file.py
+user@host:~ $ python file.py
 ````
 WARNING: DO NOT EXECUTE ```risk_map.py```. IT NEEDS TO BE RE-IMPLEMENTED!
