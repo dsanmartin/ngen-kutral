@@ -32,16 +32,16 @@ u0 = lambda x, y: 6 * G(x-20, y-20, 20)
 
 # Fuel initial condition
 def b0(x, y):
-  np.random.seed(666)
-  br = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)
-  B = br(x, y)
-  x_rows, x_cols = x.shape
-  y_rows, y_cols = y.shape
-  B[0,:] = np.zeros(x_cols)
-  B[-1,:] = np.zeros(x_cols)
-  B[:,0] = np.zeros(y_rows)
-  B[:,-1] = np.zeros(y_rows)
-  return B
+    np.random.seed(666)
+    br = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)
+    B = br(x, y)
+    x_rows, x_cols = x.shape
+    y_rows, y_cols = y.shape
+    B[0,:] = np.zeros(x_cols)
+    B[-1,:] = np.zeros(x_cols)
+    B[:,0] = np.zeros(y_rows)
+    B[:,-1] = np.zeros(y_rows)
+    return B
 
 # Wind effect
 gamma = 1

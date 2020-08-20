@@ -9,21 +9,21 @@ parser = argparse.ArgumentParser(description='Create and execute a wildfire simu
 
 # Model parameters
 parser.add_argument('-kap', '--kappa', metavar='K', default=1e-1, type=float, 
-	help='kappa parameter (default: 1e-1)')
+    help='kappa parameter (default: 1e-1)')
 parser.add_argument('-eps', '--epsilon', metavar='E', default=3e-1, type=float, 
-	help='epsilon parameter (default: 3e-1)')
+    help='epsilon parameter (default: 3e-1)')
 parser.add_argument('-upc', '--phase', metavar='P', default=3, type=float,
-	help='phase change threshold parameter (default: 3)')
+    help='phase change threshold parameter (default: 3)')
 parser.add_argument('-alp', '--alpha', metavar='A', default=1e-3, type=float, 
-	help='alpha parameter (default: 1e-3)')
+    help='alpha parameter (default: 1e-3)')
 parser.add_argument('-qrh', '--reaction', metavar='Q', default=1, type=float, 
-	help='alpha parameter (default: 1.0)')
+    help='alpha parameter (default: 1.0)')
 parser.add_argument('-xlim', '--xlimits', metavar=('x_min', 'x_max'), default=(0, 90), type=float, nargs=2, 
-  help='x domain limits (default: [0, 90])')
+    help='x domain limits (default: [0, 90])')
 parser.add_argument('-ylim', '--ylimits', metavar=('y_min', 'y_max'), default=(0, 90), type=float, nargs=2, 
-  help='y domain limits (default: [0, 90])')
+    help='y domain limits (default: [0, 90])')
 parser.add_argument('-tlim', '--tlimits', metavar=('t_min', 't_max'), default=(0, 30), type=float, nargs=2, 
-  help='t domain limits (default: [0, 30])')
+    help='t domain limits (default: [0, 30])')
 
 # Numerical parameters
 parser.add_argument('-sm', '--space', metavar='SM', type=str, help='Space method approximation', required=True)
@@ -34,19 +34,19 @@ parser.add_argument('-Nt', '--tnodes', metavar='Nt', type=int, help='Number of n
 
 # Initial conditions 
 parser.add_argument('-u0', '--initial-temperature', metavar='U0', type=str, 
-	help='Initial temperature file. Only .csv and .npy supported.', required=True)
+    help='Initial temperature file. Only .csv and .npy supported.', required=True)
 parser.add_argument('-b0', '--initial-fuel', metavar='B0', type=str, 
-	help='Initial fuel file. Only .csv and .npy supported.', required=True)
+    help='Initial fuel file. Only .csv and .npy supported.', required=True)
 
 # Others parameters
 parser.add_argument('-acc', '--accuracy', metavar='ACC', default=2, type=int, 
-	help='Finite difference accuracy (default: 2)')
+    help='Finite difference accuracy (default: 2)')
 parser.add_argument('-sps', '--sparse', metavar='S', default=False, type=bool, 
-	help='Finite difference sparse matrices (default: False)')
+    help='Finite difference sparse matrices (default: False)')
 parser.add_argument('-lst', '--last', metavar='LST', default=True, type=bool, 
-	help='Only last approximation (default: True)')
+    help='Only last approximation (default: True)')
 parser.add_argument('-plt', '--plot', metavar='PLT', default=False, type=bool,
-	help='Plot result (default: False)')
+    help='Plot result (default: False)')
 
 args = parser.parse_args()
 #print(args)
@@ -81,21 +81,9 @@ b0_dir = args.initial_fuel
 
 # Temperature
 u0 = storage.openFile(u0_dir)
-# if '.npy' in u0_dir:
-# 	u0 = np.load(u0_dir)
-# elif '.csv' in u0_dir:
-# 	u0 = np.loadtxt(u0_dir)
-# else:
-# 	raise Exception("File extension not supported.")
 
 # Fuel
 b0 = storage.openFile(b0_dir)
-# if '.npy' in b0_dir:
-# 	b0 = np.load(b0_dir)
-# elif '.csv' in b0_dir:
-# 	b0 = np.loadtxt(b0_dir)
-# else:
-# 	raise Exception("File extension not supported.")
 
 # Wind effect
 gamma = 1
@@ -121,4 +109,4 @@ wildfire_ = wildfire.Fire(**physical_parameters)
 t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method, last=last, acc=acc, sparse=sparse)
 
 if args.plot and args.last:
-	plots.UB(t, X, Y, U, B, V)
+    plots.UB(t, X, Y, U, B, V)

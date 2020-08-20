@@ -53,7 +53,7 @@ parameters = {
     'kap': kappa, 
     'eps': epsilon, 
     'upc': upc, 
-		'alp': alpha, 
+    'alp': alpha, 
     'q': q, 
     'x_lim': (xa, xb), 
     'y_lim': (ya, yb),
@@ -78,10 +78,10 @@ row = 5
 tim = Nt // (row - 1)
 
 for i in range(row):
-  tt = i*tim
-  if i == (row - 1):
-    tt = -1
-  plt.contourf(X, Y, dif_b[tt], levels=levels)
+    tt = i*tim
+    if i == (row - 1):
+        tt = -1
+    plt.contourf(X, Y, dif_b[tt], levels=levels)
 
 plt.xlabel(r"$x$", fontsize=16)
 plt.ylabel(r"$y$", fontsize=16)

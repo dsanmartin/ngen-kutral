@@ -87,36 +87,36 @@ rk4_errs_B = np.zeros(len(exps))
 #  rk4_errs.append(rk4_err)
   
 for i in range(len(exps)):
-  exp = exps[i]
-  Nt = 2 ** exp
-  print("Nt: %d" % (Nt))
-  
-  for r in range(rep):
-    start = time.time()
-    _, _, _, Ueul_e, Beul_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V,time_method='Euler')
-    end = time.time()
-    eul_times[i, r] = end - start
-    
-    # FFT
-    start = time.time()
-    _, _, _, Urk4_e, Brk4_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V)
-    end = time.time()
-    rk4_times[i, r] = end - start
-  
-  step = 2**(e - exp)
-  eul_err_U = np.linalg.norm((Ueul - Ueul_e).flatten(), np.inf) / np.linalg.norm(Ueul.flatten(), np.inf)
-  eul_err_B = np.linalg.norm((Beul - Beul_e).flatten(), np.inf) / np.linalg.norm(Beul.flatten(), np.inf)
-  #fd_errs_U.append(fd_err_U)
-  #fd_errs_B.append(fd_err_U)
-  eul_errs_U[i] = eul_err_U
-  eul_errs_B[i] = eul_err_B
-  
-  rk4_err_U = np.linalg.norm((Urk4 - Urk4_e).flatten(), np.inf) / np.linalg.norm(Urk4.flatten(), np.inf)
-  rk4_err_B = np.linalg.norm((Brk4 - Brk4_e).flatten(), np.inf) / np.linalg.norm(Brk4.flatten(), np.inf)
-  #fft_errs_U.append(fft_err_U)
-  #fft_errs_B.append(fft_err_B)
-  rk4_errs_U[i] = rk4_err_U
-  rk4_errs_B[i] = rk4_err_B
+    exp = exps[i]
+    Nt = 2 ** exp
+    print("Nt: %d" % (Nt))
+
+    for r in range(rep):
+        start = time.time()
+        _, _, _, Ueul_e, Beul_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V,time_method='Euler')
+        end = time.time()
+        eul_times[i, r] = end - start
+
+        # FFT
+        start = time.time()
+        _, _, _, Urk4_e, Brk4_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V)
+        end = time.time()
+        rk4_times[i, r] = end - start
+
+    step = 2**(e - exp)
+    eul_err_U = np.linalg.norm((Ueul - Ueul_e).flatten(), np.inf) / np.linalg.norm(Ueul.flatten(), np.inf)
+    eul_err_B = np.linalg.norm((Beul - Beul_e).flatten(), np.inf) / np.linalg.norm(Beul.flatten(), np.inf)
+    #fd_errs_U.append(fd_err_U)
+    #fd_errs_B.append(fd_err_U)
+    eul_errs_U[i] = eul_err_U
+    eul_errs_B[i] = eul_err_B
+
+    rk4_err_U = np.linalg.norm((Urk4 - Urk4_e).flatten(), np.inf) / np.linalg.norm(Urk4.flatten(), np.inf)
+    rk4_err_B = np.linalg.norm((Brk4 - Brk4_e).flatten(), np.inf) / np.linalg.norm(Brk4.flatten(), np.inf)
+    #fft_errs_U.append(fft_err_U)
+    #fft_errs_B.append(fft_err_B)
+    rk4_errs_U[i] = rk4_err_U
+    rk4_errs_B[i] = rk4_err_B
 #%%
 #import matplotlib.pyplot as plt
 #Ls = np.array([2**i for i in exps])

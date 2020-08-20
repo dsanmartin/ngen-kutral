@@ -37,15 +37,15 @@ Nt = 1
 
 # Parameters for the model
 parameters = {
-  # Physical
-  'kap': 1e-1, # diffusion coefficient
-  'eps': 3e-1, #3e-2 # inverse of activation energy
-  'upc': 3, # u phase change
-  'q': 1, # reaction heat
-  'alp': 1e-3, # natural convection
-  'x_lim': (0, 90), 
-  'y_lim': (0, 90), 
-  't_lim': (0, 1e-10),
+    # Physical
+    'kap': 1e-1, # diffusion coefficient
+    'eps': 3e-1, #3e-2 # inverse of activation energy
+    'upc': 3, # u phase change
+    'q': 1, # reaction heat
+    'alp': 1e-3, # natural convection
+    'x_lim': (0, 90), 
+    'y_lim': (0, 90), 
+    't_lim': (0, 1e-10),
 }
 
 ct = Fire(**parameters)
@@ -64,25 +64,25 @@ fft_errs = []
 exps = np.arange(4, e)
 
 for exp in exps:
-  Nx, Ny = 2 ** exp, 2 ** exp
-  print("Nx: %d, Ny: %d" % (Nx, Ny))
-  
-  start = time.time()
-  _, _, _, Ufd_e, Bfd_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V)
-  end = time.time()
-  fd_times.append(end - start)
-  
-  # FFT
-  start = time.time()
-  _, _, _, Ufft_e, Bfft2_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='fft')
-  end = time.time()
-  fft_times.append(end - start)
+    Nx, Ny = 2 ** exp, 2 ** exp
+    print("Nx: %d, Ny: %d" % (Nx, Ny))
 
-  step = 2**(e - exp)
-  fd_err = np.linalg.norm((Ufd[::step,::step] - Ufd_e).flatten(), np.inf) #/ np.linalg.norm(Ufd[::step,::step].flatten(), np.inf)
-  fft_err = np.linalg.norm((Ufft[::step,::step] - Ufft_e).flatten(), np.inf) #/ np.linalg.norm(Ufft[::step,::step].flatten(), np.inf)
-  fd_errs.append(fd_err)
-  fft_errs.append(fft_err)
+    start = time.time()
+    _, _, _, Ufd_e, Bfd_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V)
+    end = time.time()
+    fd_times.append(end - start)
+
+    # FFT
+    start = time.time()
+    _, _, _, Ufft_e, Bfft2_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='fft')
+    end = time.time()
+    fft_times.append(end - start)
+
+    step = 2**(e - exp)
+    fd_err = np.linalg.norm((Ufd[::step,::step] - Ufd_e).flatten(), np.inf) #/ np.linalg.norm(Ufd[::step,::step].flatten(), np.inf)
+    fft_err = np.linalg.norm((Ufft[::step,::step] - Ufft_e).flatten(), np.inf) #/ np.linalg.norm(Ufft[::step,::step].flatten(), np.inf)
+    fd_errs.append(fd_err)
+    fft_errs.append(fft_err)
 
 #%%
 #sim_id, dir_base = utils.simulation()

@@ -12,12 +12,12 @@ u0 = lambda x, y: 6 * G(x-20, y-20, 20)
 np.random.seed(666)
 br = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)
 def b0(x, y):
-  B = br(x, y)
-  B[0,:] = np.zeros(len(x))
-  B[-1,:] = np.zeros(len(x))
-  B[:,0] = np.zeros(len(y))
-  B[:,-1] = np.zeros(len(y))
-  return B
+    B = br(x, y)
+    B[0,:] = np.zeros(len(x))
+    B[-1,:] = np.zeros(len(x))
+    B[:,0] = np.zeros(len(y))
+    B[:,-1] = np.zeros(len(y))
+    return B
 
 # Wind effect
 gamma = 1
@@ -33,15 +33,15 @@ Nt = 100
 
 # Parameters for the model
 parameters = {    
-  # Physical
-  'kap': 1e-1, # diffusion coefficient
-  'eps': 3e-1, # inverse of activation energy
-	'upc': 3, # u phase change
-	'alp': 1e-3, # natural convection
-  'q': 1, # reaction heat
-  'x_lim': (0, 90), 
-  'y_lim': (0, 90), 
-  't_lim': (0, 20),
+    # Physical
+    'kap': 1e-1, # diffusion coefficient
+    'eps': 3e-1, # inverse of activation energy
+    'upc': 3, # u phase change
+    'alp': 1e-3, # natural convection
+    'q': 1, # reaction heat
+    'x_lim': (0, 90), 
+    'y_lim': (0, 90), 
+    't_lim': (0, 20),
 }
 
 # Meshes for initial condition plots

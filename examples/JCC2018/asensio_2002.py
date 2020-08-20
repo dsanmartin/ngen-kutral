@@ -4,11 +4,10 @@ from wildfire.utils import old_plots as p
 #%%
 # Asensio 2002 experiment
 Nx, Ny = 128, 128
-Nt = 3000 # Timesteps
-dt = 1e-2 # dt
+Nt = 500 # Timesteps
 xa, xb = 0, 90 # x domain limit
 ya, yb = 0, 90 # y domain limit
-ta, tb = 0, dt * Nt
+ta, tb = 0, 30
 x = np.linspace(xa, xb, Nx) # x domain
 y = np.linspace(ya, yb, Ny) # y domain
 t = np.linspace(ta, tb, Nt + 1) # t domain
@@ -45,7 +44,7 @@ parameters = {
     'kap': kappa, 
     'eps': epsilon, 
     'upc': upc, 
-		'alp': alpha, 
+    'alp': alpha, 
     'q': q, 
     'x_lim': (xa, xb), 
     'y_lim': (ya, yb),

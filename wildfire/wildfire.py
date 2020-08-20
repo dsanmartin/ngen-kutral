@@ -9,6 +9,7 @@ from .numerical.time import Integration
 from .utils.functions import K, Ku, f, g, H, sigmoid
 
 class Fire:    
+    
     def __init__(self, kap, eps, upc, alp, q, x_lim, y_lim, t_lim, **kwargs):
         """Wildfire constructor.
 

@@ -37,15 +37,15 @@ Nt = 100
 
 # Parameters for the model
 parameters = {    
-  # Physical
-  'kap': 1e-1, # diffusion coefficient
-  'eps': 3e-1, # inverse of activation energy
-	'upc': 3, # u phase change
-	'alp': 1e-3, # natural convection
-  'q': 1, # reaction heat
-  'x_lim': (0, 90), 
-  'y_lim': (0, 90), 
-  't_lim': (0, 20),
+    # Physical
+    'kap': 1e-1, # diffusion coefficient
+    'eps': 3e-1, # inverse of activation energy
+    'upc': 3, # u phase change
+    'alp': 1e-3, # natural convection
+    'q': 1, # reaction heat
+    'x_lim': (0, 90), 
+    'y_lim': (0, 90), 
+    't_lim': (0, 20),
 }
 
 # Meshes for initial condition plots
@@ -56,5 +56,5 @@ ct = Fire(**parameters)
 t, X, Y, U, B = ct.solvePDE(Nx, Ny, Ny, u0, b0, V, space_method='fft', last=False)
 
 for k in range(Nt):
-	if k % 10 == 0:
-		plots.UBs(k, t, X, Y, U, B, V)
+    if k % 10 == 0:
+        plots.UBs(k, t, X, Y, U, B, V)
