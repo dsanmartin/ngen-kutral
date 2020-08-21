@@ -151,7 +151,7 @@ class Fire:
 
             # Create FD
             FD = FiniteDifference(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), 
-            order=acc, sparse=sparse, cmp=self.cmp, v=v, K=None, f=self.f, g=self.g, kap=self.kap)
+                order=acc, sparse=sparse, cmp=self.cmp, v=v, K=None, f=self.f, g=self.g, kap=self.kap)
 
             # FD Mesh
             X, Y = FD.getMesh()
@@ -172,7 +172,7 @@ class Fire:
             Ny -= 1 # Remove one node for periodic boundary
             
             FFTD = FFTDerivatives(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), cmp=self.cmp,
-            v=v, K=None, f=self.f, g=self.g, kap=self.kap)
+                v=v, K=None, f=self.f, g=self.g, kap=self.kap)
 
             # FFT Mesh
             X, Y = FFTD.getMesh()

@@ -113,8 +113,12 @@ def RK4Last(t, F, y0):
         
     return y
 
-def IVP(t, F, y0):
+def IVP(t, F, y0, last=True, method='RK45'):
     t_min = t[0]
     t_max = t[-1]
-    sol = solve_ivp(F, (t_min, t_max), y0, t_eval=[t_max], method='RK45')    
+    if last:
+        t_eval = np.array([t_max])
+    else:
+        t_eval = t
+    sol = solve_ivp(F, (t_min, t_max), y0, t_eval=t_eval, method=method)    
     return sol.y

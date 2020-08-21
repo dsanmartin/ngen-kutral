@@ -1,5 +1,5 @@
 import numpy as np
-from .time import Euler, RK4
+from .time import Euler, RK4, IVP
 
 class Integration:
 
@@ -18,6 +18,8 @@ class Integration:
             self.time_integration = Euler
         elif self.method == 'RK4':
             self.time_integration = RK4
+        elif self.method in ['RK45', 'RK23', 'DOP853', 'Radau', 'BDF', 'LSODA']:
+            self.time_integration = lambda t, F, y0, last: IVP(t, F, y0, self.method)
         else:
             raise Exception("Time integration method error. Please select available time approximation method.")
 
