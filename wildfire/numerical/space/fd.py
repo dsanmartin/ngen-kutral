@@ -1,5 +1,4 @@
-"""
-Right hand side approximation using Finite Difference
+"""Right hand side approximation using Finite Difference.
 """
 import numpy as np
 from .diffmat import FD1Matrix, FD2Matrix
@@ -57,15 +56,16 @@ class FiniteDifference:
 
         Parameters
         ----------
-        t			: (Nt) array
-                        Time discrete variable
-        y			: (2 * Ny * Nx) array
-                        Temperature and fuel variables vectorized 
+        t : array_like, shape (Nt + 1, )
+            Time discrete variable.
+        y : array_like, shape (2 * Ny * Nx) 
+            Temperature and fuel variables vectorized.
 
         Returns
         -------
-        y			: (2 * Ny * Nx) array
-                        New temperature and fuel variables vectorized
+        y : array_like, shape (2 * Ny * Nx)
+            New temperature and fuel variables vectorized.
+            
         """
         # Vector field evaluation
         V1 = self.v[0](self.X, self.Y, t)
@@ -115,24 +115,24 @@ class FiniteDifference:
         return np.r_[Uf.flatten('F'), Bf.flatten('F')] 
 
     def boundaryConditions(self, U, B):
-        """
-        Add boundary conditions (BC)
+        """Add Dirichlet boundary conditions (BC).
         Let \Gamma the domain boundary, then Dirichlet boundary condition is
         U_{\Gamma} = 0, B_{\Gamma} = 0
 
         Parameters
         -----------
-        U: (Ny, Nx) array
-            Temperature approximation without BC
-        B: (Ny, Nx) array
-            Fuel approximation without array BC
+        U: array_like, shape (Ny, Nx)
+            Temperature approximation without BC.
+        B: array_like, shape (Ny, Nx)
+            Fuel approximation without  BC
 
         Returns
         -------
-        Ub: (Ny, Nx) array
+        Ub: array_like, shape (Ny, Nx)
             Temperature approximation with BC
-        Bb: (Ny, Nx) 
+        Bb: array_like, shape (Ny, Nx) 
             Fuel approximation with BC
+
         """
         Ub = np.copy(U)
         Bb = np.copy(B)
@@ -151,6 +151,23 @@ class FiniteDifference:
         return Ub, Bb
 
     def reshaper(self, y, Nt=None):
+        """Reshape function to restore correct size.
+
+        Parameters
+        ----------
+        y : array_like
+            Approximation array.
+        Nt : int, optional
+            Number of time steps, by default None.
+
+        Returns
+        -------
+        U: array_like
+            Temperaturea approximation array.
+        B : array_like
+            Fuel approximation array.
+
+        """
         if Nt is None: # Just last approximation
             U = y[:self.Ny * self.Nx].reshape(self.Ny, self.Nx, order='F')
             B = y[self.Ny * self.Nx:].reshape(self.Ny, self.Nx, order='F')

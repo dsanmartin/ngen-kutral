@@ -1,33 +1,59 @@
 """Time approximation using numerical integration methods.
 
-Implements integration methods:
+Solve Initial Value Problem (IVP) or ODE:
+    .. math::
+        \frac{dy}{dt} = F(t, y) \\
+        y(t_0) = y_0
+
+Implements the following integration methods:
     - Euler method
     - Runge-Kutta of fourth order method (RK4)
 
-Details in: Sauer, T. (2018). Numerical Analysis. Pearson	.
-https://www.pearson.com/us/higher-education/program/Sauer-Numerical-Analysis-3rd-Edition/PGM1735484.html
+Also includes `solve_ivp` from `scipy.integrate`. 
+
+Details in: 
+    - Sauer, T. (2018). Numerical Analysis. Pearson. https://www.pearson.com/us/higher-education/program/Sauer-Numerical-Analysis-3rd-Edition/PGM1735484.html
+    - Scipy. solve_ivp. https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html
 """
 import numpy as np
 from scipy.integrate import solve_ivp 
 
-# Euler method #
 def Euler(t, F, y0, last=True):
+    """Euler method implementation.
 
+    Parameters
+    ----------
+    t : array_like
+        Time discrete variable.
+    F : function
+        RHS function of ODE.
+    y0 : array_like
+        Initial condition
+    last : bool, optional
+        Return and keep only last approximation, by default True.
+
+    Returns
+    -------
+    array_like
+        Aproximated solution of ODE.
+
+    """
     # Get number time of nodes
     Nt = t.shape[0]
 
-    # Get \Delta t
+    # Get :math:`\Delta t`
     dt = t[1] - t[0] 
 
-    if last: # Only keep and return last approximation
+    # Only keep and return last approximation
+    if last: 
         y = y0
     
         for k in range(Nt - 1):
             yc = np.copy(y)
             y = yc + dt * F(t[k], yc)
 
+    # Keep and return array with all approximations
     else:
-        # Array with approximations
         y = np.zeros((Nt, y0.shape[0])) 
         y[0] = y0 # Initial condition
         
@@ -36,26 +62,26 @@ def Euler(t, F, y0, last=True):
         
     return y
 
-# Keep last approximation
-def EulerLast(t, F, y0):    
-    # Get number time of nodes
-    Nt = t.shape[0]
-
-    # Get \Delta t
-    dt = t[1] - t[0] 
-
-    y = y0
-    
-    for k in range(Nt - 1):
-        yc = np.copy(y)
-        y = yc + dt * F(t[k], yc)
-        
-    return y
-
-# Runge-Kutta 4th order #
-# Keep all approximations
 def RK4(t, F, y0, last=True):
+    """Runge-Kutta of fourth order implementation.
 
+    Parameters
+    ----------
+    t : array_like
+        Time discrete variable.
+    F : function
+        RHS function of ODE.
+    y0 : array_like
+        Initial condition
+    last : bool, optional
+        Return and keep only last approximation, by default True.
+
+    Returns
+    -------
+    array_like
+        Aproximated solution of ODE.
+
+    """
     # Get number time of nodes
     Nt = t.shape[0]
 
@@ -90,30 +116,29 @@ def RK4(t, F, y0, last=True):
         
     return y
 
-# Keep just last approximation
-def RK4Last(t, F, y0):
-
-    # Get number time of nodes
-    Nt = t.shape[0]
-
-    # Get \Delta t
-    dt = t[1] - t[0] 
-
-    # Initial condition
-    y = y0
-    
-    for k in range(Nt - 1):
-        yc = np.copy(y)
-        k1 = F(t[k], yc)
-        k2 = F(t[k] + 0.5 * dt, yc + 0.5 * dt * k1)
-        k3 = F(t[k] + 0.5 * dt, yc + 0.5 * dt * k2)
-        k4 = F(t[k] + dt, yc + dt * k3)
-
-        y = yc + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
-        
-    return y
-
 def IVP(t, F, y0, last=True, method='RK45'):
+    """Solve IVP wrapper.
+
+    Parameters
+    ----------
+    t : array_like
+        Time discrete variable.
+    F : function
+        RHS function of ODE.
+    y0 : array_like
+        Initial condition
+    last : bool, optional
+        Return and keep only last approximation, by default True.
+    method : strin, optional
+        Numerical method to solve IVP, default RK45. 
+        Also includes 'RK23', 'DOP853', 'Radau', 'BDF', 'LSODA'. More details in `scipy.integrate.solve_ivp` documentation.
+
+    Returns
+    -------
+    array_like
+        Aproximated solution of ODE.
+
+    """
     t_min = t[0]
     t_max = t[-1]
     if last:
