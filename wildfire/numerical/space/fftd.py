@@ -29,6 +29,12 @@ class FFTDerivatives:
 
         # Others params
         self.cmp = cmp # Components of models
+
+        # Vector field wrapper. Check if v is lambda or numpy array
+        if type(self.v) is np.ndarray:
+            self.V = lambda t: self.v[t]
+        else:
+            self.V = lambda t: self.v(self.X, self.Y, t)
         
     def getMesh(self, full=False):
         if full:
@@ -45,8 +51,12 @@ class FFTDerivatives:
         Compute right hand side of PDE
         """
         # Vector field evaluation
-        V1 = self.v[0](self.X, self.Y, t)
-        V2 = self.v[1](self.X, self.Y, t)
+        # Vector field evaluation
+        # V1 = self.v[0](self.X, self.Y, t) 
+        # V2 = self.v[1](self.X, self.Y, t)
+        #print("t", t)
+        #print(self.V(t))
+        V1, V2 = self.V(t)
         
         Uf = np.copy(y[:self.Ny * self.Nx].reshape((self.Ny, self.Nx), order='F'))
         Bf = np.copy(y[self.Ny * self.Nx:].reshape((self.Ny, self.Nx), order='F'))

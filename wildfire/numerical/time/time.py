@@ -18,7 +18,7 @@ Details in:
 import numpy as np
 from scipy.integrate import solve_ivp 
 
-def Euler(t, F, y0, last=True):
+def Euler(t, F, y0, last=True, vdata=False):
     """Euler method implementation.
 
     Parameters
@@ -31,6 +31,9 @@ def Euler(t, F, y0, last=True):
         Initial condition
     last : bool, optional
         Return and keep only last approximation, by default True.
+    vdata: bool, optional
+        Vector field is np.ndarray, by default False.
+        If vdata is True, method uses time iteration as index for vector field data.
 
     Returns
     -------
@@ -47,22 +50,31 @@ def Euler(t, F, y0, last=True):
     # Only keep and return last approximation
     if last: 
         y = y0
-    
-        for k in range(Nt - 1):
-            yc = np.copy(y)
-            y = yc + dt * F(t[k], yc)
+
+        if vdata:
+            for n in range(Nt - 1):
+                yc = np.copy(y)
+                y = yc + dt * F(n, yc)
+        else:
+            for n in range(Nt - 1):
+                yc = np.copy(y)
+                y = yc + dt * F(t[n], yc)
 
     # Keep and return array with all approximations
     else:
         y = np.zeros((Nt, y0.shape[0])) 
         y[0] = y0 # Initial condition
         
-        for k in range(Nt - 1):
-            y[k+1] = y[k] + dt * F(t[k], y[k])
+        if vdata:
+            for n in range(Nt - 1):
+                y[n+1] = y[n] + dt * F(n, y[n])
+        else:
+            for n in range(Nt - 1):
+                y[n+1] = y[n] + dt * F(t[n], y[n])
         
     return y
 
-def RK4(t, F, y0, last=True):
+def RK4(t, F, y0, last=True, vdata=False):
     """Runge-Kutta of fourth order implementation.
 
     Parameters
@@ -75,6 +87,9 @@ def RK4(t, F, y0, last=True):
         Initial condition
     last : bool, optional
         Return and keep only last approximation, by default True.
+    vdata: bool, option
+        Vector field is np.ndarray, by default False.
+        If vdata is True, method uses time iteration as index for vector field data.
 
     Returns
     -------
@@ -92,27 +107,43 @@ def RK4(t, F, y0, last=True):
         # Initial condition
         y = y0
         
-        for k in range(Nt - 1):
-            yc = np.copy(y)
-            k1 = F(t[k], yc)
-            k2 = F(t[k] + 0.5 * dt, yc + 0.5 * dt * k1)
-            k3 = F(t[k] + 0.5 * dt, yc + 0.5 * dt * k2)
-            k4 = F(t[k] + dt, yc + dt * k3)
+        if vdata:
+            for n in range(Nt - 1):
+                yc = np.copy(y)
+                k1 = F(n, yc)
+                k2 = F(n, yc + 0.5 * dt * k1)
+                k3 = F(n, yc + 0.5 * dt * k2)
+                k4 = F(n, yc + dt * k3)
+                y = yc + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
+        else:
+            for n in range(Nt - 1):
+                yc = np.copy(y)
+                k1 = F(t[n], yc)
+                k2 = F(t[n] + 0.5 * dt, yc + 0.5 * dt * k1)
+                k3 = F(t[n] + 0.5 * dt, yc + 0.5 * dt * k2)
+                k4 = F(t[n] + dt, yc + dt * k3)
 
-            y = yc + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
+                y = yc + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
 
     else: # Keep and return all approximations
         # Array for approximations
         y = np.zeros((Nt, y0.shape[0]))
         y[0] = y0 # Initial condition
-        
-        for k in range(Nt - 1):
-            k1 = F(t[k], y[k])
-            k2 = F(t[k] + 0.5 * dt, y[k] + 0.5 * dt * k1)
-            k3 = F(t[k] + 0.5 * dt, y[k] + 0.5 * dt * k2)
-            k4 = F(t[k] + dt, y[k] + dt * k3)
 
-            y[k + 1] = y[k] + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
+        if vdata:
+            for n in range(Nt - 1):
+                k1 = F(n, y[n])
+                k2 = F(n, y[n] + 0.5 * dt * k1)
+                k3 = F(n, y[n] + 0.5 * dt * k2)
+                k4 = F(n, y[n] + dt * k3)
+                y[n + 1] = y[n] + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
+        else:
+            for n in range(Nt - 1):
+                k1 = F(t[n], y[n])
+                k2 = F(t[n] + 0.5 * dt, y[n] + 0.5 * dt * k1)
+                k3 = F(t[n] + 0.5 * dt, y[n] + 0.5 * dt * k2)
+                k4 = F(t[n] + dt, y[n] + dt * k3)
+                y[n + 1] = y[n] + (1/6) * dt * (k1 + 2 * k2 + 2 * k3 + k4)
         
     return y
 
@@ -141,9 +172,7 @@ def IVP(t, F, y0, last=True, method='RK45'):
     """
     t_min = t[0]
     t_max = t[-1]
-    if last:
-        t_eval = np.array([t_max])
-    else:
-        t_eval = t
-    sol = solve_ivp(F, (t_min, t_max), y0, t_eval=t_eval, method=method)    
-    return sol.y
+    t_eval = np.array([t_max]) if last else t
+    sol = solve_ivp(F, (t_min, t_max), y0, t_eval=t_eval, method=method)  
+    y = sol.y if last else sol.y.T  
+    return y

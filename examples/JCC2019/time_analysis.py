@@ -17,7 +17,7 @@ b0 = lambda x, y: x * 0 + 1
 gamma = 1
 v1 = lambda x, y, t: gamma * np.cos(np.pi/4 + x * 0 - t * 0)#.025) 
 v2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x * 0 - t * 0)#.025) 
-V = (v1, v2)
+V = lambda x, y, t: (v1(x, y, t), v2(x, y, t)) #V = (v1, v2)
 
 e = 12
 Nt = 2 ** e

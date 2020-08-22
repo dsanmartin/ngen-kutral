@@ -42,8 +42,8 @@ class Fire:
             Model components included. Tuple needs 3 boolean, (diffusion, convection, reaction).
         sf	: string
             Solid-gas phase function.
+
         """
-        
         # Physical Model parameters
         self.kap = kap
         self.eps = eps
@@ -199,7 +199,7 @@ class Fire:
 
         # Time approximation
         Nt += 1 # Include initial condition
-        integrator = Integration(Nt, (self.t_min, self.t_max), time_method, last)
+        integrator = Integration(Nt, (self.t_min, self.t_max), time_method, last, vdata=type(v) is np.ndarray)
         t = integrator.getT()
 
         # Vectorize variables for Method of Lines. [vec(U), vec(B)]^T

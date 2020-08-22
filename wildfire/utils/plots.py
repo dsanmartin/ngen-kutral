@@ -13,7 +13,12 @@ def UBs(i, t, X, Y, U, B, V):
     temp = plt.imshow(U, origin='lower', cmap=plt.cm.jet, alpha=0.8, 
         vmin=np.min(U), vmax=np.max(U), extent=[X[-1, 0], X[-1, -1], Y[0, -1], Y[-1, -1]])
     if V is not None:
-        plt.quiver(X_s, Y_s, V[0](X_s, Y_s, t[i]), V[1](X_s, Y_s, t[i]))
+        if type(V) is np.ndarray:
+            V1, V2 = V[i, 0], V[i, 1]
+        else:
+            V1, V2 = V(X_s, Y_s, t[i])
+        plt.quiver(X_s, Y_s, V1, V2)
+        #plt.quiver(X_s, Y_s, V[0](X_s, Y_s, t[i]), V[1](X_s, Y_s, t[i]))
     cb1 = plt.colorbar(temp, fraction=0.046, pad=0.04)
     cb1.set_label("Temperature", size=14)
     #plt.title("Temperature and wind")

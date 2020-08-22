@@ -5,6 +5,15 @@ from wildfire.utils.functions import G
 from wildfire.utils import plots
 from wildfire.utils import storage
 
+def str_to_bool(value):
+    if isinstance(value, bool):
+        return value
+    if value.lower() in {'false', 'f', '0', 'no', 'n'}:
+        return False
+    elif value.lower() in {'true', 't', '1', 'yes', 'y'}:
+        return True
+    raise ValueError(f'{value} is not a valid boolean value')
+
 parser = argparse.ArgumentParser(description='Create and execute a wildfire simulation.')
 
 # Model parameters
@@ -41,11 +50,11 @@ parser.add_argument('-b0', '--initial-fuel', metavar='B0', type=str,
 # Others parameters
 parser.add_argument('-acc', '--accuracy', metavar='ACC', default=2, type=int, 
     help='Finite difference accuracy (default: 2)')
-parser.add_argument('-sps', '--sparse', metavar='S', default=False, type=bool, 
+parser.add_argument('-sps', '--sparse', metavar='S', default=0, type=int, 
     help='Finite difference sparse matrices (default: False)')
-parser.add_argument('-lst', '--last', metavar='LST', default=True, type=bool, 
+parser.add_argument('-lst', '--last', metavar='LST', default=1, type=int, 
     help='Only last approximation (default: True)')
-parser.add_argument('-plt', '--plot', metavar='PLT', default=False, type=bool,
+parser.add_argument('-plt', '--plot', metavar='PLT', default=0, type=int,
     help='Plot result (default: False)')
 
 args = parser.parse_args()
@@ -87,9 +96,10 @@ b0 = storage.openFile(b0_dir)
 
 # Wind effect
 gamma = 1
-w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + x * 0)
-w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x * 0)
-V = (w1, w2)
+w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + 1e-2 * t)
+w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + 1e-2 * t)
+#V = (w1, w2)
+V = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
 ### PARAMETERS ###
 
 # Physical parameters for the model
@@ -108,5 +118,11 @@ physical_parameters = {
 wildfire_ = wildfire.Fire(**physical_parameters)
 t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method, last=last, acc=acc, sparse=sparse)
 
-if args.plot and args.last:
-    plots.UB(t, X, Y, U, B, V)
+## Plot results
+if args.plot:
+    # Only last 
+    if args.last:
+        plots.UB(t, X, Y, U, B, V)
+    else: # Some plots
+        for n in np.arange(Nt + 1)[::Nt // 4]:
+            plots.UBs(n, t, X, Y, U, B, V)

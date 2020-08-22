@@ -35,6 +35,14 @@ class FiniteDifference:
         self.D2x = FD2Matrix(self.Nx, self.dx, self.order, self.sparse)
         self.D2y = FD2Matrix(self.Ny, self.dy, self.order, self.sparse)
 
+        # Vector field wrapper. Check if v is lambda or numpy array
+        #self.V = lambda t: (self.v[0](self.X, self.Y, t), self.v[1](self.X, self.Y, t)) if type(self.v) is tuple else lambda t: (self.v[t, 0], self.v[t, 1])
+        #self.V = lambda t: self.v[t] if type(self.v) is np.ndarray else lambda t: self.v(self.X, self.Y, t)
+        if type(self.v) is np.ndarray:
+            self.V = lambda t: self.v[t]
+        else:
+            self.V = lambda t: self.v(self.X, self.Y, t)
+
     def getX(self):
         return self.x
 
@@ -68,8 +76,12 @@ class FiniteDifference:
             
         """
         # Vector field evaluation
-        V1 = self.v[0](self.X, self.Y, t)
-        V2 = self.v[1](self.X, self.Y, t)
+        # V1 = self.v[0](self.X, self.Y, t) 
+        # V2 = self.v[1](self.X, self.Y, t)
+        #print("t", t)
+        #print(self.V(t))
+        V1, V2 = self.V(t)
+
         
         # Recover u and b from y
         U = np.copy(y[:self.Ny * self.Nx].reshape((self.Ny, self.Nx), order='F'))
@@ -149,6 +161,12 @@ class FiniteDifference:
         Bb[:,-1] = np.zeros(self.Ny)
 
         return Ub, Bb
+
+    # def evalV(self, t):
+    #     if type(self.v) is tuple:
+    #         return self.v[0](self.X, self.Y, t), self.v[1](self.X, self.Y, t)
+    #     else
+    #         return self.v[t, 0], self.v[t, 1]
 
     def reshaper(self, y, Nt=None):
         """Reshape function to restore correct size.

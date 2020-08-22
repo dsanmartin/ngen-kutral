@@ -23,7 +23,7 @@ b0 = lambda x, y: np.round(np.random.uniform(size=(x.shape)), decimals=2)#x*0 + 
 gamma = 1
 v1 = lambda x, y, t: gamma * np.cos(np.pi/4 + x*0) # 300
 v2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x*0) # 300
-V = (v1, v2)
+V = lambda x, y, t: (v1(x, y, t), v2(x, y, t)) #V = (v1, v2)
 
 # Parameters
 kappa = 1e-1 # diffusion coefficient

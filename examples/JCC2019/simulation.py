@@ -15,6 +15,7 @@ b0 = lambda x, y: G(x-10, y-10, 200) + G(x-20, y-60, 300) + G(x-45, y-45, 200) +
 T = lambda x, y: 1.5 * (3 * G(x-45, y-45, 40) + 2 * G(x-30, y-30, 60) + 3 * G(x-70, y-70, 60) + 2 * G(x-20, y-70, 70))
 Tx = lambda x, y: -2 * 1.5 * ( 3 * (x-45) * G(x-45, y-45, 40) / 40 + 2 * (x-30) * G(x-30, y-30, 60) / 60 + 3 * (x-70) * G(x-70, y-70, 60) / 60 + 2 * (x-20) * G(x-20, y-70, 70) / 70)
 Ty = lambda x, y: -2 * 1.5 * ( 3 * (y-45) * G(x-45, y-45, 40) / 40 + 2 * (y-30) * G(x-30, y-30, 60) / 60 + 3 * (y-70) * G(x-70, y-70, 60) / 60 + 2 * (y-70) * G(x-20, y-70, 70) / 70) 
+TT = lambda x, y: (Tx(x, y), Ty(x, y))
 
 X, Y = np.meshgrid(np.linspace(0, 90, 2 ** 7), np.linspace(0, 90, 2 ** 7))
 
@@ -22,13 +23,14 @@ X, Y = np.meshgrid(np.linspace(0, 90, 2 ** 7), np.linspace(0, 90, 2 ** 7))
 gamma = 1
 w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + x * 0 + t * 0.0025) 
 w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x * 0 + t * 0.025) 
+W = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
 
 rm_t = 1 # Set to 0 for no terrain
 
 # Vector field w(x,y,t) + \nabla T(x,y)
 v1 = lambda x, y, t: w1(x, y, t) + rm_t * Tx(x, y)
 v2 = lambda x, y, t: w2(x, y, t) + rm_t * Ty(x, y)
-V = (v1, v2)
+V = lambda x, y, t: (v1(x, y, t), v2(x, y, t)) #V = (v1, v2)
 
 e = 7
 Nx = 2 ** e
@@ -49,7 +51,7 @@ parameters = {
 }
 
 # Meshes for initial condition plots
-p.plotIC(X, Y, u0, b0, (w1, w2), (Tx, Ty), T, save=False)
+p.plotIC(X, Y, u0, b0, W, TT, T, save=False)
 
 ct = Fire(**parameters)
 

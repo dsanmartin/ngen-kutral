@@ -17,7 +17,8 @@ def plotIC(X, Y, U, B, W, T, top, save=False):
 	axarr[0].set_ylabel(r"$y$")
 	plt.colorbar(temp, fraction=0.046, pad=0.04, ax=axarr[0])
 	if W is not None:
-		axarr[0].quiver(X_s, Y_s, W[0](X_s, Y_s, 0), W[1](X_s, Y_s, 0))
+		axarr[0].quiver(X_s, Y_s, W(X_s, Y_s, 0)[0], W(X_s, Y_s, 0)[1])
+		#axarr[0].quiver(X_s, Y_s, W[0](X_s, Y_s, 0), W[1](X_s, Y_s, 0))
 		plot_name += " and Wind"
 	axarr[0].set_title(plot_name)
 	new_cmap = truncate_colormap(plt.cm.gray, 0, 0.5)
@@ -28,7 +29,8 @@ def plotIC(X, Y, U, B, W, T, top, save=False):
 		topo = axarr[1].contour(X, Y, top(X,Y), vmin=np.min(top(X,Y)), cmap=new_cmap)
 		plt.clabel(topo, inline=1, fontsize=10)
 	if T is not None:
-		axarr[1].quiver(X_t, Y_t, T[0](X_t, Y_t), T[1](X_t, Y_t))
+		axarr[1].quiver(X_t, Y_t, T(X_t, Y_t)[0], T(X_t, Y_t)[1])
+		#axarr[1].quiver(X_t, Y_t, T[0](X_t, Y_t), T[1](X_t, Y_t))
 		tit += " and Topography"
 	plt.colorbar(fuel, fraction=0.046, pad=0.04, ax=axarr[1])
 	axarr[1].set_title(tit)
@@ -69,10 +71,14 @@ def plotJCC(t, X, Y, U, B, W, T=None, row=4, col=2, save=False):
 			vmin=np.min(B), vmax=np.max(B), extent=[X[-1, 0], X[-1, -1], Y[0, -1], Y[-1, -1]])
 #    up[i] = axarr[i, 0].contourf(X, Y, U[tt], vU, cmap=plt.cm.jet, alpha=0.9)
 #    bp[i] = axarr[i, 1].contourf(X, Y, B[tt], vB,  cmap=plt.cm.Oranges, alpha=0.9)
-		if type(W) is tuple:
-			axarr[i,0].quiver(X_s, Y_s, W1(X_s, Y_s, t[tt]), W2(X_s, Y_s, t[tt]))
-		else:
+		if type(W) is np.ndarray:
 			axarr[i,0].quiver(X_s, Y_s, W[tt, 0]*np.ones_like(X_s), W[tt, 1]*np.ones_like(Y_s))
+		else:
+			axarr[i,0].quiver(X_s, Y_s, W(X_s, Y_s, t[tt])[0], W(X_s, Y_s, t[tt])[1])
+		# if type(W) is tuple:
+		# 	axarr[i,0].quiver(X_s, Y_s, W1(X_s, Y_s, t[tt]), W2(X_s, Y_s, t[tt]))
+		# else:
+		# 	axarr[i,0].quiver(X_s, Y_s, W[tt, 0]*np.ones_like(X_s), W[tt, 1]*np.ones_like(Y_s))
 			
 		if T is not None:
 			X_t = X[::4,::4]

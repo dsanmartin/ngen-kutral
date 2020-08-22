@@ -24,7 +24,7 @@ gamma = 1
 w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + x * 0)
 w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x * 0)
 
-V = (w1, w2)
+V = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
 
 e = 7
 Nx = 2 ** e
@@ -46,7 +46,7 @@ parameters = {
 
 # Meshes for initial condition plots
 X, Y = np.meshgrid(np.linspace(0, 90, Nx), np.linspace(0, 90, Ny))
-p.plotIC(X, Y, u0, b0, (w1, w2), None, None, save=False)
+p.plotIC(X, Y, u0, b0, V, None, None, save=False)
 
 t, X, Y, Ufft, Bfft = Fire(**parameters).solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='fft')
 

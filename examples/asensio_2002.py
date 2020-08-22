@@ -47,7 +47,7 @@ def b0(x, y):
 gamma = 1
 w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + x * 0)
 w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + x * 0)
-V = (w1, w2)
+V = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
 ### PARAMETERS ###
 
 # Physical parameters for the model
@@ -64,7 +64,12 @@ physical_parameters = {
 }
 
 wildfire_ = wildfire.Fire(**physical_parameters)
-t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method, acc=acc, sparse=sparse)
+t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method, last=last, acc=acc, sparse=sparse)
 
-## Plot last results.
-plots.UB(t, X, Y, U, B, V)
+## Plot results
+if last:
+    plots.UB(t, X, Y, U, B, V)
+else:
+    Ns = np.arange(Nt + 1)[::Nt // 4]
+    for n in Ns:
+        plots.UBs(n, t, X, Y, U, B, V)
