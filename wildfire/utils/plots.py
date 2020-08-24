@@ -14,7 +14,10 @@ def UBs(i, t, X, Y, U, B, V):
         vmin=np.min(U), vmax=np.max(U), extent=[X[-1, 0], X[-1, -1], Y[0, -1], Y[-1, -1]])
     if V is not None:
         if type(V) is np.ndarray:
-            V1, V2 = V[i, 0], V[i, 1]
+            if len(V[0].shape) > 2 and len(V[1].shape) > 2: # Check shape of vector field array
+                V1, V2 = V[i, 0, ::s, ::s], V[i, 1, ::s, ::s]
+            else:
+                V1, V2 = V[i, 0], V[i, 1]
         else:
             V1, V2 = V(X_s, Y_s, t[i])
         plt.quiver(X_s, Y_s, V1, V2)

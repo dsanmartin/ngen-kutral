@@ -24,10 +24,12 @@ class FiniteDifference:
         
         # Physical Model Functions
         self.v = kwargs['v']
-        self.K = kwargs['K']
         self.f = kwargs['f']
         self.g = kwargs['g']
         self.kap = kwargs['kap']
+
+        self.K = kwargs['K']
+        self.Ku = kwargs['Ku']
 
         # Differentiation matrices
         self.Dx = FD1Matrix(self.Nx, self.dx, self.order, self.sparse)
@@ -36,8 +38,6 @@ class FiniteDifference:
         self.D2y = FD2Matrix(self.Ny, self.dy, self.order, self.sparse)
 
         # Vector field wrapper. Check if v is lambda or numpy array
-        #self.V = lambda t: (self.v[0](self.X, self.Y, t), self.v[1](self.X, self.Y, t)) if type(self.v) is tuple else lambda t: (self.v[t, 0], self.v[t, 1])
-        #self.V = lambda t: self.v[t] if type(self.v) is np.ndarray else lambda t: self.v(self.X, self.Y, t)
         if type(self.v) is np.ndarray:
             self.V = lambda t: self.v[t]
         else:
@@ -76,10 +76,6 @@ class FiniteDifference:
             
         """
         # Vector field evaluation
-        # V1 = self.v[0](self.X, self.Y, t) 
-        # V2 = self.v[1](self.X, self.Y, t)
-        #print("t", t)
-        #print(self.V(t))
         V1, V2 = self.V(t)
 
         
@@ -99,7 +95,7 @@ class FiniteDifference:
         lapU = Uxx + Uyy
 
         # Compute diffusion
-        if self.K is not None: # Using K(U) diffusion function
+        if self.K is not None and self.Ku is not None: # Using K(U) diffusion function
             K = self.K(U) 
             Kx = self.Ku(U) * Ux #(Dx.dot(K.T)).T
             Ky = self.Ku(U) * Uy #Dy.dot(K)

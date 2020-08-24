@@ -22,7 +22,6 @@ class FFTDerivatives:
 
         # Physical model functions
         self.v = kwargs['v']
-        self.K = kwargs['K']
         self.f = kwargs['f']
         self.g = kwargs['g']
         self.kap = kwargs['kap']
@@ -51,11 +50,6 @@ class FFTDerivatives:
         Compute right hand side of PDE
         """
         # Vector field evaluation
-        # Vector field evaluation
-        # V1 = self.v[0](self.X, self.Y, t) 
-        # V2 = self.v[1](self.X, self.Y, t)
-        #print("t", t)
-        #print(self.V(t))
         V1, V2 = self.V(t)
         
         Uf = np.copy(y[:self.Ny * self.Nx].reshape((self.Ny, self.Nx), order='F'))

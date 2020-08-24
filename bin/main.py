@@ -47,6 +47,9 @@ parser.add_argument('-u0', '--initial-temperature', metavar='U0', type=str,
 parser.add_argument('-b0', '--initial-fuel', metavar='B0', type=str, 
     help='Initial fuel file. Only .csv and .npy supported.', required=True)
 
+parser.add_argument('-vf', '--vector-field', metavar='V', type=str, default='',
+    help='Vector Field. Only .csv and .npy supported.', required=True)
+
 # Others parameters
 parser.add_argument('-acc', '--accuracy', metavar='ACC', default=2, type=int, 
     help='Finite difference accuracy (default: 2)')
@@ -58,7 +61,6 @@ parser.add_argument('-plt', '--plot', metavar='PLT', default=0, type=int,
     help='Plot result (default: False)')
 
 args = parser.parse_args()
-#print(args)
 
 ### PARAMETERS ###
 # Model parameters #
@@ -95,11 +97,18 @@ u0 = storage.openFile(u0_dir)
 b0 = storage.openFile(b0_dir)
 
 # Wind effect
-gamma = 1
-w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + 1e-2 * t)
-w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + 1e-2 * t)
-#V = (w1, w2)
-V = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
+v_dir = args.vector_field
+
+# If vector field is not data array
+if v_dir == "":
+    gamma = 1
+    w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + 1e-2 * t)
+    w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + 1e-2 * t)
+    #V = (w1, w2)
+    V = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
+else:
+    V = storage.openFile(v_dir)
+
 ### PARAMETERS ###
 
 # Physical parameters for the model

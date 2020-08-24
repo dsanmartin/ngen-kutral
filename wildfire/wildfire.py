@@ -36,10 +36,10 @@ class Fire:
 
         Other Parameters
         ----------------
-        complete : boolean
+        complete : bool
             Use complete model with diffusion function :math:`K(u)`.
         cmp : tuple
-            Model components included. Tuple needs 3 boolean, (diffusion, convection, reaction).
+            Model components included. Tuple needs 3 bool, (diffusion, convection, reaction).
         sf	: string
             Solid-gas phase function.
 
@@ -65,8 +65,13 @@ class Fire:
         s = lambda u: H(u, self.upc) if self.sf == 'step' else sigmoid(u)
         self.f = lambda u, b: f(u, b, self.eps, self.alp, s)
         self.g = lambda u, b: g(u, b, self.eps, self.q, s)
-        self.K = lambda u: K(u, self.kap, self.eps)
-        self.Ku = lambda u: Ku(u, self.kap, self.eps)
+
+        if self.complete:
+            self.K = lambda u: K(u, self.kap, self.eps)
+            self.Ku = lambda u: Ku(u, self.kap, self.eps)
+        else:
+            self.K = None
+            self.Ku = None
 
     def solvePDE(self, Nx, Ny, Nt, u0, b0, v, space_method='fd', time_method='RK4', last=True, **kwargs):
         """Solve numerical PDE.
@@ -91,7 +96,7 @@ class Fire:
         time_method : str, optional
             Numerical method for time approximation. 
             'Euler' for Euler method, 'RK4' for Runge-Kutta of fourth order, by default 'RK4'.
-        last : boolean, optional
+        last : bool, optional
             Keep and return last approximation, by default True.
         **kwargs : dict
             Extra parameters.
@@ -151,7 +156,7 @@ class Fire:
 
             # Create FD
             FD = FiniteDifference(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), 
-                order=acc, sparse=sparse, cmp=self.cmp, v=v, K=None, f=self.f, g=self.g, kap=self.kap)
+                order=acc, sparse=sparse, cmp=self.cmp, v=v, f=self.f, g=self.g, kap=self.kap, K=self.K, Ku=self.Ku)
 
             # FD Mesh
             X, Y = FD.getMesh()
@@ -172,7 +177,7 @@ class Fire:
             Ny -= 1 # Remove one node for periodic boundary
             
             FFTD = FFTDerivatives(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), cmp=self.cmp,
-                v=v, K=None, f=self.f, g=self.g, kap=self.kap)
+                v=v, f=self.f, g=self.g, kap=self.kap)
 
             # FFT Mesh
             X, Y = FFTD.getMesh()
