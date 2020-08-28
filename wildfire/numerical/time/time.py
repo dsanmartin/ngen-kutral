@@ -1,11 +1,4 @@
-"""Time approximation using numerical integration methods.
-
-Solve Initial Value Problem (IVP) or ODE:
-    .. math::
-        \frac{dy}{dt} = F(t, y) \\
-        y(t_0) = y_0
-
-Implements the following integration methods:
+"""Implements the following integration methods:
     - Euler method
     - Runge-Kutta of fourth order method (RK4)
 

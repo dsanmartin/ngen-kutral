@@ -105,3 +105,6 @@ venv.bak/
 
 # Data folders
 data/
+
+# Another files
+wildfire/numerical/time/euler.py

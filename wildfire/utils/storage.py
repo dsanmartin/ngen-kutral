@@ -1,4 +1,8 @@
-import pathlib, json, inspect
+import os
+import glob
+import pathlib
+import json
+import inspect
 import numpy as np
 from datetime import datetime
 
@@ -56,10 +60,22 @@ def saveTimeError(DIR_BASE, times, errors):
     np.save(DIR_BASE + 'errors', errors)
   
 def openFile(dir):
-    if '.npy' in dir:
-        return np.load(dir)
-    elif '.csv' in dir:
-        return np.loadtxt(dir)
+    if os.path.isdir(dir):
+        # Check file sizes
+        Nt = len(glob.glob(dir + "/1_*.txt")) # Nt
+        tmp = np.loadtxt(dir + "/1_0.txt") 
+        Ny, Nx = tmp.shape
+        V = np.zeros((Nt, 2, Ny, Nx))
+        for n in range(Nt):
+            V1 = np.loadtxt(dir + "/1_{0}.txt".format(n))
+            V2 = np.loadtxt(dir + "/2_{0}.txt".format(n))
+            V[n] = V1, V2
+        return V
     else:
-        raise Exception("File extension not supported.")
+        if '.npy' in dir:
+            return np.load(dir)
+        elif '.txt' in dir:
+            return np.loadtxt(dir)
+        else:
+            raise Exception("File extension not supported.")
 

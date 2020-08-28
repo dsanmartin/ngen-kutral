@@ -8,7 +8,7 @@ from .numerical.space import FiniteDifference, FFTDerivatives
 from .numerical.time import Integration
 from .utils.functions import K, Ku, f, g, H, sigmoid
 
-class Fire:    
+class Fire:
     
     def __init__(self, kap, eps, upc, alp, q, x_lim, y_lim, t_lim, **kwargs):
         """Wildfire constructor.
@@ -147,6 +147,7 @@ class Fire:
             In 2018 37th International Conference of the Chilean Computer Science Society (SCCC) (pp. 1–8). https://doi.org/10.1109/SCCC.2018.8705159
         .. [3] San Martín, D., & Torres, C. E. (2019). "Exploring a Spectral Numerical Algorithm for Solving a Wildfire Mathematical Model". 
             In 2019 38th International Conference of the Chilean Computer Science Society (SCCC) (pp. 1–7). https://doi.org/10.1109/SCCC49216.2019.8966412
+        
         """
         # Space approximation #
         if space_method == 'fd': # Finite Differences
@@ -177,7 +178,7 @@ class Fire:
             Ny -= 1 # Remove one node for periodic boundary
             
             FFTD = FFTDerivatives(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), cmp=self.cmp,
-                v=v, f=self.f, g=self.g, kap=self.kap)
+                v=v, f=self.f, g=self.g, kap=self.kap, K=self.K, Ku=self.Ku)
 
             # FFT Mesh
             X, Y = FFTD.getMesh()
@@ -205,7 +206,7 @@ class Fire:
         # Time approximation
         Nt += 1 # Include initial condition
         integrator = Integration(Nt, (self.t_min, self.t_max), time_method, last, vdata=type(v) is np.ndarray)
-        t = integrator.getT()
+        t = integrator.getTime()
 
         # Vectorize variables for Method of Lines. [vec(U), vec(B)]^T
         y0 = np.zeros((2 * Ny * Nx))
@@ -213,7 +214,7 @@ class Fire:
         y0[Ny * Nx:] = B0.flatten('F')
         
         # Integration
-        y = integrator.integration(t, RHS, y0)
+        y = integrator.solve(t, RHS, y0)
 
         # Reshape arrays 
         U, B = reshaper(y) if last else reshaper(y, Nt)

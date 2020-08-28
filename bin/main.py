@@ -5,6 +5,8 @@ from wildfire.utils.functions import G
 from wildfire.utils import plots
 from wildfire.utils import storage
 
+import os
+
 def str_to_bool(value):
     if isinstance(value, bool):
         return value
@@ -43,12 +45,12 @@ parser.add_argument('-Nt', '--tnodes', metavar='Nt', type=int, help='Number of n
 
 # Initial conditions 
 parser.add_argument('-u0', '--initial-temperature', metavar='U0', type=str, 
-    help='Initial temperature file. Only .csv and .npy supported.', required=True)
+    help='Initial temperature file. Only .txt and .npy supported.', required=True)
 parser.add_argument('-b0', '--initial-fuel', metavar='B0', type=str, 
-    help='Initial fuel file. Only .csv and .npy supported.', required=True)
+    help='Initial fuel file. Only .txt and .npy supported.', required=True)
 
 parser.add_argument('-vf', '--vector-field', metavar='V', type=str, default='',
-    help='Vector Field. Only .csv and .npy supported.', required=True)
+    help='Vector Field. Only .txt and .npy supported.')
 
 # Others parameters
 parser.add_argument('-acc', '--accuracy', metavar='ACC', default=2, type=int, 
@@ -91,9 +93,11 @@ u0_dir = args.initial_temperature
 b0_dir = args.initial_fuel
 
 # Temperature
+print("Loading initial temperature data...")
 u0 = storage.openFile(u0_dir)
 
 # Fuel
+print("Loading initial fueld data...")
 b0 = storage.openFile(b0_dir)
 
 # Wind effect
@@ -102,12 +106,14 @@ v_dir = args.vector_field
 # If vector field is not data array
 if v_dir == "":
     gamma = 1
-    w1 = lambda x, y, t: gamma * np.cos(np.pi/4 + 1e-2 * t)
-    w2 = lambda x, y, t: gamma * np.sin(np.pi/4 + 1e-2 * t)
+    w1 = lambda x, y, t: gamma * np.cos(np.pi/4)# + 1e-2 * t)
+    w2 = lambda x, y, t: gamma * np.sin(np.pi/4)# + 1e-2 * t)
     #V = (w1, w2)
     V = lambda x, y, t: (w1(x, y, t), w2(x, y, t))
 else:
+    print("Loading vector field data...")
     V = storage.openFile(v_dir)
+    assert V.shape[0] == (Nt + 1), "File vector size and time steps don't match."
 
 ### PARAMETERS ###
 
@@ -125,10 +131,13 @@ physical_parameters = {
 }
 
 wildfire_ = wildfire.Fire(**physical_parameters)
+print("Starting the numerical simulation...")
 t, X, Y, U, B = wildfire_.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method, time_method, last=last, acc=acc, sparse=sparse)
+print("Numerical simulation has finished.")
 
 ## Plot results
 if args.plot:
+    print("Plots...")
     # Only last 
     if args.last:
         plots.UB(t, X, Y, U, B, V)

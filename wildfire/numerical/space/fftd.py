@@ -1,5 +1,7 @@
 import numpy as np
 
+MAX_FLOAT = 1e10 # Defined to check divergence.... 
+
 class FFTDerivatives:
 
     def __init__(self, Nx, Ny, x_lim, y_lim, cmp=(1,1,1), **kwargs):
@@ -26,6 +28,10 @@ class FFTDerivatives:
         self.g = kwargs['g']
         self.kap = kwargs['kap']
 
+        # Diffusion functions
+        self.K = kwargs['K']
+        self.Ku = kwargs['Ku']
+
         # Others params
         self.cmp = cmp # Components of models
 
@@ -46,8 +52,24 @@ class FFTDerivatives:
 
     # FFT to approximate space derivatives
     def RHS(self, t, y):
-        """
-        Compute right hand side of PDE
+        """Compute right hand side of PDE using Fast Fourier Transform.
+
+        Parameters
+        ----------
+        t : array_like
+            Time variable.
+        y : array_like
+            [description]
+
+        Returns
+        -------
+        array_like
+            [description]
+
+        Raises
+        ------
+        Exception
+            [description]
         """
         # Vector field evaluation
         V1, V2 = self.V(t)
@@ -65,13 +87,25 @@ class FFTDerivatives:
         Uhaty = 1j * self.ETA * Uhat
         if self.Nx % 2 == 0: Uhatx[:, self.Nx // 2] = np.zeros(self.Ny)
         if self.Ny % 2 == 0: Uhaty[self.Ny // 2, :] = np.zeros(self.Nx)
-        
         Ux = np.real(np.fft.ifft2(Uhatx))
         Uy = np.real(np.fft.ifft2(Uhaty))
         
         # Laplace operator
         lap = np.real(np.fft.ifft2((-(self.XI ** 2 + self.ETA ** 2)) * Uhat)) 
-        diffusion = self.kap * lap # k \nabla U
+
+        # Compute diffusion
+        if self.K is not None and self.Ku is not None: # Using K(U) diffusion function
+            K = self.K(U) 
+            Ku = self.Ku(U)
+            #Kx = self.Ku(U) * Ux 
+            #Ky = self.Ku(U) * Uy 
+            #diffusion = Kx * Ux + Ky * Uy + K * lap
+            diffusion = Ku * (Ux ** 2 + Uy ** 2) + K * lap
+        else: # Diffusion is constant with value \kappa
+            # \kappa \Delta u = \kappa (u_{xx} + u_{yy}) or \kappa lap(U)
+            diffusion = self.kap * lap
+
+        #diffusion = self.kap * lap # k \nabla U
         
         convection = Ux * V1 + Uy * V2 # v \cdot grad u.    
         reaction = self.f(U, B) # eval fuel
@@ -81,8 +115,14 @@ class FFTDerivatives:
         convection *= self.cmp[1]
         reaction *= self.cmp[2]
 
+        # Compute RHS approximation
         Uf = diffusion - convection + reaction
         Bf = self.g(U, B)
+
+        # Check if approximation diverges
+        if np.any(np.isnan(Uf)) or np.any(np.isinf(Uf)) or np.any(np.isnan(Bf)) or  \
+            np.any(np.isinf(Bf)) or np.any(Uf > MAX_FLOAT) or np.any(Bf > MAX_FLOAT):
+            raise Exception("Numerical approximation diverges. Please check number of nodes in space or time.") 
         
         return np.r_[Uf.flatten('F'), Bf.flatten('F')]
 

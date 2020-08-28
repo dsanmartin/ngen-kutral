@@ -3,6 +3,8 @@
 import numpy as np
 from .diffmat import FD1Matrix, FD2Matrix
 
+MAX_FLOAT = 1e10 # Defined to check divergence.... 
+
 class FiniteDifference:
 
     def __init__(self, Nx, Ny, x_lim, y_lim, order=2, sparse=False, cmp=(1, 1, 1), **kwargs):
@@ -77,7 +79,7 @@ class FiniteDifference:
         """
         # Vector field evaluation
         V1, V2 = self.V(t)
-
+        #print(V1, V2)
         
         # Recover u and b from y
         U = np.copy(y[:self.Ny * self.Nx].reshape((self.Ny, self.Nx), order='F'))
@@ -97,9 +99,11 @@ class FiniteDifference:
         # Compute diffusion
         if self.K is not None and self.Ku is not None: # Using K(U) diffusion function
             K = self.K(U) 
-            Kx = self.Ku(U) * Ux #(Dx.dot(K.T)).T
-            Ky = self.Ku(U) * Uy #Dy.dot(K)
-            diffusion = Kx * Ux + Ky * Uy + K * lapU
+            Ku = self.Ku(U)
+            #Kx = self.Ku(U) * Ux 
+            #Ky = self.Ku(U) * Uy 
+            #diffusion = Kx * Ux + Ky * Uy + K * lapU
+            diffusion = Ku * (Ux ** 2 + Uy ** 2) + K * lapU
         else: # Diffusion is constant with value \kappa
             # \kappa \Delta u = \kappa (u_{xx} + u_{yy}) or \kappa lap(U)
             diffusion = self.kap * lapU 
@@ -113,11 +117,16 @@ class FiniteDifference:
         reaction *= self.cmp[2]
         
         # Compute RHS
-        Uf = diffusion -  convection + reaction 
+        Uf = diffusion - convection + reaction 
         Bf = self.g(U, B)
         
         # Add boundary conditions
         Uf, Bf = self.boundaryConditions(Uf, Bf)
+
+        # Check if approximation diverges
+        if np.any(np.isnan(Uf)) or np.any(np.isinf(Uf)) or np.any(np.isnan(Bf)) or  \
+            np.any(np.isinf(Bf)) or np.any(Uf > MAX_FLOAT) or np.any(Bf > MAX_FLOAT):
+            raise Exception("Numerical approximation diverges. Please check number of nodes in space or time.") 
         
         # Build y = [vec(u), vec(\beta)]^T and return
         return np.r_[Uf.flatten('F'), Bf.flatten('F')] 
@@ -157,12 +166,6 @@ class FiniteDifference:
         Bb[:,-1] = np.zeros(self.Ny)
 
         return Ub, Bb
-
-    # def evalV(self, t):
-    #     if type(self.v) is tuple:
-    #         return self.v[0](self.X, self.Y, t), self.v[1](self.X, self.Y, t)
-    #     else
-    #         return self.v[t, 0], self.v[t, 1]
 
     def reshaper(self, y, Nt=None):
         """Reshape function to restore correct size.

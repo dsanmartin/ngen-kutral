@@ -1,15 +1,43 @@
+"""Time approximation using numerical integration methods.
+
+Solve Initial Value Problem (IVP) or ODE:
+    .. math::
+        \frac{dy}{dt} = F(t, y) \\
+        y(t_0) = y_0
+
+"""
 import numpy as np
 from .time import Euler, RK4, IVP
 
 class Integration:
 
     def __init__(self, Nt, t_lim, method, last, vdata):
+        """Integrator constructor.
+
+        Parameters
+        ----------
+        Nt : int
+            Number of time nodes.
+        t_lim : tuple
+            Boundary of time variable.
+        method : str
+            Method used to integrate.
+        last : bool
+            Return and keep only last approximation.
+        vdata : bool
+            If vector field is np.ndarray.
+
+        Raises
+        ------
+        Exception
+            Error if method is not implemented.
+        """
         self.Nt = Nt
         self.t_min, self.t_max = t_lim
         self.last = last
         self.vdata = vdata
 
-        # Time domain
+        # If vector field is data, index of numerical method is used.
         if self.vdata:
             self.t = np.arange(Nt)
         else:
@@ -26,10 +54,10 @@ class Integration:
         else:
             raise Exception("Time integration method error. Please select available time approximation method.")
 
-    def getT(self):
+    def getTime(self):
         return np.linspace(self.t_min, self.t_max, self.Nt)
 
-    def integration(self, t, F, y0):
+    def solve(self, t, F, y0):
         return self.time_integration(t, F, y0, self.last, self.vdata)
 
 
