@@ -37,7 +37,7 @@ class Integration:
         self.last = last
         self.vdata = vdata
 
-        # If vector field is data, index of numerical method is used.
+        # If vector field is data, index of numerical method is used as time variable.
         if self.vdata:
             self.t = np.arange(Nt)
         else:

@@ -60,22 +60,44 @@ def saveTimeError(DIR_BASE, times, errors):
     np.save(DIR_BASE + 'errors', errors)
   
 def openFile(dir):
+    """Function to handle data files.
+
+    Parameters
+    ----------
+    dir : str
+        Data file path.
+
+    Returns
+    -------
+    array_like
+        Data.
+
+    Raises
+    ------
+    Exception
+        Error if file format or path is not supported.
+    """
+    # If path is a directory
     if os.path.isdir(dir):
-        # Check file sizes
+        # Check file sizes from first file
         Nt = len(glob.glob(dir + "/1_*.txt")) # Nt
         tmp = np.loadtxt(dir + "/1_0.txt") 
         Ny, Nx = tmp.shape
+        # Output array
         V = np.zeros((Nt, 2, Ny, Nx))
         for n in range(Nt):
-            V1 = np.loadtxt(dir + "/1_{0}.txt".format(n))
-            V2 = np.loadtxt(dir + "/2_{0}.txt".format(n))
+            V1 = np.loadtxt("{0}/1_{1}.txt".format(dir, n))
+            V2 = np.loadtxt("{0}/2_{1}.txt".format(dir, n))
             V[n] = V1, V2
         return V
-    else:
-        if '.npy' in dir:
+    # If path is a file
+    elif os.path.isfile(dir):
+        if '.npy' in dir: # Numpy data file
             return np.load(dir)
-        elif '.txt' in dir:
+        elif '.txt' in dir: # Plain text data file
             return np.loadtxt(dir)
         else:
             raise Exception("File extension not supported.")
+    else:
+        raise Exception("Path is not supported.")
 

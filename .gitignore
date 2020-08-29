@@ -103,8 +103,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# Data folders
-data/
-
 # Another files
 wildfire/numerical/time/euler.py

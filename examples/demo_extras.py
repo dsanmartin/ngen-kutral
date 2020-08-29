@@ -1,4 +1,4 @@
-"""Extra code for demo.
+"""Extra code for demo jupyter notebook.
 
 """
 import numpy as np
@@ -123,9 +123,9 @@ time_nt_text = widgets.BoundedIntText(
 
 # Checkbox to select last approximation
 time_last_cb = widgets.Checkbox(
-        value=False,
-        description='Last approximation:',
-        disabled=False,
-        indent=False
+    value=False,
+    description='Last approximation:',
+    disabled=False,
+    indent=False
 )
 out = widgets.Output()
