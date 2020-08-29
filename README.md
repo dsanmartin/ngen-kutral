@@ -38,7 +38,7 @@ export PYTHONPATH=$PYTHONPATH:/path/you/put/the/repository/ngen-kutral/
 import wildfire
 ```
 
-2. Using a wrapper script inside ```bin``` [folder](!./bin):
+2. Using a wrapper script inside ```bin``` [folder](./bin):
 ```console
 usage: main.py [-h] [-kap K] [-eps E] [-upc P] [-alp A] [-qrh Q]
                [-xlim x_min x_max] [-ylim y_min y_max] [-tlim t_min t_max] -sm

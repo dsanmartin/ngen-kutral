@@ -12,7 +12,7 @@ You can put your input/ouput files inside this folder. Framework supports both `
 
 ## Example files
 
-[Example](!./input/example/) folder includes some testing files. 
+[Example](./input/example/) folder includes some testing files. 
 * ```U0.npy``` and ```U0.txt``` for temperature initial condition. Shape of both files is ```128 x 128```.
 * ```B0.npy``` and ```B0.txt``` for fuel initial condition. Shape of both files is ```128 x 128```.
 * For vector field we include: 
