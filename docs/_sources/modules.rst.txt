@@ -1,0 +1,7 @@
+wildfire
+========
+
+.. toctree::
+   :maxdepth: 4
+
+   wildfire

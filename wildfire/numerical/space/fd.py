@@ -58,10 +58,10 @@ class FiniteDifference:
         """
         Compute right hand side of PDE:
 
-        .. math::
-            \begin{split}
-                u_{t} &= \Delta u - \mathbf{v} \cdot \nabla u + f(u, \beta) \\
-                \beta_{t} &= g(u, \beta)
+        .. math:: 
+            \\begin{split}
+                u_{t} &= \Delta u - \mathbf{v} \cdot \\nabla u + f(u, \\beta) \\\\
+                \\beta_{t} &= g(u, \\beta)
             \end{split}
 
         Parameters

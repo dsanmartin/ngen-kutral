@@ -1,0 +1,30 @@
+wildfire package
+================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   wildfire.numerical
+   wildfire.utils
+
+Submodules
+----------
+
+wildfire.wildfire module
+------------------------
+
+.. automodule:: wildfire.wildfire
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: wildfire
+   :members:
+   :undoc-members:
+   :show-inheritance:

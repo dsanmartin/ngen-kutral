@@ -1,0 +1,389 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wildfire.numerical.time package &mdash; Ngen-Kutral  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Ngen-Kutral
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">wildfire.numerical.time package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.time.euler">wildfire.numerical.time.euler module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.time.integration">wildfire.numerical.time.integration module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.time.time">wildfire.numerical.time.time module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.time">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Ngen-Kutral</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>wildfire.numerical.time package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/wildfire.numerical.time.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="wildfire-numerical-time-package">
+<h1>wildfire.numerical.time package<a class="headerlink" href="#wildfire-numerical-time-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-wildfire.numerical.time.euler">
+<span id="wildfire-numerical-time-euler-module"></span><h2>wildfire.numerical.time.euler module<a class="headerlink" href="#module-wildfire.numerical.time.euler" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="wildfire.numerical.time.euler.Euler">
+<em class="property">class </em><code class="sig-prename descclassname">wildfire.numerical.time.euler.</code><code class="sig-name descname">Euler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">last</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">vdata</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.euler.Euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 47%" />
+<col style="width: 53%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>solve</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="wildfire.numerical.time.euler.Euler.solve">
+<code class="sig-name descname">solve</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.euler.Euler.solve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.time.integration">
+<span id="wildfire-numerical-time-integration-module"></span><h2>wildfire.numerical.time.integration module<a class="headerlink" href="#module-wildfire.numerical.time.integration" title="Permalink to this headline">¶</a></h2>
+<p>Time approximation using numerical integration methods.</p>
+<dl>
+<dt>Solve Initial Value Problem (IVP) or ODE:</dt><dd><div class="math notranslate nohighlight">
+\[\]</div>
+</dd>
+<dt>rac{dy}{dt} = F(t, y) </dt><dd><p>y(t_0) = y_0</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt id="wildfire.numerical.time.integration.Integration">
+<em class="property">class </em><code class="sig-prename descclassname">wildfire.numerical.time.integration.</code><code class="sig-name descname">Integration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Nt</span></em>, <em class="sig-param"><span class="n">t_lim</span></em>, <em class="sig-param"><span class="n">method</span></em>, <em class="sig-param"><span class="n">last</span></em>, <em class="sig-param"><span class="n">vdata</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.integration.Integration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 52%" />
+<col style="width: 48%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>getTime</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>solve</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="wildfire.numerical.time.integration.Integration.getTime">
+<code class="sig-name descname">getTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.integration.Integration.getTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.time.integration.Integration.solve">
+<code class="sig-name descname">solve</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">y0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.integration.Integration.solve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.time.time">
+<span id="wildfire-numerical-time-time-module"></span><h2>wildfire.numerical.time.time module<a class="headerlink" href="#module-wildfire.numerical.time.time" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Implements the following integration methods:</dt><dd><ul class="simple">
+<li><p>Euler method</p></li>
+<li><p>Runge-Kutta of fourth order method (RK4)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Also includes <cite>solve_ivp</cite> from <cite>scipy.integrate</cite>.</p>
+<dl class="simple">
+<dt>Details in:</dt><dd><ul class="simple">
+<li><p>Sauer, T. (2018). Numerical Analysis. Pearson. <a class="reference external" href="https://www.pearson.com/us/higher-education/program/Sauer-Numerical-Analysis-3rd-Edition/PGM1735484.html">https://www.pearson.com/us/higher-education/program/Sauer-Numerical-Analysis-3rd-Edition/PGM1735484.html</a></p></li>
+<li><p>Scipy. solve_ivp. <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html</a></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py function">
+<dt id="wildfire.numerical.time.time.Euler">
+<code class="sig-prename descclassname">wildfire.numerical.time.time.</code><code class="sig-name descname">Euler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">last</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">vdata</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.time.Euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Euler method implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t</strong><span class="classifier">array_like</span></dt><dd><p>Time discrete variable.</p>
+</dd>
+<dt><strong>F</strong><span class="classifier">function</span></dt><dd><p>RHS function of ODE.</p>
+</dd>
+<dt><strong>y0</strong><span class="classifier">array_like</span></dt><dd><p>Initial condition</p>
+</dd>
+<dt><strong>last</strong><span class="classifier">bool, optional</span></dt><dd><p>Return and keep only last approximation, by default True.</p>
+</dd>
+<dt><strong>vdata: bool, optional</strong></dt><dd><p>Vector field is np.ndarray, by default False.
+If vdata is True, method uses time iteration as index for vector field data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>array_like</dt><dd><p>Aproximated solution of ODE.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="wildfire.numerical.time.time.IVP">
+<code class="sig-prename descclassname">wildfire.numerical.time.time.</code><code class="sig-name descname">IVP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">last</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'RK45'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.time.IVP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve IVP wrapper.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t</strong><span class="classifier">array_like</span></dt><dd><p>Time discrete variable.</p>
+</dd>
+<dt><strong>F</strong><span class="classifier">function</span></dt><dd><p>RHS function of ODE.</p>
+</dd>
+<dt><strong>y0</strong><span class="classifier">array_like</span></dt><dd><p>Initial condition</p>
+</dd>
+<dt><strong>last</strong><span class="classifier">bool, optional</span></dt><dd><p>Return and keep only last approximation, by default True.</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">strin, optional</span></dt><dd><p>Numerical method to solve IVP, default RK45.
+Also includes ‘RK23’, ‘DOP853’, ‘Radau’, ‘BDF’, ‘LSODA’. More details in <cite>scipy.integrate.solve_ivp</cite> documentation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>array_like</dt><dd><p>Aproximated solution of ODE.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="wildfire.numerical.time.time.RK4">
+<code class="sig-prename descclassname">wildfire.numerical.time.time.</code><code class="sig-name descname">RK4</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">F</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">last</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">vdata</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.time.time.RK4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runge-Kutta of fourth order implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t</strong><span class="classifier">array_like</span></dt><dd><p>Time discrete variable.</p>
+</dd>
+<dt><strong>F</strong><span class="classifier">function</span></dt><dd><p>RHS function of ODE.</p>
+</dd>
+<dt><strong>y0</strong><span class="classifier">array_like</span></dt><dd><p>Initial condition</p>
+</dd>
+<dt><strong>last</strong><span class="classifier">bool, optional</span></dt><dd><p>Return and keep only last approximation, by default True.</p>
+</dd>
+<dt><strong>vdata: bool, option</strong></dt><dd><p>Vector field is np.ndarray, by default False.
+If vdata is True, method uses time iteration as index for vector field data.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>array_like</dt><dd><p>Aproximated solution of ODE.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.time">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-wildfire.numerical.time" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Daniel San Martin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

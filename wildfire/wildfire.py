@@ -132,9 +132,9 @@ class Fire:
         and then solve an IVP using 'Euler' or 'RK4' method. 
 
         Variables used:
-        .. Temperature :math:`u(x,y,t)` is represented by `U`.
-        .. Fuel :math:`\beta(x,y,t)` is representeted by `B`.
-        .. Vector field with wind and topography :math:`\mathbf{v}(x,y,t)` is represented by `V`.
+            * Temperature :math:`u(x,y,t)` is represented by `U`.
+            * Fuel :math:`\\beta(x,y,t)` is representeted by `B`.
+            * Vector field with wind and topography :math:`\mathbf{v}(x,y,t)` is represented by `V`.
         
         The implementation needs to vectorize :math:`u` and :math:`b` into :math:`\mathbf{y}`, 
         and then apply the time solver using the RHS function.

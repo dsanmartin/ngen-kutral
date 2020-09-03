@@ -1,0 +1,37 @@
+wildfire.numerical.time package
+===============================
+
+Submodules
+----------
+
+wildfire.numerical.time.euler module
+------------------------------------
+
+.. automodule:: wildfire.numerical.time.euler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.numerical.time.integration module
+------------------------------------------
+
+.. automodule:: wildfire.numerical.time.integration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.numerical.time.time module
+-----------------------------------
+
+.. automodule:: wildfire.numerical.time.time
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: wildfire.numerical.time
+   :members:
+   :undoc-members:
+   :show-inheritance:

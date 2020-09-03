@@ -1,0 +1,45 @@
+wildfire.utils package
+======================
+
+Submodules
+----------
+
+wildfire.utils.functions module
+-------------------------------
+
+.. automodule:: wildfire.utils.functions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.utils.old\_plots module
+--------------------------------
+
+.. automodule:: wildfire.utils.old_plots
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.utils.plots module
+---------------------------
+
+.. automodule:: wildfire.utils.plots
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.utils.storage module
+-----------------------------
+
+.. automodule:: wildfire.utils.storage
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: wildfire.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

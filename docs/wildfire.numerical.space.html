@@ -1,0 +1,571 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>wildfire.numerical.space package &mdash; Ngen-Kutral  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Ngen-Kutral
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">wildfire.numerical.space package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.space.cheb">wildfire.numerical.space.cheb module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.space.diffmat">wildfire.numerical.space.diffmat module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.space.fd">wildfire.numerical.space.fd module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.space.fftd">wildfire.numerical.space.fftd module</a></li>
+<li><a class="reference internal" href="#module-wildfire.numerical.space">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Ngen-Kutral</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>wildfire.numerical.space package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/wildfire.numerical.space.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="wildfire-numerical-space-package">
+<h1>wildfire.numerical.space package<a class="headerlink" href="#wildfire-numerical-space-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-wildfire.numerical.space.cheb">
+<span id="wildfire-numerical-space-cheb-module"></span><h2>wildfire.numerical.space.cheb module<a class="headerlink" href="#module-wildfire.numerical.space.cheb" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="wildfire.numerical.space.cheb.Chebyshev">
+<em class="property">class </em><code class="sig-prename descclassname">wildfire.numerical.space.cheb.</code><code class="sig-name descname">Chebyshev</code><a class="headerlink" href="#wildfire.numerical.space.cheb.Chebyshev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#wildfire.numerical.space.cheb.Chebyshev.RHS" title="wildfire.numerical.space.cheb.Chebyshev.RHS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RHS</span></code></a>(t, y)</p></td>
+<td><p>Compute right hand side of PDE</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#wildfire.numerical.space.cheb.Chebyshev.tx" title="wildfire.numerical.space.cheb.Chebyshev.tx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tx</span></code></a>(t)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 63%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>xt</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="wildfire.numerical.space.cheb.Chebyshev.RHS">
+<code class="sig-name descname">RHS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.cheb.Chebyshev.RHS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute right hand side of PDE</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.cheb.Chebyshev.tx">
+<code class="sig-name descname">tx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.cheb.Chebyshev.tx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.cheb.Chebyshev.xt">
+<code class="sig-name descname">xt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.cheb.Chebyshev.xt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.space.diffmat">
+<span id="wildfire-numerical-space-diffmat-module"></span><h2>wildfire.numerical.space.diffmat module<a class="headerlink" href="#module-wildfire.numerical.space.diffmat" title="Permalink to this headline">¶</a></h2>
+<p>Space derivatives approximation using differentiation matrices</p>
+<dl class="simple">
+<dt>Implements differentiation matrices for:</dt><dd><ul class="simple">
+<li><p>Finite Differences of second and fourth order of accuracy</p></li>
+<li><p>Chebyshev differentiation matrix</p></li>
+</ul>
+</dd>
+</dl>
+<p>Details in: Trefethen, L. N. (2000). Spectral methods in MATLAB. Society for industrial and applied mathematics.
+<a class="reference external" href="https://doi.org/10.1137/1.9780898719598">https://doi.org/10.1137/1.9780898719598</a></p>
+<dl class="py function">
+<dt id="wildfire.numerical.space.diffmat.FD1Matrix">
+<code class="sig-prename descclassname">wildfire.numerical.space.diffmat.</code><code class="sig-name descname">FD1Matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">acc</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">sparse</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.diffmat.FD1Matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute first derivative using Finite Difference Matrix
+with O(h^acc) of accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>N</strong><span class="classifier">int</span></dt><dd><p>Number of nodes.</p>
+</dd>
+<dt><strong>h</strong><span class="classifier">float</span></dt><dd><p>Step size.</p>
+</dd>
+<dt><strong>acc</strong><span class="classifier">int</span></dt><dd><p>Order of accuracy (2 or 4)</p>
+</dd>
+<dt><strong>sparse</strong><span class="classifier">boolean</span></dt><dd><p>If true, return sparse matrix.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>D1</strong><span class="classifier">(N, N) ndarray</span></dt><dd><p>Finite difference dense matrix; or</p>
+</dd>
+<dt><strong>sD1</strong><span class="classifier">sparse-like</span></dt><dd><p>Finite difference sparse matrix.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="wildfire.numerical.space.diffmat.FD2Matrix">
+<code class="sig-prename descclassname">wildfire.numerical.space.diffmat.</code><code class="sig-name descname">FD2Matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em>, <em class="sig-param"><span class="n">h</span></em>, <em class="sig-param"><span class="n">acc</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">sparse</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.diffmat.FD2Matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute second derivative using Finite Difference Matrix
+with O(h^acc) of accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>N</strong><span class="classifier">int</span></dt><dd><p>Number of nodes.</p>
+</dd>
+<dt><strong>h</strong><span class="classifier">float</span></dt><dd><p>Step size.</p>
+</dd>
+<dt><strong>acc</strong><span class="classifier">int</span></dt><dd><p>Order of accuracy (2 or 4)</p>
+</dd>
+<dt><strong>sparse</strong><span class="classifier">boolean</span></dt><dd><p>If true, return sparse matrix.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>D2</strong><span class="classifier">(N, N) ndarray</span></dt><dd><p>Finite difference dense matrix; or</p>
+</dd>
+<dt><strong>sD2</strong><span class="classifier">sparse-like</span></dt><dd><p>Finite difference sparse matrix.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="wildfire.numerical.space.diffmat.chebyshevMatrix">
+<code class="sig-prename descclassname">wildfire.numerical.space.diffmat.</code><code class="sig-name descname">chebyshevMatrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">N</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.diffmat.chebyshevMatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute derivative using Chebyshev differentiation Matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>N</strong><span class="classifier">int</span></dt><dd><p>Number of nodes.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>D2</strong><span class="classifier">(N+1, N+1) ndarray</span></dt><dd><p>Chebyshev differentation matrix</p>
+</dd>
+<dt><strong>x</strong><span class="classifier">(N+1) array</span></dt><dd><p>Chebyshev x domain</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.space.fd">
+<span id="wildfire-numerical-space-fd-module"></span><h2>wildfire.numerical.space.fd module<a class="headerlink" href="#module-wildfire.numerical.space.fd" title="Permalink to this headline">¶</a></h2>
+<p>Right hand side approximation using Finite Difference.</p>
+<dl class="py class">
+<dt id="wildfire.numerical.space.fd.FiniteDifference">
+<em class="property">class </em><code class="sig-prename descclassname">wildfire.numerical.space.fd.</code><code class="sig-name descname">FiniteDifference</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Nx</span></em>, <em class="sig-param"><span class="n">Ny</span></em>, <em class="sig-param"><span class="n">x_lim</span></em>, <em class="sig-param"><span class="n">y_lim</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">sparse</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cmp</span><span class="o">=</span><span class="default_value">1, 1, 1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#wildfire.numerical.space.fd.FiniteDifference.RHS" title="wildfire.numerical.space.fd.FiniteDifference.RHS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RHS</span></code></a>(t, y)</p></td>
+<td><p>Compute right hand side of PDE:</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#wildfire.numerical.space.fd.FiniteDifference.boundaryConditions" title="wildfire.numerical.space.fd.FiniteDifference.boundaryConditions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">boundaryConditions</span></code></a>(U, B)</p></td>
+<td><p>Add Dirichlet boundary conditions (BC).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#wildfire.numerical.space.fd.FiniteDifference.reshaper" title="wildfire.numerical.space.fd.FiniteDifference.reshaper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reshaper</span></code></a>(y[, Nt])</p></td>
+<td><p>Reshape function to restore correct size.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 52%" />
+<col style="width: 48%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>getMesh</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>getX</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>getY</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="wildfire.numerical.space.fd.FiniteDifference.RHS">
+<code class="sig-name descname">RHS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference.RHS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute right hand side of PDE:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{split}
+    u_{t} &amp;= \Delta u - \mathbf{v} \cdot \nabla u + f(u, \beta) \\
+    \beta_{t} &amp;= g(u, \beta)
+\end{split}\end{split}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t</strong><span class="classifier">array_like, shape (Nt + 1, )</span></dt><dd><p>Time discrete variable.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like, shape (2 * Ny * Nx)</span></dt><dd><p>Temperature and fuel variables vectorized.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array_like, shape (2 * Ny * Nx)</span></dt><dd><p>New temperature and fuel variables vectorized.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fd.FiniteDifference.boundaryConditions">
+<code class="sig-name descname">boundaryConditions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">U</span></em>, <em class="sig-param"><span class="n">B</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference.boundaryConditions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add Dirichlet boundary conditions (BC).
+Let Gamma the domain boundary, then Dirichlet boundary condition is
+U_{Gamma} = 0, B_{Gamma} = 0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>U: array_like, shape (Ny, Nx)</strong></dt><dd><p>Temperature approximation without BC.</p>
+</dd>
+<dt><strong>B: array_like, shape (Ny, Nx)</strong></dt><dd><p>Fuel approximation without  BC</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>Ub: array_like, shape (Ny, Nx)</dt><dd><p>Temperature approximation with BC</p>
+</dd>
+<dt>Bb: array_like, shape (Ny, Nx)</dt><dd><p>Fuel approximation with BC</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fd.FiniteDifference.getMesh">
+<code class="sig-name descname">getMesh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference.getMesh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fd.FiniteDifference.getX">
+<code class="sig-name descname">getX</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference.getX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fd.FiniteDifference.getY">
+<code class="sig-name descname">getY</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference.getY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fd.FiniteDifference.reshaper">
+<code class="sig-name descname">reshaper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">Nt</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fd.FiniteDifference.reshaper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reshape function to restore correct size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>Approximation array.</p>
+</dd>
+<dt><strong>Nt</strong><span class="classifier">int, optional</span></dt><dd><p>Number of time steps, by default None.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>U: array_like</dt><dd><p>Temperaturea approximation array.</p>
+</dd>
+<dt><strong>B</strong><span class="classifier">array_like</span></dt><dd><p>Fuel approximation array.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.space.fftd">
+<span id="wildfire-numerical-space-fftd-module"></span><h2>wildfire.numerical.space.fftd module<a class="headerlink" href="#module-wildfire.numerical.space.fftd" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="wildfire.numerical.space.fftd.FFTDerivatives">
+<em class="property">class </em><code class="sig-prename descclassname">wildfire.numerical.space.fftd.</code><code class="sig-name descname">FFTDerivatives</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Nx</span></em>, <em class="sig-param"><span class="n">Ny</span></em>, <em class="sig-param"><span class="n">x_lim</span></em>, <em class="sig-param"><span class="n">y_lim</span></em>, <em class="sig-param"><span class="n">cmp</span><span class="o">=</span><span class="default_value">1, 1, 1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fftd.FFTDerivatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#wildfire.numerical.space.fftd.FFTDerivatives.RHS" title="wildfire.numerical.space.fftd.FFTDerivatives.RHS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RHS</span></code></a>(t, y)</p></td>
+<td><p>Compute right hand side of PDE using Fast Fourier Transform.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 45%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>getMesh</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>reshaper</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="wildfire.numerical.space.fftd.FFTDerivatives.RHS">
+<code class="sig-name descname">RHS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fftd.FFTDerivatives.RHS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute right hand side of PDE using Fast Fourier Transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>t</strong><span class="classifier">array_like</span></dt><dd><p>Time variable.</p>
+</dd>
+<dt><strong>y</strong><span class="classifier">array_like</span></dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>array_like</dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>Exception</dt><dd><p>[description]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fftd.FFTDerivatives.getMesh">
+<code class="sig-name descname">getMesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">full</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fftd.FFTDerivatives.getMesh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="wildfire.numerical.space.fftd.FFTDerivatives.reshaper">
+<code class="sig-name descname">reshaper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">Nt</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#wildfire.numerical.space.fftd.FFTDerivatives.reshaper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-wildfire.numerical.space">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-wildfire.numerical.space" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Daniel San Martin
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+wildfire.numerical.space package
+================================
+
+Submodules
+----------
+
+wildfire.numerical.space.cheb module
+------------------------------------
+
+.. automodule:: wildfire.numerical.space.cheb
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.numerical.space.diffmat module
+---------------------------------------
+
+.. automodule:: wildfire.numerical.space.diffmat
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.numerical.space.fd module
+----------------------------------
+
+.. automodule:: wildfire.numerical.space.fd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+wildfire.numerical.space.fftd module
+------------------------------------
+
+.. automodule:: wildfire.numerical.space.fftd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: wildfire.numerical.space
+   :members:
+   :undoc-members:
+   :show-inheritance:

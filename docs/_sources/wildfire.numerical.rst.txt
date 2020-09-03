@@ -1,0 +1,19 @@
+wildfire.numerical package
+==========================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   wildfire.numerical.space
+   wildfire.numerical.time
+
+Module contents
+---------------
+
+.. automodule:: wildfire.numerical
+   :members:
+   :undoc-members:
+   :show-inheritance:
