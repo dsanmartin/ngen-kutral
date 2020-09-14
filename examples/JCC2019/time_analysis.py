@@ -93,13 +93,13 @@ for i in range(len(exps)):
 
     for r in range(rep):
         start = time.time()
-        _, _, _, Ueul_e, Beul_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V,time_method='Euler')
+        _, _, _, Ueul_e, Beul_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='FFT', time_method='Euler')
         end = time.time()
         eul_times[i, r] = end - start
 
         # FFT
         start = time.time()
-        _, _, _, Urk4_e, Brk4_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V)
+        _, _, _, Urk4_e, Brk4_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='FFT')
         end = time.time()
         rk4_times[i, r] = end - start
 

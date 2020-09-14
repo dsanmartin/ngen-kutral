@@ -28,7 +28,7 @@ V = lambda x, y, t: (v1(x, y, t), v2(x, y, t)) #V = (v1, v2)
 # Parameters
 kappa = 1e-1 # diffusion coefficient
 epsilon = 3e-1#3e-2 # inverse of activation energy
-upc = 3e0 # u phase change
+upc = 3 # u phase change
 q = 1 # reaction heat
 alpha = 1e-3 # natural convection
 

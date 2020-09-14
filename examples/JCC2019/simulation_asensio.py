@@ -48,6 +48,6 @@ parameters = {
 X, Y = np.meshgrid(np.linspace(0, 90, Nx), np.linspace(0, 90, Ny))
 p.plotIC(X, Y, u0, b0, V, None, None, save=False)
 
-t, X, Y, Ufft, Bfft = Fire(**parameters).solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='fft')
+t, X, Y, Ufft, Bfft = Fire(**parameters).solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='FFT')
 
 plots.UB(t, X, Y, Ufft, Bfft, V)

@@ -92,7 +92,7 @@ class Fire:
             Wind vector field.
         space_method : str, optional
             Numerical method for space approximation. 
-            'fd' for Finite Difference, 'fft' for FFT based, by default 'fd'.
+            'FD' for Finite Difference, 'FFT' for FFT based, by default 'FD'.
         time_method : str, optional
             Numerical method for time approximation. 
             'Euler' for Euler method, 'RK4' for Runge-Kutta of fourth order, by default 'RK4'.
@@ -128,7 +128,7 @@ class Fire:
         Notes
         -----
         Numerical approximation of PDE by Method of Lines (MOL) [1].
-        This method requires a RHS approximation, performed by finite difference 'fd' [2]  or  fast fourier transform 'fft' [3], 
+        This method requires a RHS approximation, performed by finite difference 'FD' [2]  or  fast fourier transform 'FFT' [3], 
         and then solve an IVP using 'Euler' or 'RK4' method. 
 
         Variables used:
@@ -150,29 +150,29 @@ class Fire:
         
         """
         # Space approximation #
-        if space_method == 'fd': # Finite Differences
+        if space_method == 'FD': # Finite Differences
             # Get finite difference extra parameters
             acc = kwargs.get('acc', 2)
             sparse = kwargs.get('sparse', False)
 
             # Create FD
-            FD = FiniteDifference(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), 
+            FDD = FiniteDifference(Nx, Ny, (self.x_min, self.x_max), (self.y_min, self.y_max), 
                 order=acc, sparse=sparse, cmp=self.cmp, v=v, f=self.f, g=self.g, kap=self.kap, K=self.K, Ku=self.Ku)
 
             # FD Mesh
-            X, Y = FD.getMesh()
+            X, Y = FDD.getMesh()
 
             # Get RHS using FD
-            RHS = FD.RHS
+            RHS = FDD.RHS
             
             # Get reshaper for approximations
-            reshaper = FD.reshaper
+            reshaper = FDD.reshaper
 
             # Initial condition evaluation
             U0 = u0 if type(u0) is np.ndarray else u0(X, Y)
             B0 = b0 if type(b0) is np.ndarray else b0(X, Y)
 
-        elif space_method == 'fft':
+        elif space_method == 'FFT':
 
             Nx -= 1 # Remove one node for periodic boundary
             Ny -= 1 # Remove one node for periodic boundary
@@ -222,4 +222,22 @@ class Fire:
         if space_method == 'fft':
             X, Y = FFTD.getMesh(True) # Append boundary removed
             
-        return t, X, Y, U, B 
+        return t, X, Y, U, B     
+    
+    def getTemperature(self, U, U_inf=300):
+        return U_inf * (self.eps * U + 1)
+
+    def getFuel(self, B, B_0=4.509542191276741):
+        return B_0 * B
+
+    def getV(self, v, l0, t0):
+        if type(v) is np.ndarray:
+            return l0 * v / t0  
+        else:
+            return lambda x, y, t: (l0 * v(x, y, t)[0] / t0, l0 * v(x, y, t)[1] / t0)
+
+    def getSpace(self, X, Y, l0):
+        return l0 * X, l0 * Y
+
+    def getTime(self, t, t0):
+        return t0 * t

@@ -74,7 +74,7 @@ for exp in exps:
 
     # FFT
     start = time.time()
-    _, _, _, Ufft_e, Bfft2_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='fft')
+    _, _, _, Ufft_e, Bfft2_e = ct.solvePDE(Nx, Ny, Nt, u0, b0, V, space_method='FFT')
     end = time.time()
     fft_times.append(end - start)
 

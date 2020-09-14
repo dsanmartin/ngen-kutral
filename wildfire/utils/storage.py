@@ -101,3 +101,26 @@ def openFile(dir):
     else:
         raise Exception("Path is not supported.")
 
+
+def openVectorWT(w_dir, t_dir):
+    """Open vector field with independent directories.
+
+    Parameters
+    ----------
+    w_dir : str
+        Wind effect filepath.
+    t_dir : tuple (str, str)
+        Topography effect filepaths.
+    """
+    tx_dir, ty_dir = t_dir
+    W = openFile(w_dir)
+    Tx = openFile(tx_dir)
+    Ty = openFile(ty_dir)
+    assert Tx.shape == Ty.shape, "Tx and Ty must have same dimensions."
+    Nt, Nc = W.shape
+    Ny, Nx = Tx.shape 
+    V = np.zeros((Nt, 2, Ny, Nx))
+    for n in range(Nt):
+        V[n, 0] = Tx + W[n, 0]
+        V[n, 1] = Ty + W[n, 1]
+    return V

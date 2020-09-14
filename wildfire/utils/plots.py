@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def UBs(i, t, X, Y, U, B, V, type_plot='imshow'):
+    print("t: ", t[i])
     rows, cols = X.shape
     # Get sample for quiver
     s_r, s_c =  rows // int(0.1 * rows), cols // int(0.1 * cols)
@@ -33,6 +34,7 @@ def UBs(i, t, X, Y, U, B, V, type_plot='imshow'):
         else:
             V1, V2 = V(X_s, Y_s, t[i])
         #print(V1, V2)
+        print("V1: [%f, %f], V2: [%f, %f]" % (np.min(V1), np.max(V1), np.min(V2), np.max(V2)))
         plt.quiver(X_s, Y_s, V1, V2)
         #plt.quiver(X_s, Y_s, V[0](X_s, Y_s, t[i]), V[1](X_s, Y_s, t[i]))
     cb1 = plt.colorbar(temp, fraction=0.046, pad=0.04)

@@ -3,14 +3,31 @@
 """
 import numpy as np
 from wildfire.utils.functions import G
+from wildfire.utils import parameters # Parameters handler
+from wildfire.utils import plots # Framework plots
 import ipywidgets as widgets
+
+def showSimulation(t, X, Y, U, B, V, k=0):
+    plots.UBs(k, t, X, Y, U, B, V, type_plot='imshow')
+
+def checkParams(k, delta, rho, C, h, E_A, H, A, U_inf, B_0):
+    parameters_ = parameters.Parameters(k, delta, rho, C, h, E_A, H, A, U_inf, B_0)
+    #kappa_w = widgets.FloatText(value=parameters_.getKappa(), description=r'$\kappa$', disabled=True)
+    #out = widgets.Output()
+    print("Non-dimensional")
+    print("Kappa:", parameters_.getKappa())
+    print("Epsilon:", parameters_.getEpsilon())
+    print("q:", parameters_.getQ())
+    print("Alpha:", parameters_.getAlpha())
+    print("t0:", parameters_.getT0())
+    print("l0:", parameters_.getL0())
 
 gamma = 1 # Wind effect coefficient...
 rm_t = 1 # Set to 0 for no terrain in JCC2019 experiment
 
 ## INITIAL CONDITIONS AND VECTOR FIELD ##
 # Temperatures
-u0_af2002  = lambda x, y: 1 * G(x-50, y-50, 100)
+u0_af2002  = lambda x, y: 50 * G(x-50, y-50, 100)
 u0_jcc2018 = lambda x, y: 6 * G(x-20, y-20, 20)
 u0_jcc2019 = lambda x, y: 7 * G(x-20, y-20, 20) + 4 * G(x-80, y-70, 20) + 4 * G(x-20, y-35, 50)
 
@@ -66,8 +83,8 @@ experiment_dp =  widgets.Dropdown(
 
 # Widget to select space method
 space_method_dp = widgets.Dropdown(
-    options=[('Finite Difference', 'fd'), ('Fast Fourier Transform', 'fft')], 
-    value='fd', 
+    options=[('Finite Difference', 'FD'), ('Fast Fourier Transform', 'FFT')], 
+    value='FD', 
     description="Space Method"
 )
 
@@ -115,7 +132,7 @@ time_method_dp_2 = widgets.Dropdown(
 time_nt_text = widgets.BoundedIntText(
     value=100,
     min=100,
-    max=3000,
+    max=1000000,
     step=50,
     description=r"$N_t$:",
     disabled=False
@@ -128,4 +145,18 @@ time_last_cb = widgets.Checkbox(
     disabled=False,
     indent=False
 )
+
+# Widgets for parameters
+k_w = widgets.FloatText(value=1.0, description=r"$k$")
+delta_w = widgets.FloatText(value=0.01632918494453172, description=r"$\delta$")
+rho_w = widgets.FloatText(value=100., description=r"$\rho$")
+C_w = widgets.FloatText(value=1000., description=r"$C$")
+h_w = widgets.FloatText(value=0.009035838487303521, description=r"$h$")
+E_A_w = widgets.FloatText(value=83680., description=r"$E_A$")
+H_w = widgets.FloatText(value=66525.6, description=r"$H$")
+A_w = widgets.FloatText(value=1e9, description=r"$A$")
+U_inf_w = widgets.FloatText(value=300., description=r"$u_{\infty}$")
+B_0_w = widgets.FloatText(value=4.509542191276741, description=r"$\beta_0$")
+
+
 out = widgets.Output()

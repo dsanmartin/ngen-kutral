@@ -9,6 +9,9 @@ You can put your input/ouput files inside this folder. Framework supports both `
 * Vector field, terrain + wind: 
 	* If you vector field is constant in space, use a supported file with shape ```(Nt + 1) x 2```, one column per component.
 	* If your vector field depends of space and time, yo can use a ```.npy``` file with shape ```(Nt + 1) x 2 x Ny x Nx```. Also you can use a folder with ```.txt``` files with the following format: ```V1_{timestep}.txt``` and ```V2_{timestep}.txt``` for each time step, that is for ```0``` to ```Nt```. 
+    * If wind and topography effect are independent files, `framework` supports:
+        - One file for wind effect with shape `(Nt + 1) x 2`. Wind is supposed to be time-dependent only.
+        - Two files for topography effect (gradient of topography), both with shapes `Ny x Nx`. Topography only depends of space variables.
 
 ## Example files
 
@@ -18,3 +21,4 @@ You can put your input/ouput files inside this folder. Framework supports both `
 * For vector field we include: 
 	* ```V.npy``` and ```V.txt``` files with shape ```101 x 2```. 
 	* ```VV.npy``` file of shape ```101 x 2 x 128 x 128```.  Also includes ```V``` directory with ```101``` files of shape ```128 x 128``` for both vector components. The data is the same but ```.npy``` can handle differents shapes, while ```.txt``` do not.
+    * `W.npy` and `W.txt` for independent wind effect with shape `101 x 2`, `Tx.npy`/`Tx.txt` and `Ty.npy`/`Ty.txt` for independent terrain effect both with shape `128 x 128`.

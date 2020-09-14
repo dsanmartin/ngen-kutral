@@ -40,43 +40,53 @@ import wildfire
 
 2. Using a wrapper script inside ```bin``` [folder](./bin):
 ```console
-usage: main.py [-h] [-kap K] [-eps E] [-upc P] [-alp A] [-qrh Q]
-               [-xlim x_min x_max] [-ylim y_min y_max] [-tlim t_min t_max] -sm
-               SM -Nx Nx -Ny Ny -tm TM -Nt Nt -u0 U0 -b0 B0 [-vf V] [-acc ACC]
+usage: main.py -sm SM -Nx NX -Ny NY -tm TM -Nt NT [-h] [-k K] [-e E] [-p P]
+               [-a A] [-q Q] [-x XMIN XMAX] [-y YMIN YMAX] [-t TMIN TMAX]
+               [-u0 U0] [-b0 B0] [-vf VF] [-w W] [-T Tx Ty] [-acc ACC]
                [-sps S] [-lst LST] [-plt PLT]
 
 Create and execute a wildfire simulation.
 
+required arguments:
+  -sm SM, --space SM    Space method approximation, FD (Finite Difference) or
+                        FFT (Fast Fourier Transform).
+  -Nx NX, --xnodes NX   Number of nodes in x.
+  -Ny NY, --ynodes NY   Number of nodes in y.
+  -tm TM, --time TM     Time method approximation, Euler or RK4.
+  -Nt NT, --tnodes NT   Number of nodes in t.
+
 optional arguments:
-  -h, --help            show this help message and exit
-  -kap K, --kappa K     kappa parameter (default: 1e-1)
-  -eps E, --epsilon E   epsilon parameter (default: 3e-1)
-  -upc P, --phase P     phase change threshold parameter (default: 3)
-  -alp A, --alpha A     alpha parameter (default: 1e-3)
-  -qrh Q, --reaction Q  alpha parameter (default: 1.0)
-  -xlim x_min x_max, --xlimits x_min x_max
-                        x domain limits (default: [0, 90])
-  -ylim y_min y_max, --ylimits y_min y_max
-                        y domain limits (default: [0, 90])
-  -tlim t_min t_max, --tlimits t_min t_max
-                        t domain limits (default: [0, 30])
-  -sm SM, --space SM    Space method approximation
-  -Nx Nx, --xnodes Nx   Number of nodes in x
-  -Ny Ny, --ynodes Ny   Number of nodes in y
-  -tm TM, --time TM     Time method approximation
-  -Nt Nt, --tnodes Nt   Number of nodes in t
+  -h, --help            Show this help message and exit.
+  -k K, --kappa K       Kappa parameter (default: 0.1).
+  -e E, --epsilon E     Epsilon parameter (default: 0.3).
+  -p P, --phase P       Phase change threshold parameter (default: 3.0).
+  -a A, --alpha A       Alpha parameter (default: 1e-3).
+  -q Q, --reaction Q    Reaction heat coefficient (default: 1.0).
+  -x XMIN XMAX, --xlimits XMIN XMAX
+                        x domain limits (default: [0, 90]).
+  -y YMIN YMAX, --ylimits YMIN YMAX
+                        y domain limits (default: [0, 90]).
+  -t TMIN TMAX, --tlimits TMIN TMAX
+                        t domain limits (default: [0, 30]).
   -u0 U0, --initial-temperature U0
-                        Initial temperature file. Only .txt and .npy
-                        supported.
+                        Initial temperature file. Only .txt and .npy supported
+                        (default lambda testing function).
   -b0 B0, --initial-fuel B0
-                        Initial fuel file. Only .txt and .npy supported.
-  -vf V, --vector-field V
-                        Vector Field. Only .txt and .npy supported.
+                        Initial fuel file. Only .txt and .npy supported
+                        (default lambda testing function).
+  -vf VF, --vector-field VF
+                        Vector Field. Only .txt and .npy supported (default
+                        lambda testing function).
+  -w W, --wind W        Wind component. Only .txt and .npy supported (default
+                        lambda testing function).
+  -T Tx Ty, --terrain Tx Ty
+                        Topography gradient effect. Only .txt and .npy
+                        supported (default no topography effect).
   -acc ACC, --accuracy ACC
-                        Finite difference accuracy (default: 2)
-  -sps S, --sparse S    Finite difference sparse matrices (default: False)
-  -lst LST, --last LST  Only last approximation (default: True)
-  -plt PLT, --plot PLT  Plot result (default: False)
+                        Finite difference accuracy (default: 2).
+  -sps S, --sparse S    Finite difference sparse matrices (default: 0).
+  -lst LST, --last LST  Only last approximation (default: 1).
+  -plt PLT, --plot PLT  Plot result (default: 0).
 ```
 
 

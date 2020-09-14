@@ -55,7 +55,7 @@ p.plotIC(X, Y, u0, b0, W, TT, T, save=False)
 
 ct = Fire(**parameters)
 
-t, X, Y, U, B = ct.solvePDE(Nx, Ny, Ny, u0, b0, V, space_method='fft', last=False)
+t, X, Y, U, B = ct.solvePDE(Nx, Ny, Ny, u0, b0, V, space_method='FFT', last=False)
 
 for k in range(Nt):
     if k % 10 == 0:

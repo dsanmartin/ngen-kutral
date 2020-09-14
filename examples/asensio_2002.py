@@ -16,7 +16,7 @@ t_min, t_max = 0, 30
 
 # Numerical #
 # Space
-space_method = 'fd'
+space_method = 'FD'
 Nx = 128
 Ny = 128
 acc = 2
