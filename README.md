@@ -6,7 +6,7 @@ This repository includes:
 * Experiments of:
 	- **2018 37th International Conference of the Chilean Computer Science Society** paper *Ngen Kütral: Toward an Open Source Framework for Chilean Wildfire Spreading* by Daniel San Martin & Claudio E. Torres. https://doi.org/10.1109/SCCC.2018.8705159.
 	- **2019 38th International Conference of the Chilean Computer Science Society** paper *Exploring a Spectral Numerical Algorithm for Solving a Wildfire Mathematical Model* by Daniel San Martin & Claudio E. Torres. https://doi.org/10.1109/SCCC49216.2019.8966412.
-    - **CLEI Electronic Journal** paper *2D Simplified Wildfire Spreading Model in Python: From NumPy to CuPy* by Daniel San Martin & Claudio E. Torres. (Work in progress)
+    - **CLEI Electronic Journal** paper *2D Simplified Wildfire Spreading Model in Python: From NumPy to CuPy* by Daniel San Martin & Claudio E. Torres. https://doi.org/10.19153/cleiej.26.1.5
 
 ## Prerequisites
 
